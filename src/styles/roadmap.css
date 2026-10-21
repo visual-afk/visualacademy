@@ -1,0 +1,127 @@
+/* 성장 로드맵(4 step 그래프) — 메인·클래스 목록 공용. 페이지별 높이/여백 차이는 각 페이지 CSS에서 덮어쓴다 */
+@keyframes rc-img-in{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+.site .roadmap-section{
+  position:relative;overflow:hidden;color:var(--ink);padding:72px 0 64px;
+  background:radial-gradient(900px circle at 100% 0%,rgba(52,209,201,.10),transparent 55%),
+    linear-gradient(180deg,var(--bg) 0%,#f6fbfa 100%);
+
+  .section-head{margin-bottom:8px}
+  .section-head h2{font-size:28px;line-height:1.3;font-weight:700;letter-spacing:-.02em;margin:0 0 10px;color:var(--ink)}
+  .section-head p{color:var(--ink-2);font-size:15px;margin:0}
+
+  .exp-tabs{display:flex;gap:10px;margin:26px 0 44px;flex-wrap:wrap}
+  .etab{padding:10px 20px;border-radius:24px;border:1.5px solid var(--line-strong);background:var(--bg);
+    color:var(--ink-2);font-size:14.5px;font-weight:600;letter-spacing:-.003em;cursor:pointer;font-family:var(--font);transition:.2s}
+  .etab:hover{border-color:var(--ink-3);color:var(--ink)}
+  .etab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .roadmap{position:relative}
+  .roadmap-inner{max-width:980px;margin:0 auto}
+
+  .rgraph{position:relative;height:440px}
+  .rgraph-svg{position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible}
+  .rgraph-line{filter:drop-shadow(0 2px 6px rgba(20,22,26,.06))}
+  .rdot-end{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--line-strong);
+    transform:translate(-50%,-50%);z-index:2}
+
+  .rdivider{position:absolute;top:0;bottom:0;width:1px;background:var(--line);z-index:1;transition:.25s}
+  .rdivider.end{left:100%}
+
+  .rcol{position:absolute;top:0;height:100%;width:25%;cursor:pointer}
+  .rcol[data-step="0"]{left:0%}
+  .rcol[data-step="1"]{left:25%}
+  .rcol[data-step="2"]{left:50%}
+  .rcol[data-step="3"]{left:75%}
+
+  .rcol-divider{position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--line-strong);z-index:2;transition:.25s}
+  .rcol:hover .rcol-divider,.rcol.active .rcol-divider{background:var(--mint-grad);width:3px;
+    box-shadow:0 0 20px rgba(10,166,161,.25)}
+
+  .rcol-img{position:absolute;left:22px;width:134px;height:180px;object-fit:cover;object-position:center 20%;
+    border-radius:18px;opacity:0;transform:translateY(10px) scale(.97);transition:opacity .3s ease,transform .3s ease;
+    box-shadow:0 14px 30px -14px rgba(8,112,108,.45);border:1px solid rgba(10,166,161,.25);z-index:2;pointer-events:none}
+  .rcol[data-step="0"] .rcol-img{top:158px}
+  .rcol[data-step="1"] .rcol-img{top:134px}
+  .rcol[data-step="2"] .rcol-img{top:106px}
+  .rcol[data-step="3"] .rcol-img{top:100px}
+  .rcol:hover .rcol-img,.rcol.active .rcol-img{opacity:1;transform:translateY(0) scale(1)}
+  @media(max-width:900px){.rcol-img{display:none}}
+  .rcol-glow{position:absolute;inset:0;opacity:0;transition:opacity .3s;pointer-events:none;
+    background:linear-gradient(150deg,rgba(10,166,161,.12),rgba(10,166,161,0) 60%)}
+  .rcol:hover .rcol-glow,.rcol.active .rcol-glow{opacity:1}
+
+  .rdot{position:absolute;left:0;top:var(--y);width:22px;height:22px;border-radius:50%;
+    background:var(--bg);border:2px solid var(--line-strong);transform:translate(-50%,-50%);transition:.2s;z-index:3}
+  .rcol:hover .rdot,.rcol.active .rdot{background:var(--mint-grad);border-color:var(--mint);
+    box-shadow:0 0 0 7px var(--mint-l)}
+  .rtag{position:absolute;left:0;top:calc(var(--y) - 34px);transform:translateX(-50%);white-space:nowrap;margin:0;
+    font-size:11px;color:var(--mint-d);font-weight:700;letter-spacing:.02em;opacity:0;transition:.2s;z-index:3}
+  .rcol.recommended .rtag{opacity:1}
+
+  .rlabel{position:absolute;left:0;width:calc(100% - 28px);padding-left:22px;box-sizing:border-box;z-index:2}
+  .rlabel-top{top:0}
+  .rlabel-bottom{bottom:0}
+  .rl-step{font-size:23px;line-height:1.3;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin:0 0 8px}
+  .rl-name{font-size:15.5px;font-weight:700;color:var(--ink);margin:0 0 10px;word-break:keep-all}
+  .rl-desc{font-size:13px;line-height:1.6;color:var(--ink-2);margin:0}
+
+  /* 상태 pill + 연결 강의 칩 (클래스 목록) */
+  .rstatus{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:100px;
+    white-space:nowrap;margin:0 0 10px}
+  .rstatus.st-mint{background:var(--mint-grad);color:var(--on-mint)}
+  .rstatus.st-amber{background:var(--amber);color:#5c3d00}
+  .rstatus.st-line{background:var(--surface-2);color:var(--ink-2)}
+  .rextra{display:flex;flex-direction:column;gap:5px;margin-top:2px;max-width:190px}
+  .rextra-chip{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:100px;white-space:nowrap;
+    border:1px solid transparent;text-align:center;background:var(--surface);color:var(--ink-2)}
+  .rextra-chip.s3{background:var(--mint-l);color:#0aa6a1;border-color:#bfe8e5}
+  .rextra-chip.s4{background:#e8f3f2;color:#08706c;border-color:#c8dfdd}
+
+  .rcards{display:flex;margin-top:16px}
+  .rcard-slot{flex:1 0 25%;display:flex;justify-content:flex-start;padding-right:16px;box-sizing:border-box}
+  .rcard{width:100%;max-width:300px;background:var(--bg);border:2px solid var(--line);
+    border-radius:4px 26px 26px 26px;padding:22px 22px 20px;opacity:0;transform:translateY(8px);pointer-events:none;
+    transition:opacity .22s ease,transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+  .rcard.show{opacity:1;transform:translateY(0);pointer-events:auto;
+    border-color:var(--mint);box-shadow:0 12px 32px -16px rgba(10,166,161,.35)}
+  .rcard .rc-img{display:none}
+  .rcard .rc-step{font-size:26px;line-height:1.3;font-weight:800;color:var(--ink);margin:0 0 6px;letter-spacing:-.02em}
+  .rcard .rc-name{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 10px;letter-spacing:-.008em}
+  .rcard .rc-title{font-weight:700;font-size:15px;margin:0 0 4px;color:var(--ink)}
+  .rcard .rc-meta{font-size:12.5px;color:var(--ink-2);margin:0 0 10px;line-height:1.5}
+  .rcard .rc-extra{display:flex;flex-direction:column;gap:6px;margin-top:2px;margin-bottom:14px}
+  .rcard .rc-extra:empty{display:none}
+  .rcard .rchip{font-size:11.5px;padding:6px 10px;border-radius:20px;background:var(--surface);
+    border:1px solid var(--line-strong);color:var(--ink-2);text-align:center;letter-spacing:.008em}
+  .rcard .rc-cta{display:block;width:100%;margin-top:4px;padding:12px;border-radius:100px;text-align:center;text-decoration:none;
+    font-size:13px;font-weight:700;letter-spacing:.005em;background:var(--mint-grad);color:var(--on-mint);border:none;cursor:pointer;font-family:var(--font)}
+
+  @media(max-width:900px){
+    padding:64px 0 60px;
+    .rgraph{height:360px}
+    .rl-step{font-size:13.5px;font-weight:800;margin:0}
+    .rl-name,.rl-desc{display:none}
+    .rstatus{font-size:9px;padding:2px 8px;margin-bottom:6px;margin-top:4px}
+    .rextra{display:none}
+    .rlabel{width:calc(100% - 10px);padding-left:8px}
+    .rtag{font-size:9.5px}
+    .rcards{margin-top:0;flex-wrap:wrap;justify-content:center}
+    .rcard-slot{display:none;flex:1 1 100%;padding:0;justify-content:center}
+    .rcard-slot.show{display:flex}
+    .rcard{max-width:420px}
+    .rcard .rc-img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center 20%;
+      border-radius:14px;margin:0 0 16px;border:1px solid rgba(10,166,161,.25)}
+    .rcard.show .rc-img{animation:rc-img-in .3s ease}
+  }
+  @media(max-width:640px){
+    padding:56px 0 48px;
+    .section-head h2{font-size:24px}
+    .exp-tabs{margin:22px 0 28px}
+    .rgraph{height:260px}
+    /* 첫 단계의 '추천' 표시가 화면 왼쪽 끝에서 잘리지 않도록 점 오른쪽으로 */
+    .rcol[data-step="0"] .rtag{transform:none;left:2px}
+    .rlabel-top{top:6px}
+    .rlabel-bottom{bottom:6px}
+    .rcards{margin-top:14px}
+  }
+}

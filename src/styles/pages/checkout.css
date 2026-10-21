@@ -1,0 +1,131 @@
+/* 신청 · 결제 — 프로토타입의 토스 결제 화면 톤(더 밝은 민트·순흑 텍스트)을 그대로 따른다 */
+.site.pg-checkout{
+  --page:#fafbfa; --surface:#e4e4e4; --surface-2:#ececec; --surface-soft:#f6f7f6; --field:#f2f3f2;
+  --line:#eceeec; --line-strong:#e1e4e0;
+  --ink:#000000; --ink-2:#767676; --ink-3:#8b9089;
+  --mint:#6fdcc5; --mint-l:#eafbf6; --mint-d:#089582;
+  --mint-grad:linear-gradient(90deg,#64f7df 0%,#84f6f0 100%);
+  --on-mint:#0b4a3f;
+  --mint-glow:0 10px 24px -12px rgba(50,200,170,.6);
+  --amber-d:#e4ae00; --red-d:#ff474b;
+  --radius:22px;
+  --shadow:0 1px 2px rgba(20,22,26,.04), 0 10px 28px -16px rgba(20,22,26,.14);
+  background:var(--page);font-size:15px;line-height:1.6;
+
+  .wrap{max-width:1120px;padding:0 24px}
+
+  .topbar{background:var(--bg);border-bottom:1px solid var(--line)}
+  .topbar-inner{display:flex;align-items:center;gap:14px;padding-top:16px;padding-bottom:16px}
+  .co-logo{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px;white-space:nowrap;text-decoration:none}
+  .co-logo .dot{width:8px;height:8px;border-radius:50%;background:var(--mint-grad)}
+  .crumb{font-size:13px;color:var(--ink-3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .crumb a{text-decoration:none}
+  .crumb a:hover{color:var(--ink-2)}
+  @media(max-width:640px){.crumb{display:none}}
+
+  .flowbar{background:var(--bg);border-bottom:1px solid var(--line)}
+  .flow{display:flex;align-items:center;padding:18px 0;max-width:560px;margin:0 auto}
+  .flow-step{display:flex;align-items:center;gap:8px;position:relative;text-decoration:none}
+  .flow-step .fnum{width:26px;height:26px;border-radius:50%;background:var(--surface-2);color:var(--ink-3);
+    font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .flow-step .flabel{font-size:12.5px;color:var(--ink-3);font-weight:600;white-space:nowrap}
+  .flow-step.done .fnum{background:var(--mint-grad);color:var(--on-mint)}
+  .flow-step.done .flabel{color:var(--ink-2)}
+  .flow-step.current .fnum{background:var(--ink);color:#fff}
+  .flow-step.current .flabel{color:var(--ink);font-weight:800}
+  .flow-line{flex:1;height:1.5px;background:var(--line-strong);margin:0 6px}
+  .flow-line.done{background:var(--mint-grad)}
+  @media(max-width:600px){.flow-step .flabel{display:none}}
+
+  .btn{width:100%}
+  .btn-mint:disabled{background:var(--surface-2);color:var(--ink-3)}
+  .btn-ghost{background:var(--surface-soft);color:var(--ink);border:none;margin-top:8px}
+  .btn-ghost:hover{background:var(--surface-2)}
+
+  /* STEP 2 : 신청 정보 */
+  .order-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;padding:38px 0 118px;align-items:start}
+  @media(max-width:860px){.order-grid{grid-template-columns:minmax(0,1fr)}}
+  .panel{background:var(--bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;margin-bottom:20px}
+  .panel h3{font-size:15px;font-weight:800;margin:0 0 21px;letter-spacing:-.01em}
+  .field{margin-bottom:16px}
+  .field:last-child{margin-bottom:0}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-2);margin-bottom:7px}
+  .field input{width:100%;border:1px solid var(--line-strong);background:var(--field);
+    border-radius:15px;padding:12px 14px;font-size:14.5px;font-family:var(--font);color:var(--ink)}
+  .field input:focus{outline:2px solid var(--mint-l);border-color:var(--mint)}
+  .field .err{font-size:12px;color:var(--red-d);margin:6px 0 0}
+  .check-row{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-bottom:1px solid var(--line);font-size:13.5px;cursor:pointer}
+  .check-row:last-child{border-bottom:none}
+  .check-row input{margin-top:3px;accent-color:var(--mint);flex-shrink:0}
+  .check-row .cr-title{font-weight:700;color:var(--ink)}
+  .check-row .cr-title::after{content:'필수';font-size:10.5px;font-weight:700;color:var(--red-d);
+    background:#ffcdce;padding:2px 7px;border-radius:100px;margin-left:8px;letter-spacing:.01em}
+  .check-row .cr-link{color:var(--ink-3);text-decoration:underline;font-size:12.5px;margin-left:6px}
+
+  .summary-box{background:var(--bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px;position:sticky;top:24px}
+  .summary-box .sb-title{font-size:13px;color:var(--ink-3);margin:0 0 4px}
+  .summary-box .sb-class{font-size:15px;font-weight:800;margin:0 0 19px;letter-spacing:-.01em}
+  .summary-box dl{margin:0 0 16px;font-size:13px}
+  .summary-box dl div{display:flex;justify-content:space-between;padding:7px 0;gap:12px}
+  .summary-box dt{color:var(--ink-2);flex-shrink:0}
+  .summary-box dd{margin:0;font-variant-numeric:tabular-nums;text-align:right}
+  .sb-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;border-top:1px solid var(--line);margin-bottom:18px}
+  .sb-total .lbl{font-size:13.5px;font-weight:700}
+  .sb-total .amt{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .tax-note{font-size:11.5px;color:var(--ink-3);text-align:right;margin:-10px 0 18px;font-variant-numeric:tabular-nums}
+
+  /* STEP 3 : 결제 */
+  .pay-wrap{max-width:560px;margin:0 auto;padding:38px 24px 118px}
+  .pay-wrap h2{font-size:17px;font-weight:800;margin:0 0 21px}
+  .pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:26px}
+  .pmethod{border:1px solid var(--line-strong);background:var(--bg);border-radius:16px;padding:18px;
+    cursor:pointer;text-align:left;font-family:var(--font);color:var(--ink)}
+  .pmethod .pm-label{font-size:14px;font-weight:700;margin:0 0 3px;display:block}
+  .pmethod .pm-sub{font-size:12px;color:var(--ink-3);display:block}
+  .pmethod.on{border-width:1.5px;border-color:var(--mint);background:var(--mint-l)}
+  .pmethod.on .pm-label{color:var(--mint-d)}
+  .pay-panel{background:var(--surface-soft);border-radius:var(--radius);padding:28px;margin-bottom:26px;min-height:160px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center}
+  .pay-panel .pp-icon{width:44px;height:44px;border-radius:12px;background:var(--bg);box-shadow:var(--shadow);
+    display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--mint-d)}
+  .pay-panel p{font-size:13px;color:var(--ink-3);margin:0}
+  .pay-panel p b{color:var(--ink)}
+  .pay-total{display:flex;justify-content:space-between;align-items:baseline;padding:21px 0;border-top:1px solid var(--line);margin-bottom:18px}
+  .pay-total .lbl{font-size:14px;font-weight:700}
+  .pay-total .amt{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .sim{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;font-size:12px;color:var(--ink-3);cursor:pointer}
+  .sim input{accent-color:var(--mint)}
+
+  .center-state{max-width:420px;margin:0 auto;padding:116px 24px;text-align:center}
+  .spinner{width:46px;height:46px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--mint);
+    margin:0 auto 22px;animation:co-spin .85s linear infinite}
+  .center-state h2{font-size:17px;font-weight:800;margin:0 0 8px;letter-spacing:-.012em}
+  .center-state p{font-size:13.5px;color:var(--ink-2);margin:0}
+  .result-icon{width:56px;height:56px;border-radius:50%;margin:0 auto 22px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff}
+  .result-icon.fail{background:var(--red)}
+  .result-icon.ok{background:var(--mint-grad);color:var(--on-mint)}
+  .center-state .fail-reason{background:var(--surface-soft);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--ink-2);margin:18px 0}
+  .center-state .refund-note{font-size:12px;color:var(--ink-3);margin-top:14px}
+  .center-actions{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+  .center-actions .btn-ghost{margin-top:0}
+
+  /* STEP 4 : 완료 */
+  .done-wrap{max-width:520px;margin:0 auto;padding:70px 24px 116px;text-align:center}
+  .done-wrap h2{font-size:19px;font-weight:800;margin:0 0 6px}
+  .done-wrap .done-title{font-size:14px;color:var(--ink-2);margin:0}
+  .done-wrap .order-no{font-size:12.5px;color:var(--ink-3);background:var(--surface-soft);display:inline-block;
+    padding:6px 14px;border-radius:100px;margin-top:16px;font-variant-numeric:tabular-nums}
+  .done-panel{background:var(--bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:30px;margin-top:28px;text-align:left}
+  .done-panel h3{font-size:14.5px;font-weight:800;margin:0 0 17px;letter-spacing:-.01em}
+  .done-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+  .done-list li{display:flex;gap:10px;font-size:13.5px;color:var(--ink-2)}
+  .done-list li::before{content:'—';color:var(--ink-3);flex-shrink:0}
+  .done-cta{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+  .done-cta .btn-ghost{margin-top:0}
+  .waiting-box{background:var(--amber-l);color:var(--amber-d);border-radius:12px;padding:16px 18px;font-size:13.5px;
+    font-weight:700;margin-top:20px;text-align:left}
+  .waiting-box .wb-sub{font-weight:400;color:var(--ink-2);margin-top:6px;font-size:12.5px;font-variant-numeric:tabular-nums}
+
+  .co-footer{padding:24px 0;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3);text-align:center}
+}
+@keyframes co-spin{to{transform:rotate(360deg)}}
