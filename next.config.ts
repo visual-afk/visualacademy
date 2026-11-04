@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
    */
   // 같은 와이파이의 휴대폰에서 개발 서버(npm run dev)로 확인할 수 있도록 내부망 주소 허용
   allowedDevOrigins: ["192.168.*.*"],
+  experimental: {
+    agentUpgrade: "security",
+  },
 };
 
 export default nextConfig;
