@@ -90,7 +90,7 @@ function OrderCard({ c, flash }: { c: Row; flash: boolean }) {
     <div className={`order-card ${upcoming ? "muted" : "active"}${flash ? " flash" : ""}`} id={`level-${c.level}`}>
       <div className={`order-node s${c.level}`}>{c.level}</div>
       <div className="headrow">
-        <ClassThumb />
+        <ClassThumb src={c.images?.thumb} alt={c.name} />
         <div className="ht">
           <p className="ostep">STEP {c.level} · {STEP_NAMES[(c.level ?? 1) - 1]}</p>
           <h3><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
@@ -120,7 +120,7 @@ function LinkedCard({ c }: { c: Row }) {
   return (
     <div className={`linked-card${ended ? " past" : ""}`}>
       <div className="linkrow">
-        <ClassThumb />
+        <ClassThumb src={c.images?.thumb} alt={c.name} />
         <div className="lr-txt">
           <span className={`badge ${ended ? "badge-ended" : "badge-line"}`}>{ended ? "종료" : c.cat}</span>
           <h4><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h4>
@@ -145,7 +145,7 @@ function RowCard({ c }: { c: Row }) {
         <span className={`badge ${badgeClass(c.status)}`}>{c.status}</span>
       </div>
       <div className="headrow">
-        <ClassThumb />
+        <ClassThumb src={c.images?.thumb} alt={c.name} />
         <div className="ht">
           <h3><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
         </div>

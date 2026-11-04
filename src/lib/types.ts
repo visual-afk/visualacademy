@@ -86,6 +86,10 @@ export interface AcademyClass {
   /** 온라인 수강 기간(개월) */
   months?: number;
   manualEnd?: boolean;
+  /** 임시저장(고객 화면 미노출) — 관리자 화면에서만 */
+  draft?: boolean;
+  /** 관리자 콘텐츠 관리에서 올린 이미지 주소 */
+  images?: { thumb?: string; banner?: string; detail?: string };
   detail?: ClassDetail;
 }
 

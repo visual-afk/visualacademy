@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import { ROUTES } from "@/data/site";
+import type { ClassInput } from "@/lib/classInput";
 import { taxBreakdown } from "@/lib/format";
+import { getBrowserSupabase } from "@/lib/supabase/client";
+import { IMAGE_BUCKET, IMAGE_TYPES, MAX_IMAGE_BYTES } from "@/lib/uploads";
 import { stepLabel } from "@/lib/status";
 import type { AcademyClass, ClassCategory, RoadmapStep, TaxType } from "@/lib/types";
 
@@ -15,11 +18,33 @@ type Slot = "thumb" | "banner" | "detail";
 type Shape = "square" | "wide" | "tall";
 type DetailLen = "short" | "medium" | "long";
 
-/** 업로드 이미지 상태 — 샘플(프리셋) 또는 실제 로컬 파일 미리보기 */
+/**
+ * 업로드 이미지 상태 — 샘플(프리셋, 저장 안 됨) 또는 실제 이미지.
+ * file 이 있으면 아직 안 올린 로컬 파일(url 은 미리보기용), 없으면 이미 저장소에 있는 이미지.
+ */
 type Img =
   | { kind: "preset"; bg: string; ratio?: string; shape?: Shape }
-  | { kind: "file"; url: string; w: number; h: number }
+  | { kind: "file"; url: string; w: number; h: number; file?: File }
   | null;
+
+async function api<T = unknown>(url: string, method: string, body: unknown): Promise<T> {
+  const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error ?? "저장하지 못했어요. 잠시 후 다시 시도해주세요.");
+  return data as T;
+}
+
+/** 로컬 파일 1장을 저장소에 올리고 공개 주소를 돌려준다 */
+async function uploadImage(classId: number, slot: Slot, file: File): Promise<string> {
+  const { path, token, publicUrl } = await api<{ path: string; token: string; publicUrl: string }>("/api/admin/uploads", "POST", {
+    classId, slot, contentType: file.type, size: file.size,
+  });
+  const { error } = await getBrowserSupabase().storage.from(IMAGE_BUCKET).uploadToSignedUrl(path, token, file, { contentType: file.type });
+  if (error) throw new Error("이미지를 올리지 못했어요. 잠시 후 다시 시도해주세요.");
+  return publicUrl;
+}
+
+const draftKey = (id: number) => `va-class-draft-${id}`;
 
 const CATS: { key: ClassCategory; label: string }[] = [
   { key: "정석", label: "디자이너의 정석" },
@@ -105,15 +130,12 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
   /* ── 콘텐츠 관리 ── */
-  const [images, setImages] = useState<Record<Slot, Img>>(() =>
-    src
-      ? {
-          thumb: { kind: "preset", bg: IMG_COLORS.square, shape: "square" },
-          banner: { kind: "preset", bg: IMG_COLORS.wide, shape: "wide" },
-          detail: { kind: "preset", bg: DETAIL_COLORS.long, ratio: DETAIL_RATIO.long },
-        }
-      : { thumb: null, banner: null, detail: null },
-  );
+  const saved = (slot: Slot): Img => {
+    const url = src?.images?.[slot];
+    return url ? { kind: "file", url, w: 0, h: 0 } : null;
+  };
+  const [images, setImages] = useState<Record<Slot, Img>>(() => ({ thumb: saved("thumb"), banner: saved("banner"), detail: saved("detail") }));
+  const [busy, setBusy] = useState(false);
   const [device, setDevice] = useState<"pc" | "mobile">("pc");
   const [guide, setGuide] = useState(false);
   const [ctx, setCtx] = useState<{ slot: Slot; x: number; y: number } | null>(null);
@@ -124,6 +146,20 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
     const urls = objectUrls.current;
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, []);
+  /* 저장된 이미지는 크기를 몰라 한 번 읽어서 비율 경고·상세 길이에 쓴다 */
+  useEffect(() => {
+    (["thumb", "banner", "detail"] as Slot[]).forEach((slot) => {
+      const url = src?.images?.[slot];
+      if (!url) return;
+      const img = new Image();
+      img.onload = () =>
+        setImages((im) => {
+          const cur = im[slot];
+          return cur?.kind === "file" && cur.url === url ? { ...im, [slot]: { ...cur, w: img.naturalWidth, h: img.naturalHeight } } : im;
+        });
+      img.src = url;
+    });
+  }, [src]);
   useEffect(() => {
     if (!ctx) return;
     const close = (e: Event) => {
@@ -155,13 +191,15 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
     setImages((im) => ({ ...im, detail: { kind: "preset", bg: DETAIL_COLORS[len], ratio: DETAIL_RATIO[len] } }));
   const removeImage = (slot: Slot) => setImages((im) => ({ ...im, [slot]: null }));
 
-  /* 실제 로컬 파일 선택 — 서버 업로드는 백엔드 연동 후(POST /api/admin/uploads), 지금은 브라우저 미리보기만 */
+  /* 로컬 파일 선택 — 먼저 미리보기만 하고, '저장하기'를 누를 때 저장소에 올린다 */
   const loadFile = (slot: Slot, file: File | undefined) => {
-    if (!file || !file.type.startsWith("image/")) return;
+    if (!file) return;
+    if (!IMAGE_TYPES[file.type]) return showToast("JPG · PNG · WEBP · GIF 이미지만 올릴 수 있어요");
+    if (file.size > MAX_IMAGE_BYTES) return showToast("이미지는 10MB 이하로 올려주세요");
     const url = URL.createObjectURL(file);
     objectUrls.current.push(url);
     const img = new Image();
-    img.onload = () => setImages((im) => ({ ...im, [slot]: { kind: "file", url, w: img.naturalWidth, h: img.naturalHeight } }));
+    img.onload = () => setImages((im) => ({ ...im, [slot]: { kind: "file", url, w: img.naturalWidth, h: img.naturalHeight, file } }));
     img.src = url;
   };
 
@@ -178,19 +216,121 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
     if (!priceNum && !isSeminar) return "가격을 입력해주세요";
     return null;
   };
-  const save = () => {
+  const input = (draft: boolean): ClassInput => ({
+    name, cat, opType: type, step,
+    date: type === "offline" && date ? date : null,
+    day: type === "online" ? null : day,
+    time: type === "online" ? null : `${timeFrom}~${timeTo}`,
+    capacity: type === "online" ? null : capacity,
+    place: isSeminar ? seminarPlace.trim() : place,
+    months: type === "online" ? months : null,
+    price: priceNum || (isSeminar ? 0 : null),
+    taxType, summary,
+    checklist: forWhom.split("\n"),
+    prep, draft,
+  });
+
+  /* 공개 중인 클래스의 임시저장은 사이트에 반영되면 안 돼서 이 브라우저에만 보관한다 */
+  const FORM_FIELDS = { name, cat, type, step, date, day, timeFrom, timeTo, capacity, place, seminarPlace, months, price, taxType, summary, forWhom, prep };
+  const restoreSetters: Record<string, (v: never) => void> = {
+    name: setName, cat: setCat, type: setType, step: setStep, date: setDate, day: setDay, timeFrom: setTimeFrom, timeTo: setTimeTo,
+    capacity: setCapacity, place: setPlace, seminarPlace: setSeminarPlace, months: setMonths, price: setPrice, taxType: setTaxType,
+    summary: setSummary, forWhom: setForWhom, prep: setPrep,
+  };
+  /* localStorage 는 하이드레이션 뒤에만 읽을 수 있어 effect 안에서 복원한다 */
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (mode !== "basic" || !classId || src?.draft) return;
+    try {
+      const raw = localStorage.getItem(draftKey(classId));
+      if (!raw) return;
+      const { at, fields } = JSON.parse(raw) as { at: string; fields: Record<string, never> };
+      Object.entries(fields).forEach(([k, v]) => restoreSetters[k]?.(v));
+      setSavedAt(at);
+      showToast("임시저장한 내용을 불러왔어요 · 저장하기를 눌러야 사이트에 반영돼요");
+    } catch {
+      /* 저장공간을 못 쓰는 브라우저면 그냥 넘어간다 */
+    }
+    // 처음 한 번만 불러온다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  const stamp = () => {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  };
+
+  const saveContent = async (id: number) => {
+    const next: Record<Slot, string | null> = { thumb: null, banner: null, detail: null };
+    for (const slot of ["thumb", "banner", "detail"] as Slot[]) {
+      const img = images[slot];
+      if (img?.kind !== "file") continue; // 샘플·빈칸은 저장하지 않는다
+      next[slot] = img.file ? await uploadImage(id, slot, img.file) : img.url;
+    }
+    await api(`/api/admin/classes/${id}/content`, "PUT", next);
+    setImages((im) => {
+      const out = { ...im };
+      (["thumb", "banner", "detail"] as Slot[]).forEach((s) => {
+        const cur = out[s];
+        if (cur?.kind === "file" && next[s]) out[s] = { ...cur, url: next[s]!, file: undefined };
+      });
+      return out;
+    });
+  };
+
+  const save = async () => {
     const err = mode === "basic" ? validate() : null;
     if (err) {
       showToast(err);
       return;
     }
-    // 백엔드 연동 시: classId ? PUT /api/admin/classes/:id : POST /api/admin/classes
-    showToast("저장했어요 · 사이트에 바로 반영돼요");
+    setBusy(true);
+    try {
+      if (mode === "content") {
+        await saveContent(classId!);
+        showToast("저장했어요 · 사이트에 바로 반영돼요");
+      } else if (classId) {
+        await api(`/api/admin/classes/${classId}`, "PUT", input(false));
+        try { localStorage.removeItem(draftKey(classId)); } catch {}
+        setSavedAt(null);
+        showToast("저장했어요 · 사이트에 바로 반영돼요");
+        router.refresh();
+      } else {
+        const { id } = await api<{ id: number }>("/api/admin/classes", "POST", input(false));
+        showToast("등록했어요 · 이어서 이미지를 올려주세요");
+        router.replace(ROUTES.adminClassContent(id));
+      }
+    } catch (e) {
+      showToast((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
   };
-  const tempSave = () => {
-    const d = new Date();
-    setSavedAt(`${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`);
-    showToast("임시저장했어요");
+
+  const tempSave = async () => {
+    if (!name.trim()) return showToast("클래스명을 입력해주세요");
+    setBusy(true);
+    try {
+      if (!classId) {
+        // 새 클래스 — 고객 화면에 안 보이는 임시저장 클래스로 만들어 두고 편집 화면으로 이동
+        const { id } = await api<{ id: number }>("/api/admin/classes", "POST", input(true));
+        showToast("임시저장했어요 · 저장하기를 누르기 전까지 사이트에 안 보여요");
+        router.replace(ROUTES.adminEditClass(id));
+      } else if (src?.draft) {
+        await api(`/api/admin/classes/${classId}`, "PUT", input(true));
+        setSavedAt(stamp());
+        showToast("임시저장했어요");
+      } else {
+        localStorage.setItem(draftKey(classId), JSON.stringify({ at: stamp(), fields: FORM_FIELDS }));
+        setSavedAt(stamp());
+        showToast("임시저장했어요 · 이 브라우저에만 보관돼요");
+      }
+    } catch (e) {
+      showToast((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const fileInput = (slot: Slot) => (
@@ -564,14 +704,14 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
       <div className="footerbar">
         <div className="footerbar-inner">
           <div className="btn-group">
-            <button type="button" className="btn btn-ghost" onClick={tempSave}>임시저장</button>
+            {mode === "basic" && <button type="button" className="btn btn-ghost" onClick={tempSave} disabled={busy}>임시저장</button>}
             {mode === "content" && src && (
               <Link className="btn btn-outline" href={ROUTES.classDetail(src.slug)} target="_blank">미리보기 ↗</Link>
             )}
           </div>
           <div className="btn-group">
             <button type="button" className="btn btn-ghost" onClick={() => router.push(ROUTES.admin)}>취소</button>
-            <button type="button" className="btn btn-mint" onClick={save}>저장하기</button>
+            <button type="button" className="btn btn-mint" onClick={save} disabled={busy}>{busy ? "저장 중…" : src?.draft && mode === "basic" ? "저장하고 공개하기" : "저장하기"}</button>
           </div>
         </div>
       </div>

@@ -184,7 +184,12 @@ export default function ClassDetailView({ c, inst }: { c: AcademyClass; inst: In
       <div className="wrap detail-grid">
         <div>
           <div className="top-block">
-            <div className="hero-img"><span>{c.name}</span></div>
+            <div
+              className="hero-img"
+              style={c.images?.thumb ? { backgroundImage: `url(${c.images.thumb})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+            >
+              {!c.images?.thumb && <span>{c.name}</span>}
+            </div>
             <div className="top-info">
               <div className="tags">
                 <span className="badge badge-line">{catLabel}</span>

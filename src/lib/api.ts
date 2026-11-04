@@ -10,6 +10,8 @@ import { getAdminSupabase } from "./supabase/admin";
 import { serviceRoleConfigured } from "./supabase/env";
 import type { AcademyClass, ClassDetail, Instructor, Payment } from "./types";
 
+import { getClassDetail } from "./classes";
+
 export { getClassDetail, refundPolicy } from "./classes";
 
 /** class_with_counts view 한 행 (snake_case) */
@@ -19,12 +21,11 @@ type ClassRow = {
   capacity: number | null; applied: number | null; price: number | null; tax_type: AcademyClass["taxType"];
   cert: boolean; noob: boolean; step: AcademyClass["step"]; level: AcademyClass["level"] | null; summary: string;
   weeks: number | null; months: number | null; manual_end: boolean; draft: boolean;
-  detail: Partial<ClassDetail> | null; detail_image_url: string | null;
+  detail: Partial<ClassDetail> | null; thumbnail_url: string | null; banner_url: string | null; detail_image_url: string | null;
 };
 
 function rowToClass(r: ClassRow): AcademyClass {
-  const detail = r.detail && Object.keys(r.detail).length > 0 ? (r.detail as ClassDetail) : undefined;
-  return {
+  const base: AcademyClass = {
     id: r.id, slug: r.slug, name: r.name, cat: r.cat, field: r.field, target: r.target,
     day: r.day, time: r.time, place: r.place, date: r.date, capacity: r.capacity,
     // 개설 예정(upcoming)은 신청 인원 개념이 없어 목업처럼 null 로 둔다
@@ -35,8 +36,20 @@ function rowToClass(r: ClassRow): AcademyClass {
     ...(r.weeks ? { weeks: r.weeks } : {}),
     ...(r.months ? { months: r.months } : {}),
     ...(r.manual_end ? { manualEnd: true } : {}),
-    ...(detail ? { detail: { ...detail, ...(r.detail_image_url ? { detailImage: r.detail_image_url } : {}) } } : {}),
+    ...(r.draft ? { draft: true } : {}),
   };
+  const images = {
+    ...(r.thumbnail_url ? { thumb: r.thumbnail_url } : {}),
+    ...(r.banner_url ? { banner: r.banner_url } : {}),
+    ...(r.detail_image_url ? { detail: r.detail_image_url } : {}),
+  };
+  if (Object.keys(images).length) base.images = images;
+  // 관리자가 일부 항목(이런 분께·준비물)만 저장한 상세는 기본 상세 위에 덮어 완성한다
+  const saved = r.detail ?? {};
+  if (Object.keys(saved).length || r.detail_image_url) {
+    base.detail = { ...getClassDetail(base), ...saved, ...(r.detail_image_url ? { detailImage: r.detail_image_url } : {}) };
+  }
+  return base;
 }
 
 /** GET /api/classes — 고객 화면은 임시저장(draft) 클래스를 빼고, 관리자는 includeDraft */
