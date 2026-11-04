@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ROUTES } from "@/data/site";
-import { getClass, getClassDetail } from "@/lib/api";
+import { getClassDetail } from "@/lib/classes";
 import { fullDate, taxNote, today, won } from "@/lib/format";
 import { CATEGORY_LABELS, computeStatus } from "@/lib/status";
 import type { AcademyClass } from "@/lib/types";
@@ -71,8 +71,7 @@ function Flow({ step, slug }: { step: Step; slug: string }) {
   );
 }
 
-export default function CheckoutFlow({ slug }: { slug: string | null }) {
-  const c = getClass(slug);
+export default function CheckoutFlow({ c }: { c: AcademyClass | undefined }) {
   const [step, setStep] = useState<Step>(2);
   const [checks, setChecks] = useState<Record<string, boolean>>({});
   const [form, setForm] = useState({ name: "", phone: "", email: "", shop: "" });

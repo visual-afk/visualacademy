@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import SiteHeader from "@/components/site/SiteHeader";
 import TabBar from "@/components/site/TabBar";
-import { applications, me, MY_TABS, myCourses, myPayments, type ApplicationStatus, type MyPaymentStatus } from "@/data/mypage";
+import { applications, me as mockMe, MY_TABS, myCourses, myPayments, type ApplicationStatus, type MyPaymentStatus } from "@/data/mypage";
 import { ROUTES } from "@/data/site";
 import { taxNote, won } from "@/lib/format";
 
@@ -26,7 +26,10 @@ const PAY_BADGE: Record<MyPaymentStatus, string> = {
 type Receipt = (typeof myPayments)[number];
 type Modal = { kind: "receipt"; p: Receipt } | { kind: "withdraw" } | { kind: "withdrawn" } | { kind: "logout" } | null;
 
-export default function MyPageView({ tab }: { tab: MyTab }) {
+export type MyInfo = typeof mockMe;
+
+/** me: 로그인한 회원 정보 (없으면 목업) — 신청·결제·수강 목록은 결제 연동(P3) 때 실제 데이터로 바뀐다 */
+export default function MyPageView({ tab, me = mockMe }: { tab: MyTab; me?: MyInfo }) {
   const [modal, setModal] = useState<Modal>(null);
   const [pwError, setPwError] = useState("");
   const { toast, showToast } = useToast();
@@ -225,10 +228,10 @@ export default function MyPageView({ tab }: { tab: MyTab }) {
             {modal.kind === "logout" && (
               <>
                 <h3>로그아웃할까요?</h3>
-                <p>로그인 기능은 백엔드 연동 후 동작해요.</p>
+                <p>다음에 들어올 때 다시 카카오로 로그인하면 돼요.</p>
                 <div className="modal-actions">
                   <button type="button" className="btn btn-ghost" onClick={() => setModal(null)}>취소</button>
-                  <Link className="btn btn-mint" href={ROUTES.home}>로그아웃</Link>
+                  <form action="/auth/logout?next=/" method="post"><button type="submit" className="btn btn-mint">로그아웃</button></form>
                 </div>
               </>
             )}

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Fragment, useMemo, useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import { ROUTES } from "@/data/site";
-import { getPayments } from "@/lib/api";
 import { taxBreakdown } from "@/lib/format";
 import type { Payment } from "@/lib/types";
 
@@ -43,8 +42,8 @@ function nowStamp() {
 type RefundDraft = { id: string; type: "full" | "partial"; amount: string; reason: string; memo: string; error: string };
 type InvoiceDraft = { id: string; bizNo: string; bizName: string; ceo: string; email: string; error: string };
 
-export default function Payments() {
-  const [payments, setPayments] = useState<Payment[]>(() => getPayments().map((p) => ({ ...p })));
+export default function Payments({ initial }: { initial: Payment[] }) {
+  const [payments, setPayments] = useState<Payment[]>(() => initial.map((p) => ({ ...p })));
   const periods = useMemo(() => [...new Set(payments.map((p) => p.paidAt.slice(0, 7)))].sort().reverse(), [payments]);
   const [status, setStatus] = useState<string>("all");
   const [method, setMethod] = useState("all");

@@ -5,10 +5,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import { ROUTES } from "@/data/site";
-import { getClassById } from "@/lib/api";
 import { taxBreakdown } from "@/lib/format";
 import { stepLabel } from "@/lib/status";
-import type { ClassCategory, RoadmapStep, TaxType } from "@/lib/types";
+import type { AcademyClass, ClassCategory, RoadmapStep, TaxType } from "@/lib/types";
 
 type Tab = "basic" | "content";
 type OpType = "offline" | "waitlist" | "online";
@@ -78,9 +77,9 @@ function imgStyle(img: Img): React.CSSProperties {
  * 클래스 등록·편집 폼. 프로토타입(10.14)에서 기본 정보와 콘텐츠 관리가 별도 화면으로 분리돼
  * mode 로 두 화면을 나눠 렌더한다 — basic: /admin/classes/new, /admin/classes/[id]/edit · content: /admin/classes/[id]/content
  */
-export default function ClassForm({ mode, classId }: { mode: Tab; classId?: number }) {
+export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass }) {
   const router = useRouter();
-  const src = classId ? getClassById(classId) : undefined;
+  const classId = src?.id;
   const { toast, showToast } = useToast();
   const tab = mode;
   /* ── 기본 정보 ── */

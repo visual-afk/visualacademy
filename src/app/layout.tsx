@@ -14,6 +14,7 @@ import "@/styles/pages/admin-dashboard.css";
 import "@/styles/pages/admin-class-form.css";
 import "@/styles/pages/admin-payments.css";
 import "@/styles/pages/admin-design.css";
+import "@/styles/pages/auth.css";
 
 export const metadata: Metadata = {
   title: {

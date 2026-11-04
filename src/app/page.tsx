@@ -39,8 +39,8 @@ function roadmapColumns(c: MainContent["roadmap"]): RoadmapColumn[] {
 }
 
 /** 노출 규칙: 마감 임박 순 / 개강일 빠른 순 / 클래스 관리 순서 */
-function pickRecruit(rule: string, count: number) {
-  const rows = getClasses()
+function pickRecruit(all: AcademyClass[], rule: string, count: number) {
+  const rows = all
     .map((c) => ({ ...c, status: computeStatus(c) }))
     .filter((c) => !["종료", "마감", "개설예정"].includes(c.status));
   const urgency = (c: AcademyClass & { status: ClassStatus }) =>
@@ -78,6 +78,7 @@ function RecruitCard({ c }: { c: AcademyClass & { status: ClassStatus } }) {
 export default async function HomePage() {
   await connection();
   const C = getMainContent();
+  const classes = await getClasses();
 
   const sections: Record<string, () => React.ReactNode> = {
     hero: () => (
@@ -109,7 +110,7 @@ export default async function HomePage() {
         <div className="wrap">
           <div className="section-head"><h2>{C.recruit.title}</h2><p>{C.recruit.desc}</p></div>
           <div className="cards3">
-            {pickRecruit(C.recruit.rule, Number(C.recruit.count) || 3).map((c) => <RecruitCard key={c.id} c={c} />)}
+            {pickRecruit(classes, C.recruit.rule, Number(C.recruit.count) || 3).map((c) => <RecruitCard key={c.id} c={c} />)}
           </div>
         </div>
       </section>

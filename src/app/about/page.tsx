@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import SiteFooter from "@/components/site/SiteFooter";
 import SiteHeader from "@/components/site/SiteHeader";
 import TabBar, { pickTab } from "@/components/site/TabBar";
-import { instructors } from "@/data/instructors";
+import { getInstructors } from "@/lib/api";
 import { COMPANY } from "@/data/site";
 import PartnerForm from "./PartnerForm";
 
@@ -150,6 +150,7 @@ function IntroPanel() {
 }
 
 export default async function AboutPage({ searchParams }: PageProps<"/about">) {
+  const instructors = await getInstructors();
   const tab = pickTab(TABS, (await searchParams).tab);
 
   return (

@@ -4,12 +4,11 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import Accordion from "@/components/site/Accordion";
-import { getInstructor } from "@/data/instructors";
 import { ROUTES } from "@/data/site";
-import { getClass, getClassDetail, refundPolicy } from "@/lib/api";
+import { getClassDetail, refundPolicy } from "@/lib/classes";
 import { fullDate, ddayLabel, priceLabel } from "@/lib/format";
 import { badgeClass, CATEGORY_LABELS, computeStatus, ctaLabel } from "@/lib/status";
-import type { AcademyClass, ClassStatus } from "@/lib/types";
+import type { AcademyClass, ClassStatus, Instructor } from "@/lib/types";
 
 type Tab = "info" | "reviews" | "qna" | "refund";
 
@@ -138,11 +137,9 @@ function Lessons({ lessons }: { lessons: { t: string; d: string; hidden?: boolea
   );
 }
 
-export default function ClassDetailView({ slug }: { slug: string }) {
-  const c = getClass(slug)!;
+export default function ClassDetailView({ c, inst }: { c: AcademyClass; inst: Instructor }) {
   const d = getClassDetail(c);
   const status = computeStatus(c);
-  const inst = getInstructor(d.instructorId);
   const [tab, setTab] = useState<Tab>("info");
   const [notified, setNotified] = useState(false);
   const { toast, showToast } = useToast();

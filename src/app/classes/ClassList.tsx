@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import ClassThumb from "@/components/site/ClassThumb";
 import GrowthRoadmap, { type RoadmapColumn } from "@/components/site/GrowthRoadmap";
 import { ROUTES } from "@/data/site";
-import { getClasses } from "@/lib/api";
 import { dayLabel, ddayLabel, priceLabel } from "@/lib/format";
 import { badgeClass, computeStatus, ctaLabel, STEP_NAMES } from "@/lib/status";
 import type { AcademyClass, ClassStatus } from "@/lib/types";
@@ -168,7 +167,7 @@ function RowCard({ c }: { c: Row }) {
   );
 }
 
-export default function ClassList() {
+export default function ClassList({ classes }: { classes: AcademyClass[] }) {
   const params = useSearchParams();
   const catParam = params.get("cat");
   const initialCat = catParam && VALID_CATS.includes(catParam) ? catParam : "all";
@@ -185,7 +184,7 @@ export default function ClassList() {
     setView(initialCat === "all" || initialCat === "정석" ? "level" : "class");
   }
 
-  const rows: Row[] = useMemo(() => getClasses().map((c) => ({ ...c, status: computeStatus(c) })), []);
+  const rows: Row[] = useMemo(() => classes.map((c) => ({ ...c, status: computeStatus(c) })), [classes]);
   const orderClasses = rows.filter((c) => c.cat === "정석").sort((a, b) => (a.level ?? 0) - (b.level ?? 0));
   const rowClasses = rows.filter((c) => c.cat !== "정석");
 

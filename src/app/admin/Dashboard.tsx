@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import { ROUTES } from "@/data/site";
-import { getClasses } from "@/lib/api";
 import { dayLabel, ddayLabel, today, won } from "@/lib/format";
 import { CATEGORY_LABELS, computeStatus, stepLabel } from "@/lib/status";
 import type { AcademyClass, ClassStatus } from "@/lib/types";
@@ -28,8 +27,8 @@ function computeRevenue(classes: AcademyClass[]) {
   return { total, paidCount, catMap };
 }
 
-export default function Dashboard() {
-  const [classes, setClasses] = useState<AcademyClass[]>(() => getClasses().map((c) => ({ ...c })));
+export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
+  const [classes, setClasses] = useState<AcademyClass[]>(() => initial.map((c) => ({ ...c })));
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [catFilter, setCatFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
