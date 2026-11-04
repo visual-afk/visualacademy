@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import Accordion from "@/components/site/Accordion";
@@ -137,11 +138,31 @@ function Lessons({ lessons }: { lessons: { t: string; d: string; hidden?: boolea
   );
 }
 
-export default function ClassDetailView({ c, inst }: { c: AcademyClass; inst: Instructor }) {
+export default function ClassDetailView({ c, inst, waitlisted = false }: { c: AcademyClass; inst: Instructor; waitlisted?: boolean }) {
+  const router = useRouter();
   const d = getClassDetail(c);
   const status = computeStatus(c);
   const [tab, setTab] = useState<Tab>("info");
-  const [notified, setNotified] = useState(false);
+  const [notified, setNotified] = useState(waitlisted);
+  const [notifyBusy, setNotifyBusy] = useState(false);
+
+  /* 개설 알림 신청 — 로그인 회원 휴대폰으로 받는다. 로그인 전이면 로그인 후 이 화면으로 돌아온다 */
+  const requestNotify = async () => {
+    setNotifyBusy(true);
+    try {
+      const res = await fetch(`/api/classes/${c.slug}/waitlist`, { method: "POST" });
+      if (res.status === 401) {
+        router.push(`/login?next=${encodeURIComponent(ROUTES.classDetail(c.slug))}`);
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return showToast(data.error ?? "신청하지 못했어요");
+      setNotified(true);
+      showToast("개설 알림을 신청했어요 · 일정이 정해지면 알림톡으로 안내드려요");
+    } finally {
+      setNotifyBusy(false);
+    }
+  };
   const { toast, showToast } = useToast();
 
   const chip = ddayChip(c, status);
@@ -159,11 +180,8 @@ export default function ClassDetailView({ c, inst }: { c: AcademyClass; inst: In
       <button
         type="button"
         className={cls}
-        disabled={notified}
-        onClick={() => {
-          setNotified(true);
-          showToast("개설 알림을 신청했어요 · 일정이 정해지면 알림톡으로 안내드려요");
-        }}
+        disabled={notified || notifyBusy}
+        onClick={requestNotify}
       >
         {notified ? "알림 신청 완료" : cta}
       </button>

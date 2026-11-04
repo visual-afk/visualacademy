@@ -24,6 +24,7 @@ Node.js 20 이상 필요 (개발 환경: Node 24, Next.js 16, React 19, TypeScri
 | `SUPABASE_SERVICE_ROLE_KEY` | 서버 전용 (DB 쓰기·조회) |
 | `VISUAL_AUTO_SUPABASE_URL` / `VISUAL_AUTO_SUPABASE_ANON_KEY` | 관리자 로그인 — visual-auto 본사(hq_admin) 계정 확인 |
 | `ADMIN_SESSION_SECRET` | 관리자 쿠키 서명. 설정하면 `/admin`이 로그인으로 잠긴다 |
+| 알림톡 · 본사 채팅 · Cron | [docs/alimtalk-templates.md](docs/alimtalk-templates.md) 참고 (`SOLAPI_*`, `KAKAO_SENDER_KEY`, `KAKAO_TMPL_*`, `ACADEMY_CHAT_WEBHOOK_URL`, `CRON_SECRET`) — 없으면 알림만 건너뛴다 |
 | `NEXT_PUBLIC_TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` | 토스페이먼츠 **결제위젯 연동 키** (`gck_` / `gsk_`). API 개별 연동 키(`ck_`/`sk_`)와 섞어 쓰면 승인이 실패한다 |
 
 1. Supabase SQL Editor에서 `supabase/migrations/0001_init.sql` 실행

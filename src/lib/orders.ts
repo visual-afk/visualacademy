@@ -5,6 +5,8 @@
  */
 import { getClass } from "./api";
 import type { Profile } from "./auth";
+import { fullDate, won } from "./format";
+import { notifyHq, notifyOnce } from "./notify";
 import { computeStatus } from "./status";
 import { getAdminSupabase } from "./supabase/admin";
 import { bankName, cancelPayment, confirmPayment, getPaymentByOrderId, methodLabel, TossError, type TossPayment } from "./toss";
@@ -79,7 +81,7 @@ export async function applyTossPayment(order: OrderRow, p: TossPayment) {
       return;
   }
 
-  const { data: cls } = await db.from("classes").select("tax_type, type, months").eq("id", order.class_id).single();
+  const { data: cls } = await db.from("classes").select("name, date, time, place, tax_type, type, months").eq("id", order.class_id).single();
   const { error: payErr } = await db.from("payments").upsert(
     {
       order_id: order.id,
@@ -105,6 +107,20 @@ export async function applyTossPayment(order: OrderRow, p: TossPayment) {
   if (payErr) throw new Error(payErr.message);
   await db.from("orders").update({ status: orderStatus, updated_at: now }).eq("id", order.id);
 
+  // 처음 수강확정 / 처음 입금대기가 된 순간에만 알림 (웹훅이 여러 번 와도 notifyOnce 가 한 번만 보낸다)
+  if (cls && orderStatus === "수강확정" && order.status !== "수강확정") await onConfirmed(order, cls);
+  if (cls && orderStatus === "입금대기" && order.status !== "입금대기" && p.virtualAccount) {
+    await notifyOnce("vbank", order.id, order.applicant?.phone, {
+      "#{이름}": order.applicant?.name ?? "",
+      "#{클래스명}": cls.name,
+      "#{금액}": won(p.totalAmount),
+      "#{은행}": bankName(p.virtualAccount.bankCode),
+      "#{계좌번호}": p.virtualAccount.accountNumber,
+      "#{입금기한}": kstLabel(p.virtualAccount.dueDate),
+      "#{주문번호}": order.order_no,
+    });
+  }
+
   // 온라인 강의는 결제 완료 시 수강권한 발급, 전액 취소되면 회수
   if (cls?.type === "online") {
     if (payStatus === "결제완료") {
@@ -118,6 +134,27 @@ export async function applyTossPayment(order: OrderRow, p: TossPayment) {
       await db.from("enrollments").delete().eq("order_id", order.id);
     }
   }
+}
+
+type ClassInfo = { name: string; date: string | null; time: string | null; place: string | null; type: string; months: number | null };
+
+export function kstLabel(iso: string) {
+  const k = new Date(new Date(iso).getTime() + 9 * 3600 * 1000).toISOString();
+  return `${k.slice(0, 10).replace(/-/g, ".")} ${k.slice(11, 16)}`;
+}
+
+/** 수강확정 순간 — 고객 알림톡 + 본사 채팅 */
+async function onConfirmed(order: OrderRow, cls: ClassInfo) {
+  const online = cls.type === "online";
+  await notifyOnce("paid", order.id, order.applicant?.phone, {
+    "#{이름}": order.applicant?.name ?? "",
+    "#{클래스명}": cls.name,
+    "#{주문번호}": order.order_no,
+    "#{금액}": order.amount ? won(order.amount) : "무료",
+    "#{일정}": online ? `결제일로부터 ${cls.months ?? ""}개월` : cls.date ? `${fullDate(cls.date)} ${cls.time?.split("~")[0] ?? ""}`.trim() : "추후 안내",
+    "#{장소}": online ? "온라인 (마이페이지 > 온라인 수강권한)" : cls.place ?? "",
+  });
+  await notifyHq(`🎓 새 수강 확정 · ${cls.name}\n${order.applicant?.name ?? "-"} · ${order.amount ? won(order.amount) : "무료"} · ${order.order_no}`);
 }
 
 export type FinalizeResult =
@@ -177,6 +214,8 @@ export async function confirmFreeOrder(orderNo: string): Promise<"ok" | "full" |
   if (hold === "full") return "full";
   if (hold !== "ok") return "error";
   await db.from("orders").update({ status: "수강확정", updated_at: new Date().toISOString() }).eq("id", order.id);
+  const { data: cls } = await db.from("classes").select("name, date, time, place, type, months").eq("id", order.class_id).single();
+  if (cls) await onConfirmed(order, cls);
   return "ok";
 }
 

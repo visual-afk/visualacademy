@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { bad, guardAdmin } from "@/lib/adminApi";
 import { getClassById } from "@/lib/api";
 import { classColumns, detailPatch, validateClassInput, type ClassInput } from "@/lib/classInput";
+import { fullDate } from "@/lib/format";
+import { notifyOnce } from "@/lib/notify";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 
 /** PUT /api/admin/classes/:id — 기본 정보 저장 */
@@ -25,7 +27,26 @@ export async function PUT(request: NextRequest, { params }: RouteContext<"/api/a
   const detail = detailPatch(v, (cc?.detail as Record<string, unknown>) ?? {});
   const { error: ccErr } = await db.from("class_contents").upsert({ class_id: id, detail, updated_at: new Date().toISOString() });
   if (ccErr) return bad(`상세 정보를 저장하지 못했어요: ${ccErr.message}`, 500);
-  return NextResponse.json({ id, slug: prev.slug });
+
+  // 개설 대기 → 일정 확정으로 공개하면 알림 신청자에게 한 번 알린다
+  const opened = (prev.type === "waitlist" || prev.type === "upcoming") && v.opType === "offline" && !v.draft && v.date;
+  let notified = 0;
+  if (opened) {
+    const { data: alerts } = await db.from("waitlist_alerts").select("id, phone").eq("class_id", id).is("notified_at", null);
+    const link = `${request.nextUrl.origin}/classes/${prev.slug}`;
+    for (const a of alerts ?? []) {
+      const r = await notifyOnce("waitlist-open", a.id, a.phone, {
+        "#{클래스명}": v.name,
+        "#{일정}": `${fullDate(v.date!)} ${v.time?.split("~")[0] ?? ""}`.trim(),
+        "#{링크}": link,
+      });
+      if (r.sent) {
+        notified++;
+        await db.from("waitlist_alerts").update({ notified_at: new Date().toISOString() }).eq("id", a.id);
+      }
+    }
+  }
+  return NextResponse.json({ id, slug: prev.slug, notified });
 }
 
 type Patch = { capacity?: number; date?: string; manualEnd?: boolean };
