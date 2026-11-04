@@ -4,7 +4,8 @@ import { pickTab } from "@/components/site/TabBar";
 import { MY_TABS } from "@/data/mypage";
 import { getProfile, getUser } from "@/lib/auth";
 import { formatPhone } from "@/lib/format";
-import MyPageView, { type MyInfo } from "./MyPageView";
+import { getMyPageData } from "@/lib/mypage";
+import MyPageView, { type MyData, type MyInfo } from "./MyPageView";
 
 export const metadata: Metadata = { title: "마이페이지" };
 
@@ -21,9 +22,10 @@ export default async function MyPage({ searchParams }: PageProps<"/mypage">) {
         phone: profile.phone ? formatPhone(profile.phone) : "",
       }
     : undefined;
+  const data: MyData | undefined = profile ? await getMyPageData(profile.id) : undefined;
   return (
     <div className="site pg-mypage">
-      <MyPageView tab={tab} me={me} />
+      <MyPageView tab={tab} me={me} data={data} />
       <SiteFooter />
     </div>
   );

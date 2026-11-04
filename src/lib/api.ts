@@ -88,7 +88,39 @@ export async function getInstructors(): Promise<Instructor[]> {
   return data as Instructor[];
 }
 
-/** GET /api/admin/payments — 결제 연동(P3) 전까지는 목업 */
+const kstStamp = (iso: string) => {
+  const k = new Date(new Date(iso).getTime() + 9 * 3600 * 1000).toISOString();
+  return `${k.slice(0, 10)} ${k.slice(11, 16)}`;
+};
+
+type PaymentRow = {
+  method: string | null; amount: number; tax_type: Payment["taxType"]; status: string; approved_no: string | null;
+  refund: Payment["refund"] | null; invoice: Payment["invoice"] | null; paid_at: string | null; created_at: string;
+  orders: { order_no: string; status: string; applicant: { name: string }; classes: { name: string; cat: Payment["cat"] } };
+};
+
+/** GET /api/admin/payments — 결제를 끝낸 건만 (실패·결제창 이탈은 제외), 최근 순 */
 export async function getPayments(): Promise<Payment[]> {
-  return mockPayments;
+  if (!serviceRoleConfigured()) return mockPayments;
+  const { data, error } = await getAdminSupabase()
+    .from("payments")
+    .select("method, amount, tax_type, status, approved_no, refund, invoice, paid_at, created_at, orders(order_no, status, applicant, classes(name, cat))")
+    .in("status", ["결제완료", "부분환불", "환불완료", "입금대기"])
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`결제 조회 실패: ${error.message}`);
+  return ((data ?? []) as unknown as PaymentRow[]).map((r) => ({
+    id: r.orders.order_no,
+    className: r.orders.classes.name,
+    cat: r.orders.classes.cat,
+    applicant: r.orders.applicant?.name ?? "-",
+    method: r.method ?? "-",
+    amount: r.amount,
+    taxType: r.tax_type,
+    paidAt: kstStamp(r.paid_at ?? r.created_at),
+    status: r.status as Payment["status"],
+    ...(r.approved_no ? { approvedNo: r.approved_no } : {}),
+    ...(r.orders.status === "취소신청" ? { cancelRequested: true } : {}),
+    ...(r.refund ? { refund: { ...r.refund, refundedAt: kstStamp(r.refund.refundedAt) } } : {}),
+    ...(r.invoice ? { invoice: r.invoice } : {}),
+  }));
 }

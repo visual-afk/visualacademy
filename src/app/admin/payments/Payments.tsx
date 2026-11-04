@@ -20,7 +20,8 @@ const REASONS = ["단순 변심", "일정 참석 불가", "중복 결제", "강�
 const fmt = (n: number) => n.toLocaleString("ko-KR");
 function methodGroup(m: string) {
   if (m === "신용카드" || m === "체크카드") return "신용카드";
-  if (["카카오페이", "네이버페이", "토스페이", "간편결제"].includes(m)) return "간편결제";
+  // 토스는 간편결제를 제공사 이름(카카오페이·토스페이·페이코 등)으로 내려준다
+  if (m === "간편결제" || m === "페이코" || m.endsWith("페이")) return "간편결제";
   return m;
 }
 function taxNote(p: Payment) {
@@ -70,8 +71,9 @@ export default function Payments({ initial }: { initial: Payment[] }) {
 
   const patch = (id: string, change: Partial<Payment>) => setPayments((ps) => ps.map((p) => (p.id === id ? { ...p, ...change } : p)));
 
-  const confirmRefund = () => {
-    if (!refund) return;
+  const [refunding, setRefunding] = useState(false);
+  const confirmRefund = async () => {
+    if (!refund || refunding) return;
     const p = payments.find((x) => x.id === refund.id)!;
     let amount = p.amount;
     if (refund.type === "partial") {
@@ -81,11 +83,26 @@ export default function Payments({ initial }: { initial: Payment[] }) {
         return;
       }
     }
-    // 백엔드: POST /api/admin/payments/:id/refund → PG 환불 API 호출
-    patch(p.id, {
-      status: refund.type === "full" ? "환불완료" : "부분환불",
-      refund: { type: refund.type, amount, reason: refund.reason, refundedAt: nowStamp() },
-    });
+    setRefunding(true);
+    try {
+      const res = await fetch(`/api/admin/payments/${encodeURIComponent(p.id)}/refund`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: refund.type, amount, reason: refund.reason, memo: refund.memo }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setRefund({ ...refund, error: data.error ?? "환불하지 못했어요" });
+        return;
+      }
+      patch(p.id, {
+        status: data.status,
+        cancelRequested: false,
+        refund: { type: data.status === "환불완료" ? "full" : "partial", amount: data.refunded, reason: refund.reason, refundedAt: nowStamp() },
+      });
+    } finally {
+      setRefunding(false);
+    }
     setRefund(null);
     showToast(refund.type === "full" ? "전액 환불 처리했어요" : `${fmt(amount)}원 부분 환불 처리했어요`);
   };
@@ -214,7 +231,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
                           <div><b>과세 구분</b><p>{p.taxType === "exempt" ? "면세" : "과세"}</p></div>
                           <div><b>공급가액 · 부가세</b><p>{taxNote(p)}</p></div>
                           <div><b>실수령액 (환불 반영)</b><p>{fmt(netAmount(p))}원</p></div>
-                          <div><b>승인번호</b><p>{"AP" + p.id.slice(3).replace(/-/g, "")}</p></div>
+                          <div><b>승인번호</b><p>{p.approvedNo ?? "-"}</p></div>
                           <div><b>분류</b><p>{p.cat}</p></div>
                           <div><b>결제일시</b><p>{p.paidAt}</p></div>
                           {p.invoice && (
@@ -281,7 +298,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
             {refund.error && <p className="err">{refund.error}</p>}
             <div className="modal-actions">
               <button type="button" className="btn btn-ghost" onClick={() => setRefund(null)}>취소</button>
-              <button type="button" className="btn btn-mint" onClick={confirmRefund}>환불 처리</button>
+              <button type="button" className="btn btn-mint" onClick={confirmRefund} disabled={refunding}>{refunding ? "환불 중…" : "환불 처리"}</button>
             </div>
           </div>
         </div>

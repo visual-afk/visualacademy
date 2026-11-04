@@ -113,6 +113,10 @@ export interface Payment {
   taxType: TaxType;
   paidAt: string;
   status: PaymentStatus;
+  /** 카드 승인번호 (실제 결제만) */
+  approvedNo?: string;
+  /** 고객이 마이페이지에서 취소를 요청한 건 */
+  cancelRequested?: boolean;
   refund?: { type: "full" | "partial"; amount: number; reason: string; refundedAt: string };
   invoice?: { bizNo: string; bizName: string; ceo: string; email: string; issuedAt: string };
 }

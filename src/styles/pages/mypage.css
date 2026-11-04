@@ -46,6 +46,9 @@
   .app-price{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.011em}
   .app-cancel{font-size:12px;color:var(--ink-3);background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;font-family:var(--font)}
   .app-cancel:hover{color:var(--red-d)}
+  .app-cancel:disabled{opacity:.5;cursor:default}
+  .empty-note{font-size:14.5px;color:var(--ink-3);padding:36px 0;text-align:center}
+  .empty-note a{color:var(--mint-d);font-weight:700;margin-left:6px}
 
   .pay-table{width:100%;border-collapse:collapse;font-size:13.5px}
   .pay-table th{text-align:left;font-size:12px;color:var(--ink-3);font-weight:600;padding:0 12px 12px;border-bottom:1px solid var(--line)}

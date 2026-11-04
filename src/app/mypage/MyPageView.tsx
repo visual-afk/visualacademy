@@ -1,11 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import SiteHeader from "@/components/site/SiteHeader";
 import TabBar from "@/components/site/TabBar";
-import { applications, me as mockMe, MY_TABS, myCourses, myPayments, type ApplicationStatus, type MyPaymentStatus } from "@/data/mypage";
+import {
+  applications as mockApplications,
+  me as mockMe,
+  MY_TABS,
+  myCourses as mockCourses,
+  myPayments as mockPayments,
+  type ApplicationStatus,
+  type MyApplication,
+  type MyCourse,
+  type MyPayment,
+  type MyPaymentStatus,
+} from "@/data/mypage";
 import { ROUTES } from "@/data/site";
 import { taxNote, won } from "@/lib/format";
 
@@ -15,21 +27,44 @@ const APP_BADGE: Record<ApplicationStatus, string> = {
   "수강 확정": "badge-mint",
   "입금 대기": "badge-amber",
   "수강 완료": "badge-line",
+  "취소 요청": "badge-amber",
   "신청 취소": "badge-red",
 };
 const PAY_BADGE: Record<MyPaymentStatus, string> = {
   결제완료: "badge-mint",
   "입금 대기": "badge-amber",
+  부분환불: "badge-amber",
   환불완료: "badge-red",
 };
 
-type Receipt = (typeof myPayments)[number];
-type Modal = { kind: "receipt"; p: Receipt } | { kind: "withdraw" } | { kind: "withdrawn" } | { kind: "logout" } | null;
+type Receipt = MyPayment;
+type Modal = { kind: "receipt"; p: Receipt } | { kind: "cancel"; a: MyApplication } | { kind: "withdraw" } | { kind: "withdrawn" } | { kind: "logout" } | null;
 
 export type MyInfo = typeof mockMe;
+export type MyData = { applications: MyApplication[]; payments: MyPayment[]; courses: MyCourse[] };
 
-/** me: 로그인한 회원 정보 (없으면 목업) — 신청·결제·수강 목록은 결제 연동(P3) 때 실제 데이터로 바뀐다 */
-export default function MyPageView({ tab, me = mockMe }: { tab: MyTab; me?: MyInfo }) {
+const MOCK: MyData = { applications: mockApplications, payments: mockPayments, courses: mockCourses };
+
+/** me·data: 로그인한 회원 정보와 신청·결제·수강 내역 (DB 미연결이면 목업) */
+export default function MyPageView({ tab, me = mockMe, data = MOCK }: { tab: MyTab; me?: MyInfo; data?: MyData }) {
+  const { applications, payments: myPayments, courses: myCourses } = data;
+  const router = useRouter();
+  const [cancelling, setCancelling] = useState<string | null>(null);
+
+  const cancel = async (a: MyApplication) => {
+    setModal(null);
+    if (!a.orderId) return showToast("취소 신청이 접수됐어요 · 환불 규정에 따라 처리돼요");
+    setCancelling(a.orderId);
+    try {
+      const res = await fetch(`/api/me/orders/${a.orderId}/cancel`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) return showToast(d.error ?? "취소하지 못했어요");
+      showToast(d.status === "신청취소" ? "신청을 취소했어요" : "취소 요청이 접수됐어요 · 환불 규정에 따라 처리돼요");
+      router.refresh();
+    } finally {
+      setCancelling(null);
+    }
+  };
   const [modal, setModal] = useState<Modal>(null);
   const [pwError, setPwError] = useState("");
   const { toast, showToast } = useToast();
@@ -83,8 +118,9 @@ export default function MyPageView({ tab, me = mockMe }: { tab: MyTab; me?: MyIn
                 <h2>신청 내역</h2>
                 <span className="count">총 {applications.length}건</span>
               </div>
+              {applications.length === 0 && <p className="empty-note">아직 신청한 클래스가 없어요. <Link href={ROUTES.classes}>클래스 둘러보기</Link></p>}
               {applications.map((a) => (
-                <div key={a.title} className="app-card">
+                <div key={a.orderId ?? a.title} className="app-card">
                   <div className={`app-thumb ${a.thumb}`} />
                   <div className="app-body">
                     <p className="app-cat">{a.cat}</p>
@@ -98,8 +134,8 @@ export default function MyPageView({ tab, me = mockMe }: { tab: MyTab; me?: MyIn
                     <span className={`badge ${APP_BADGE[a.status]}`}>{a.status}</span>
                     <span className="app-price">{won(a.price)}</span>
                     {(a.status === "수강 확정" || a.status === "입금 대기") && (
-                      <button type="button" className="app-cancel" onClick={() => showToast("취소 신청이 접수됐어요 · 환불 규정에 따라 처리돼요")}>
-                        취소 신청
+                      <button type="button" className="app-cancel" disabled={cancelling === a.orderId} onClick={() => setModal({ kind: "cancel", a })}>
+                        {cancelling === a.orderId ? "처리 중…" : "취소 신청"}
                       </button>
                     )}
                   </div>
@@ -119,8 +155,11 @@ export default function MyPageView({ tab, me = mockMe }: { tab: MyTab; me?: MyIn
                   <tr><th>결제일</th><th>상품명</th><th>결제수단</th><th>상태</th><th>금액</th><th>영수증</th></tr>
                 </thead>
                 <tbody>
-                  {myPayments.map((p) => (
-                    <tr key={p.item}>
+                  {myPayments.length === 0 && (
+                    <tr><td colSpan={6} className="empty-note">결제 내역이 없어요</td></tr>
+                  )}
+                  {myPayments.map((p, i) => (
+                    <tr key={`${p.item}-${i}`}>
                       <td data-label="결제일">{p.date}</td>
                       <td data-label="상품명" className="pay-item">{p.item}</td>
                       <td data-label="결제수단">{p.method}</td>
@@ -144,6 +183,7 @@ export default function MyPageView({ tab, me = mockMe }: { tab: MyTab; me?: MyIn
                 <h2>온라인 수강권한</h2>
                 <span className="count">총 {myCourses.length}건</span>
               </div>
+              {myCourses.length === 0 && <p className="empty-note">수강 중인 온라인 강의가 없어요. <Link href={ROUTES.classList("온라인")}>온라인 강의 보기</Link></p>}
               {myCourses.map((c) => (
                 <div key={c.title} className="course-card">
                   <div className={`course-thumb ${c.thumb}`} />
@@ -198,11 +238,26 @@ export default function MyPageView({ tab, me = mockMe }: { tab: MyTab; me?: MyIn
                   <div><dt>상품명</dt><dd>{modal.p.item}</dd></div>
                   <div><dt>결제수단</dt><dd>{modal.p.method}</dd></div>
                   <div><dt>결제 금액</dt><dd>{won(modal.p.amount)}</dd></div>
-                  {modal.p.status === "환불완료" && <div><dt>환불 상태</dt><dd>환불완료</dd></div>}
+                  {(modal.p.status === "환불완료" || modal.p.status === "부분환불") && <div><dt>환불 상태</dt><dd>{modal.p.status}</dd></div>}
                 </dl>
                 <p className="receipt-tax">{taxNote(modal.p.amount, modal.p.taxType)}</p>
                 <div className="modal-actions">
+                  {modal.p.receiptUrl && <a className="btn btn-mint" href={modal.p.receiptUrl} target="_blank" rel="noreferrer">카드·현금 영수증 보기 ↗</a>}
                   <button type="button" className="btn btn-ghost" onClick={() => setModal(null)}>닫기</button>
+                </div>
+              </>
+            )}
+            {modal.kind === "cancel" && (
+              <>
+                <h3>{modal.a.status === "입금 대기" ? "신청을 취소할까요?" : "취소를 요청할까요?"}</h3>
+                <p>
+                  {modal.a.status === "입금 대기"
+                    ? "아직 입금 전이라 바로 취소돼요."
+                    : "환불 규정(개강 7일 전 전액 · 3일 전 50%)에 따라 확인 후 환불해 드려요."}
+                </p>
+                <div className="modal-actions">
+                  <button type="button" className="btn btn-ghost" onClick={() => setModal(null)}>닫기</button>
+                  <button type="button" className="btn btn-danger" onClick={() => cancel(modal.a)}>취소하기</button>
                 </div>
               </>
             )}

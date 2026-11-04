@@ -1,25 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { ROUTES } from "@/data/site";
 import { getClassDetail } from "@/lib/classes";
-import { fullDate, taxNote, today, won } from "@/lib/format";
+import { fullDate, taxNote, won } from "@/lib/format";
 import { CATEGORY_LABELS, computeStatus } from "@/lib/status";
 import type { AcademyClass } from "@/lib/types";
+import TossWidget, { type PendingOrder } from "./TossWidget";
 
+/* 4단계(완료)는 토스 결제 후 /checkout/success 에서 서버가 보여준다 */
 type Step = 2 | 3 | 4;
-type PayState = "idle" | "processing" | "fail";
 
 const FLOW_LABELS = ["클래스 상세", "신청 정보", "결제", "완료"];
-const METHODS = [
-  { k: "card", label: "신용·체크카드", sub: "국내 모든 카드사" },
-  { k: "easy", label: "간편결제", sub: "카카오페이 · 네이버페이 · 토스페이" },
-  { k: "transfer", label: "실시간 계좌이체", sub: "모든 은행" },
-  { k: "vaccount", label: "가상계좌", sub: "무통장 입금" },
-] as const;
-type MethodKey = (typeof METHODS)[number]["k"];
-
 function summaryRows(c: AcademyClass): [string, string][] {
   if (c.type === "online") {
     return [
@@ -34,10 +28,6 @@ function summaryRows(c: AcademyClass): [string, string][] {
     ["정원", `${c.capacity}명 중 ${c.applied}명 신청`],
     ["장소", c.place ?? "-"],
   ];
-}
-
-function pad(n: number) {
-  return String(n).padStart(2, "0");
 }
 
 function Flow({ step, slug }: { step: Step; slug: string }) {
@@ -71,20 +61,16 @@ function Flow({ step, slug }: { step: Step; slug: string }) {
   );
 }
 
-export default function CheckoutFlow({ c }: { c: AcademyClass | undefined }) {
+export type Prefill = { name: string; phone: string; email: string; shop: string };
+
+export default function CheckoutFlow({ c, prefill }: { c: AcademyClass | undefined; prefill?: Prefill }) {
   const [step, setStep] = useState<Step>(2);
   const [checks, setChecks] = useState<Record<string, boolean>>({});
-  const [form, setForm] = useState({ name: "", phone: "", email: "", shop: "" });
+  const [form, setForm] = useState(prefill ?? { name: "", phone: "", email: "", shop: "" });
   const [formError, setFormError] = useState("");
-  const [method, setMethod] = useState<MethodKey | null>(null);
-  const [payState, setPayState] = useState<PayState>("idle");
-  const [simulateFail, setSimulateFail] = useState(false);
-  const [orderNo, setOrderNo] = useState("");
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
+  const [order, setOrder] = useState<PendingOrder | null>(null);
+  const [busy, setBusy] = useState(false);
+  const router = useRouter();
 
   const go = (s: Step) => {
     setStep(s);
@@ -103,7 +89,7 @@ export default function CheckoutFlow({ c }: { c: AcademyClass | undefined }) {
       </div>
     </div>
   );
-  const footer = <footer className="co-footer">비주얼아카데미 프로토타입 화면 — 실제 결제는 진행되지 않아요</footer>;
+  const footer = <footer className="co-footer">결제는 토스페이먼츠로 안전하게 처리돼요 · (주)비주얼뷰티</footer>;
 
   /* 신청할 수 없는 클래스 */
   const status = c ? computeStatus(c) : null;
@@ -134,40 +120,36 @@ export default function CheckoutFlow({ c }: { c: AcademyClass | undefined }) {
     { k: "terms", label: "이용약관 및 개인정보 수집에 동의해요", link: ROUTES.guide("faq") },
   ];
   const allChecked = requiredChecks.every((r) => checks[r.k]);
-  const isVaccount = method === "vaccount";
-  const isOnline = c.type === "online";
 
-  const toPay = () => {
+  /* 결제 단계로 — 서버에 주문을 만들어 주문번호·금액을 받는다 (금액은 서버가 정함) */
+  const toPay = async () => {
     if (!form.name.trim() || !/^01[0-9]-?\d{3,4}-?\d{4}$/.test(form.phone.trim())) {
       setFormError("이름과 휴대폰 번호(010-0000-0000)를 정확히 입력해주세요");
       return;
     }
     setFormError("");
-    go(3);
-  };
-
-  /* PG(토스페이먼츠) 연동 전 결제 시뮬레이션 */
-  const pay = () => {
-    setPayState("processing");
-    window.scrollTo(0, 0);
-    timer.current = setTimeout(() => {
-      if (simulateFail) {
-        setPayState("fail");
+    setBusy(true);
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: c.slug, applicant: form, agreements: checks }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setFormError(data.error ?? "신청서를 저장하지 못했어요. 잠시 후 다시 시도해주세요.");
         return;
       }
-      const t = today();
-      const ymd = `${t.getFullYear()}${pad(t.getMonth() + 1)}${pad(t.getDate())}`;
-      setOrderNo(`VA-${ymd}-${String(Math.floor(Math.random() * 9000) + 1000)}`);
-      setPayState("idle");
-      go(4);
-    }, 1800);
+      if (data.free) {
+        router.push(`/checkout/success?free=1&orderId=${encodeURIComponent(data.orderNo)}`);
+        return;
+      }
+      setOrder(data as PendingOrder);
+      go(3);
+    } finally {
+      setBusy(false);
+    }
   };
-
-  const vaDeadline = (() => {
-    const t = today();
-    t.setDate(t.getDate() + 2);
-    return `${t.getFullYear()}.${pad(t.getMonth() + 1)}.${pad(t.getDate())} 23:59`;
-  })();
 
   let body: React.ReactNode;
   if (step === 2) {
@@ -217,95 +199,14 @@ export default function CheckoutFlow({ c }: { c: AcademyClass | undefined }) {
             </dl>
             <div className="sb-total"><span className="lbl">결제 예정 금액</span><span className="amt">{won(price)}</span></div>
             <p className="tax-note">{taxNote(price, c.taxType)}</p>
-            <button type="button" className="btn btn-mint" disabled={!allChecked} onClick={toPay}>결제 단계로</button>
+            <button type="button" className="btn btn-mint" disabled={!allChecked || busy} onClick={toPay}>{busy ? "신청서 저장 중…" : price === 0 ? "무료로 신청하기" : "결제 단계로"}</button>
           </div>
         </div>
-      </div>
-    );
-  } else if (step === 3 && payState === "processing") {
-    body = (
-      <div className="center-state">
-        <div className="spinner" />
-        <h2>결제를 확인하고 있어요</h2>
-        <p>잠시만 기다려주세요. 창을 닫지 마세요.</p>
-      </div>
-    );
-  } else if (step === 3 && payState === "fail") {
-    body = (
-      <div className="center-state">
-        <div className="result-icon fail">✕</div>
-        <h2>결제가 완료되지 않았어요</h2>
-        <p>카드 한도 초과로 결제가 승인되지 않았어요.</p>
-        <div className="fail-reason">결제 금액은 청구되지 않았어요. 다시 시도하시거나 다른 결제 수단을 이용해주세요.</div>
-        <div className="center-actions">
-          <button type="button" className="btn btn-mint" onClick={pay}>다시 결제하기</button>
-          <button type="button" className="btn btn-ghost" onClick={() => { setMethod(null); setPayState("idle"); }}>다른 수단으로 결제하기</button>
-        </div>
-        <p className="refund-note">계속 문제가 있다면 카카오채널로 문의해주세요.</p>
-      </div>
-    );
-  } else if (step === 3) {
-    const cur = METHODS.find((m) => m.k === method);
-    body = (
-      <div className="pay-wrap">
-        <h2>결제 수단을 선택해주세요</h2>
-        <div className="pay-methods">
-          {METHODS.map((m) => (
-            <button key={m.k} type="button" className={`pmethod${method === m.k ? " on" : ""}`} onClick={() => setMethod(m.k)}>
-              <span className="pm-label">{m.label}</span>
-              <span className="pm-sub">{m.sub}</span>
-            </button>
-          ))}
-        </div>
-        <div className="pay-panel">
-          {cur ? (
-            <>
-              <div className="pp-icon">{cur.label[0]}</div>
-              <p><b>{cur.label}</b>로 결제를 진행해요</p>
-              <p>토스페이먼츠 결제창이 연결돼요</p>
-            </>
-          ) : (
-            <p>결제 수단을 선택해주세요</p>
-          )}
-        </div>
-        <div className="pay-total"><span className="lbl">최종 결제 금액</span><span className="amt">{won(price)}</span></div>
-        <p className="tax-note">{taxNote(price, c.taxType)}</p>
-        <button type="button" className="btn btn-mint" disabled={!method} onClick={pay}>{won(price)} 결제하기</button>
-        <button type="button" className="btn btn-ghost" onClick={() => go(2)}>이전 단계로</button>
-        <label className="sim">
-          <input type="checkbox" checked={simulateFail} onChange={(e) => setSimulateFail(e.target.checked)} />
-          (테스트) 결제 실패 시뮬레이션
-        </label>
       </div>
     );
   } else {
-    const notes = d.doneNotes ?? [];
-    body = (
-      <div className="done-wrap">
-        <div className="result-icon ok">✓</div>
-        <h2>{isVaccount ? "신청이 접수됐어요" : "신청이 완료됐어요"}</h2>
-        <p className="done-title">{c.name}</p>
-        <div className="order-no">주문번호 {orderNo}</div>
-        {isVaccount ? (
-          <div className="waiting-box">
-            입금을 기다리고 있어요
-            <div className="wb-sub">가상계좌: 신한은행 110-123-456789 · 입금기한 {vaDeadline}까지 · {won(price)}</div>
-          </div>
-        ) : (
-          <div className="done-panel">
-            <h3>안내드려요</h3>
-            <ul className="done-list">
-              {notes.map((n) => <li key={n}>{n}</li>)}
-            </ul>
-          </div>
-        )}
-        <div className="done-cta">
-          <Link className="btn btn-mint" href={isOnline && !isVaccount ? "/mypage?tab=online" : ROUTES.mypage}>
-            {isOnline && !isVaccount ? "바로 수강하기" : "마이페이지에서 확인하기"}
-          </Link>
-          <Link className="btn btn-ghost" href={ROUTES.classes}>클래스 목록으로 돌아가기</Link>
-        </div>
-      </div>
+    body = order && (
+      <TossWidget order={order} customer={form} slug={c.slug} onBack={() => go(2)} taxLine={taxNote(price, c.taxType)} />
     );
   }
 
