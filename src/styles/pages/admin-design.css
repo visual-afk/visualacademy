@@ -21,6 +21,7 @@
   .layout{display:grid;grid-template-columns:minmax(380px,560px) minmax(0,1fr);gap:24px;align-items:start;padding-bottom:80px}
   @media(max-width:1000px){
     .layout{grid-template-columns:minmax(0,1fr)}
+    .layout>*{min-width:0}
     .pv-head{flex-wrap:wrap;gap:8px}
     .modebar .modehint{display:none}
     .preview-col{position:static!important}

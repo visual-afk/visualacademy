@@ -19,6 +19,7 @@ import {
   type MyPaymentStatus,
 } from "@/data/mypage";
 import { ROUTES } from "@/data/site";
+import { logout } from "@/lib/loginState";
 import { taxNote, won } from "@/lib/format";
 
 type MyTab = (typeof MY_TABS)[number]["key"];
@@ -286,7 +287,7 @@ export default function MyPageView({ tab, me = mockMe, data = MOCK }: { tab: MyT
                 <p>다음에 들어올 때 다시 카카오로 로그인하면 돼요.</p>
                 <div className="modal-actions">
                   <button type="button" className="btn btn-ghost" onClick={() => setModal(null)}>취소</button>
-                  <form action="/auth/logout?next=/" method="post"><button type="submit" className="btn btn-mint">로그아웃</button></form>
+                  <form action="/auth/logout?next=/" method="post" onSubmit={() => logout()}><button type="submit" className="btn btn-mint">로그아웃</button></form>
                 </div>
               </>
             )}

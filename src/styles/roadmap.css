@@ -41,9 +41,10 @@
     border-radius:18px;opacity:0;transform:translateY(10px) scale(.97);transition:opacity .3s ease,transform .3s ease;
     box-shadow:0 14px 30px -14px rgba(8,112,108,.45);border:1px solid rgba(10,166,161,.25);z-index:2;pointer-events:none}
   .rcol[data-step="0"] .rcol-img{top:158px}
-  .rcol[data-step="1"] .rcol-img{top:134px}
-  .rcol[data-step="2"] .rcol-img{top:106px}
-  .rcol[data-step="3"] .rcol-img{top:100px}
+  /* 직선 위 점 높이(81·62.5·44·25.5%)에 맞춘 위치 — 점과의 간격은 곡선일 때와 같게 유지 */
+  .rcol[data-step="1"] .rcol-img{top:110px}
+  .rcol[data-step="2"] .rcol-img{top:115px}
+  .rcol[data-step="3"] .rcol-img{top:129px}
   .rcol:hover .rcol-img,.rcol.active .rcol-img{opacity:1;transform:translateY(0) scale(1)}
   @media(max-width:900px){.rcol-img{display:none}}
   .rcol-glow{position:absolute;inset:0;opacity:0;transition:opacity .3s;pointer-events:none;

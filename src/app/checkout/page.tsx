@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { getClass } from "@/lib/api";
 import { getProfile, getUser } from "@/lib/auth";
 import { formatPhone } from "@/lib/format";
+import { supabaseConfigured } from "@/lib/supabase/env";
 import CheckoutFlow, { type Prefill } from "./CheckoutFlow";
 
 export const metadata: Metadata = { title: "신청 · 결제" };
@@ -19,7 +20,7 @@ export default async function CheckoutPage({ searchParams }: PageProps<"/checkou
     : undefined;
   return (
     <div className="site pg-checkout">
-      <CheckoutFlow c={c} prefill={prefill} />
+      <CheckoutFlow c={c} prefill={prefill} loggedIn={supabaseConfigured() ? !!user : undefined} />
     </div>
   );
 }

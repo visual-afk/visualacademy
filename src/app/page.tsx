@@ -17,11 +17,19 @@ import HeroSearch from "./HeroSearch";
  */
 
 const STEP_LAYOUT = [
-  { y: 81, labelPos: "top" },
-  { y: 68, labelPos: "top" },
-  { y: 42, labelPos: "bottom" },
-  { y: 19, labelPos: "bottom" },
+  { labelPos: "top" },
+  { labelPos: "top" },
+  { labelPos: "bottom" },
+  { labelPos: "bottom" },
 ] as const;
+/** 히어로 배경 물결 — a(원래 모양) ↔ b(일렁인 모양). 두 경로는 명령 구성이 같아야 부드럽게 변형된다.
+ *  b는 가운데 이음점 양쪽 제어점을 한 직선 위에 두어 꺾이지 않게 했다 */
+const HERO_WAVES = [
+  { a: "M-40,120 C260,40 420,260 720,140 C980,40 1160,180 1260,80", b: "M-40,150 C260,90 420,210 720,170 C980,135 1160,120 1260,110", dur: "11s", opacity: 0.35 },
+  { a: "M-60,620 C240,720 460,540 760,660 C1000,750 1180,600 1280,680", b: "M-60,650 C240,680 460,600 760,630 C1000,654 1180,660 1280,650", dur: "14s", opacity: 0.28 },
+  { a: "M-40,380 C300,300 560,460 820,360 C1020,290 1180,380 1260,340", b: "M-40,350 C300,410 560,420 820,390 C1020,367 1180,320 1260,370", dur: "9s", opacity: 0.2 },
+];
+
 const LEVEL_SLUGS = ["designer-level-1", "designer-level-2", "designer-level-3", "designer-level-4"];
 
 const lines = (s: string) => s.split("\n").flatMap((l, i) => (i ? [<br key={i} />, l] : [l]));
@@ -83,11 +91,28 @@ export default async function HomePage() {
   const sections: Record<string, () => React.ReactNode> = {
     hero: () => (
       <section key="hero" className="hero" id="heroSection">
-        <div className="hero-bigtext" aria-hidden>VISUAL ACADEMY</div>
+        {/* 같은 문구 2개를 이어 붙여 왼쪽으로 천천히 흘린다 — 절반만큼 이동하면 처음과 똑같아져 끊김 없이 반복 */}
+        <div className="hero-bigtext" aria-hidden>
+          <div className="hero-bigtext-track">
+            <span>VISUAL ACADEMY</span>
+            <span>VISUAL ACADEMY</span>
+          </div>
+        </div>
         <svg className="hero-strands" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden>
-          <path d="M-40,120 C260,40 420,260 720,140 C980,40 1160,180 1260,80" stroke="#5fd0ca" strokeWidth="1" fill="none" opacity=".35" />
-          <path d="M-60,620 C240,720 460,540 760,660 C1000,750 1180,600 1280,680" stroke="#5fd0ca" strokeWidth="1" fill="none" opacity=".28" />
-          <path d="M-40,380 C300,300 560,460 820,360 C1020,290 1180,380 1260,340" stroke="#5fd0ca" strokeWidth="1" fill="none" opacity=".2" />
+          {/* 물결 모션: 곡선 모양이 두 형태 사이를 천천히 오가며 일렁인다 (선마다 속도를 달리해 엇갈리게) */}
+          {HERO_WAVES.map((w, i) => (
+            <path key={i} className={`hero-wave hero-wave-${i + 1}`} d={w.a} stroke="#5fd0ca" strokeWidth="1" fill="none" opacity={w.opacity}>
+              <animate
+                attributeName="d"
+                values={`${w.a};${w.b};${w.a}`}
+                dur={w.dur}
+                repeatCount="indefinite"
+                calcMode="spline"
+                keyTimes="0;0.5;1"
+                keySplines="0.45 0 0.55 1;0.45 0 0.55 1"
+              />
+            </path>
+          ))}
         </svg>
         {C.hero.badges[0] && <div className="hero-badge badge-tl"><span className="dot" />{C.hero.badges[0].t}</div>}
         {C.hero.badges[1] && <div className="hero-badge badge-br"><span className="dot" />{C.hero.badges[1].t}</div>}

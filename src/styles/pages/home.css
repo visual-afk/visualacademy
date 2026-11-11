@@ -13,10 +13,19 @@
       radial-gradient(760px circle at 84% 78%, rgba(10,166,161,.26), transparent 58%),
       radial-gradient(500px circle at 50% 100%, rgba(95,208,202,.18), transparent 60%),
       linear-gradient(165deg,#04100f 0%,#071a19 55%,#031110 100%)}
-  .hero-bigtext{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  .hero-bigtext{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-start;overflow:hidden;
     font-size:clamp(90px,16vw,260px);font-weight:800;letter-spacing:-.05em;white-space:nowrap;
     color:rgba(255,255,255,.045);pointer-events:none;user-select:none;z-index:0}
+  /* 아주 느린 가로 흐름 (한 바퀴 120초) */
+  .hero-bigtext-track{display:flex;width:max-content;animation:hero-marquee 120s linear infinite;will-change:transform}
+  .hero-bigtext-track span{padding-right:.6em}
+  @media (prefers-reduced-motion:reduce){.hero-bigtext-track{animation:none}}
   .hero-strands{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.55;width:100%;height:100%}
+  /* 물결이 좌우·위아래로 천천히 흘러가는 움직임 (모양 일렁임은 page.tsx의 SVG animate) */
+  .hero-wave{transform-box:fill-box;transform-origin:center;animation:hero-drift 16s ease-in-out infinite alternate}
+  .hero-wave-2{animation-duration:20s;animation-delay:-6s}
+  .hero-wave-3{animation-duration:13s;animation-delay:-3s;animation-direction:alternate-reverse}
+  @media (prefers-reduced-motion:reduce){.hero-wave{animation:none}}
   .hero-badge{position:absolute;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.18);
     border-radius:20px;padding:8px 14px;font-size:12px;color:rgba(255,255,255,.75);background:rgba(255,255,255,.04);
     backdrop-filter:blur(6px);z-index:1}
@@ -125,4 +134,6 @@
   }
 }
 
+@keyframes hero-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes hero-drift{from{transform:translate(-28px,-8px)}to{transform:translate(28px,10px)}}
 @keyframes home-fade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}

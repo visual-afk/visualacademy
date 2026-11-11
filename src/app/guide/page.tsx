@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Accordion from "@/components/site/Accordion";
+import { RefundAutoOpen } from "@/components/site/RefundPopup";
 import SiteFooter from "@/components/site/SiteFooter";
 import SiteHeader from "@/components/site/SiteHeader";
 import TabBar, { pickTab } from "@/components/site/TabBar";
@@ -8,10 +9,10 @@ import { ROUTES } from "@/data/site";
 
 export const metadata: Metadata = { title: "수강 안내" };
 
+/* 환불 규정은 탭이 아니라 모든 페이지 푸터의 '환불 규정' 팝업 (?tab=refund 링크는 팝업으로 연결) */
 const TABS = [
   { key: "proc", label: "수강 절차" },
   { key: "faq", label: "자주 묻는 질문" },
-  { key: "refund", label: "환불 규정" },
 ] as const;
 
 const FAQ_GROUPS = [
@@ -34,7 +35,7 @@ const FAQ_GROUPS = [
   {
     title: "환불 · 변경",
     items: [
-      { q: "신청한 클래스를 취소하고 싶어요", a: "마이페이지 > 신청 내역에서 직접 취소 신청할 수 있어요. 환불 비율은 환불 규정 탭을 확인해주세요." },
+      { q: "신청한 클래스를 취소하고 싶어요", a: "마이페이지 > 신청 내역에서 직접 취소 신청할 수 있어요. 환불 비율은 화면 맨 아래 '환불 규정'을 눌러 확인해주세요." },
       { q: "다른 기수로 일정을 변경할 수 있나요?", a: "개강 3일 전까지는 1회에 한해 다른 기수로 일정 변경이 가능해요. 카카오채널로 문의해주세요." },
     ],
   },
@@ -64,7 +65,8 @@ const PROC: { title: string; desc: React.ReactNode; notes?: [string, string][] }
 ];
 
 export default async function GuidePage({ searchParams }: PageProps<"/guide">) {
-  const tab = pickTab(TABS, (await searchParams).tab);
+  const raw = (await searchParams).tab;
+  const tab = pickTab(TABS, raw);
 
   return (
     <div className="site pg-guide">
@@ -105,45 +107,9 @@ export default async function GuidePage({ searchParams }: PageProps<"/guide">) {
                 <Accordion items={g.items} />
               </div>
             ))}
-
-          {tab === "refund" && (
-            <div className="section">
-              <h2>환불 규정</h2>
-              <div className="table-scroll">
-                <table className="refund-table">
-                  <thead>
-                    <tr><th style={{ width: "22%" }}>구분</th><th>환불 기준</th><th style={{ width: "20%" }}>환불 비율</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="cat" rowSpan={3}>정규 레벨 과정<br /><span>(디자이너의 정석)</span></td>
-                      <td>개강 7일 전까지</td><td className="hl">전액 환불</td>
-                    </tr>
-                    <tr><td>개강 3일 전까지</td><td className="hl">50% 환불</td></tr>
-                    <tr><td>개강 3일 전 이후 / 1회차 출석 이후</td><td className="hl">환불 불가</td></tr>
-                    <tr>
-                      <td className="cat" rowSpan={3}>단독 특강 · 세미나<br /><span>(1일 과정)</span></td>
-                      <td>개강 7일 전까지</td><td className="hl">전액 환불</td>
-                    </tr>
-                    <tr><td>개강 3일 전까지</td><td className="hl">50% 환불</td></tr>
-                    <tr><td>개강 3일 전 이후</td><td className="hl">환불 불가</td></tr>
-                    <tr>
-                      <td className="cat" rowSpan={2}>온라인 강의</td>
-                      <td>첫 강의 시청 전</td><td className="hl">전액 환불</td>
-                    </tr>
-                    <tr><td>첫 강의 시청 후</td><td className="hl">환불 제한</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <div className="legal-note">
-                <b>안내</b>
-                위 환불 규정은 전자상거래 등에서의 소비자보호에 관한 법률 등 관련 법령에 따라 운영돼요. 천재지변, 강사·시설 사정 등 학원 귀책 사유로 인한 휴강·폐강 시에는 규정과 무관하게 전액 환불돼요.
-                환불 신청은 마이페이지 또는 카카오채널을 통해 접수하며, 신청일로부터 영업일 기준 3~5일 이내 처리돼요.
-              </div>
-            </div>
-          )}
         </div>
       </div>
+      {raw === "refund" && <RefundAutoOpen />}
       <SiteFooter />
     </div>
   );

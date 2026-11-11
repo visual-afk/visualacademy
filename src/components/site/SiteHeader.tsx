@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ROUTES } from "@/data/site";
 import { getMainContent } from "@/data/siteContent";
+import { useLoginName } from "@/lib/loginState";
 
 type NavKey = "classes" | "online" | "academy" | "guide";
 
@@ -39,6 +40,7 @@ export default function SiteHeader({
   right?: React.ReactNode;
 }) {
   const [scrolled, setScrolled] = useState(false);
+  const loginName = useLoginName();
 
   useEffect(() => {
     if (!hero) return;
@@ -80,6 +82,12 @@ export default function SiteHeader({
               <Link href="/#search" className="icon-btn" aria-label="검색" onClick={onSearchClick}>
                 <SearchIcon />
               </Link>
+              {/* 로그인 전: 로그인 / 로그인 후: 마이페이지 (서버 렌더는 항상 '로그인') */}
+              {loginName ? (
+                <Link href={ROUTES.mypage} className="btn btn-ghost nav-login">마이페이지</Link>
+              ) : (
+                <Link href={ROUTES.login()} className="btn btn-ghost nav-login">로그인</Link>
+              )}
               <Link href={ROUTES.about("way")} className="btn btn-mint">
                 {NAV_CONTENT.cta}
               </Link>

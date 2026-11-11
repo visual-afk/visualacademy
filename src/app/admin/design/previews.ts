@@ -53,7 +53,11 @@ const PV_MAIN: Record<string, R> = {
   instructors: (d) => `<div class="sect"><h2>${esc(d.title)}</h2><p class="sd">${esc(d.desc)}</p><div class="pv-ins">${d.list.map((i: any) => `<div><div class="ph" style="${bg(i.img)}">${url(i.img) ? "" : "사진"}</div><b>${esc(i.name)}</b><span>${esc(i.role)}</span></div>`).join("")}</div></div>`,
   reviews: (d) => `<div class="sect alt"><h2>${esc(d.title)}</h2><p class="sd">${esc(d.desc)}</p><div class="pv-ts">${d.list.map((r: any) => `<div>"${esc(r.q)}"<span>${esc(r.a)}</span></div>`).join("")}</div></div>`,
   salon: (d) => `<div class="sect"><div class="pv-band"><div><b>${esc(d.title)}</b><p>${esc(d.desc)}</p></div><span class="gh">${esc(d.btn)}</span></div></div>`,
-  footer: (d, all) => `<div class="pv-ft"><div class="lg">${esc(all.nav.logo)}</div>${esc(d.desc)}<div class="cols">${d.cols.map((c: any) => `<div><b>${esc(c.h)}</b>${sp(c.links).map((l) => `<span>${esc(l)}</span>`).join("")}</div>`).join("")}</div><div class="biz">${nl(d.biz1)}<br>${nl(d.biz2)}</div></div>`,
+  footer: (d, all) => `<div class="pv-ft"><div class="lg">${esc(all.nav.logo)}</div>${esc(d.desc)}<div class="cols">${d.cols.map((c: any) => `<div><b>${esc(c.h)}</b>${sp(c.links).map((l) => `<span>${esc(l)}</span>`).join("")}</div>`).join("")}</div><div class="biz">${nl(d.biz1)}<br>${nl(d.biz2)}</div></div>
+    ${tag("팝업 : 푸터 \"환불 규정\" 클릭 시")}
+    <div class="sect"><h2 style="font-size:14px">${esc(d.rfTitle)}</h2><table style="width:100%;border-collapse:collapse;font-size:10px"><tr style="background:#f5f6f5">${d.rfTh.map((h: any) => `<th style="text-align:left;padding:6px 8px">${esc(h.t)}</th>`).join("")}</tr>
+    ${d.rfCats.map((c: any) => c.rows.map((r: any, i: number) => `<tr style="border-top:1px solid #eceeec">${i === 0 ? `<td rowspan="${c.rows.length}" style="padding:6px 8px;font-weight:700;vertical-align:top">${esc(c.name)}${c.sub ? `<br><span style="font-weight:400;color:#8b9089">${esc(c.sub)}</span>` : ""}</td>` : ""}<td style="padding:6px 8px">${esc(r.c)}</td><td style="padding:6px 8px;font-weight:700;color:#07705f">${esc(r.r)}</td></tr>`).join("")).join("")}</table>
+    <div style="margin-top:12px;background:#f5f6f5;border-radius:12px;padding:10px 12px;font-size:10px;color:#767676;line-height:1.7"><b style="display:block;color:#5b615a;margin-bottom:2px">${esc(d.rfNoteTitle)}</b>${nl(d.rfNote)}</div></div>`,
 };
 
 const PV_LIST: Record<string, R> = {
@@ -118,9 +122,6 @@ const PV_GUIDE: Record<string, R> = {
   tabs: (d) => tabsLine(d),
   proc: (d, all) => `${tabTag(all, 0)}<div class="sect"><h2 style="font-size:14px;margin-bottom:12px">${esc(d.title)}</h2>${d.steps.map((s: any, i: number) => `<div style="display:flex;gap:10px;margin-bottom:12px"><div style="width:22px;height:22px;border-radius:50%;background:#14161a;color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i + 1}</div><div><b style="font-size:11.5px">${esc(s.t)}</b><p style="margin:2px 0 0;font-size:10.5px;color:#5b615a">${esc(s.d)}</p>${String(s.notes || "").split("\n").filter((x) => x.trim()).map((n) => { const a = n.split("|"); return `<div style="margin-top:5px;background:#f5f6f5;border-radius:8px;padding:5px 9px;font-size:10px;color:#5b615a">${a.length > 1 ? `<b style="color:#000">${esc(a[0].trim())}</b>&nbsp;${esc(a.slice(1).join("|").trim())}` : esc(n)}</div>`; }).join("")}</div></div>`).join("")}</div>`,
   faq: (d, all) => `${tabTag(all, 1)}<div class="sect alt">${d.groups.map((g: any) => `<h3 style="font-size:12px;margin:0 0 6px">${esc(g.g)}</h3><div style="margin-bottom:12px">${g.items.map((it: any) => `<div style="background:#fff;border:1px solid #e1e4e0;border-radius:10px;padding:8px 10px;margin-bottom:5px;font-size:10.5px;font-weight:700;display:flex;justify-content:space-between"><span>${esc(it.q)}</span><span style="color:#8b9089">+</span></div>`).join("")}</div>`).join("")}</div>`,
-  refund: (d, all) => `${tabTag(all, 2)}<div class="sect"><h2 style="font-size:14px">${esc(d.title)}</h2><table style="width:100%;border-collapse:collapse;font-size:10px"><tr style="background:#f5f6f5">${d.th.map((h: any) => `<th style="text-align:left;padding:6px 8px">${esc(h.t)}</th>`).join("")}</tr>
-    ${d.cats.map((c: any) => c.rows.map((r: any, i: number) => `<tr style="border-top:1px solid #eceeec">${i === 0 ? `<td rowspan="${c.rows.length}" style="padding:6px 8px;font-weight:700;vertical-align:top">${esc(c.name)}${c.sub ? `<br><span style="font-weight:400;color:#8b9089">${esc(c.sub)}</span>` : ""}</td>` : ""}<td style="padding:6px 8px">${esc(r.c)}</td><td style="padding:6px 8px;font-weight:700;color:#08706c">${esc(r.r)}</td></tr>`).join("")).join("")}</table>
-    <div style="margin-top:12px;background:#f5f6f5;border-radius:12px;padding:10px 12px;font-size:10px;color:#767676;line-height:1.7"><b style="display:block;color:#5b615a;margin-bottom:2px">${esc(d.noteTitle)}</b>${nl(d.note)}</div></div>`,
 };
 
 const PV_MY: Record<string, R> = {
@@ -147,6 +148,20 @@ const PV_PAY: Record<string, R> = {
     <div style="margin-top:10px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">${pBtn(d.btnMy, true)}${pBtn(d.btnWatch, true)}${pBtn(d.btnList)}</div></div>`,
 };
 
+const PV_LOGIN: Record<string, R> = {
+  start: (d) => `${tag("화면 : 로그인 첫 화면")}<div class="sect" style="text-align:center"><div style="width:44px;height:44px;border-radius:14px;background:#fee500;margin:0 auto 10px"></div><b style="font-size:15px">${esc(d.title)}</b><p style="font-size:10.5px;color:#767676;margin:4px 0 12px">${esc(d.lead)}</p>
+    <div style="background:#fee500;color:#191919;border-radius:100px;padding:9px;font-size:11px;font-weight:700">${esc(d.btn)}</div>
+    <div style="text-align:left;margin-top:10px;font-size:10px;color:#5b615a">${d.notes.map((n: any) => `<div style="margin-bottom:3px"><span style="color:#07705f;font-weight:800">✓</span> ${esc(n.t)}</div>`).join("")}</div>
+    <div style="margin-top:8px;font-size:9.5px;color:#8b9089">${esc(d.small)}</div></div>`,
+  profile: (d) => `${tag("화면 : 처음 오는 회원")}<div class="sect"><div style="text-align:center"><b style="font-size:14px">${esc(d.title)}</b><p style="font-size:10.5px;color:#767676;margin:3px 0 10px">${esc(d.lead)}</p></div>
+    ${[["이름", "김민지", d.nameNote], ["휴대폰 번호", "010-1234-5678", d.phoneNote], [`${d.shop} (선택)`, "", ""]].map((r) => `<div style="margin-bottom:6px"><div style="font-size:9.5px;font-weight:700;color:#767676;margin-bottom:3px">${esc(r[0])}</div><div style="border:1.5px solid #e1e4e0;border-radius:10px;padding:5px 9px;font-size:10px;min-height:14px">${r[1]}</div>${r[2] ? `<div style="font-size:9px;color:#07705f;font-weight:600;margin-top:2px">${esc(r[2])}</div>` : ""}</div>`).join("")}
+    <div style="border:1px solid #e1e4e0;border-radius:12px;padding:6px 10px;margin:8px 0">${d.agree.map((a: any, i: number) => `<div style="display:flex;gap:6px;align-items:center;font-size:10px;padding:3px 0"><span style="width:11px;height:11px;border:1.5px solid #c9ccc8;border-radius:3px"></span><b style="font-size:9px;color:${i < 3 ? "#07705f" : "#8b9089"}">${i < 3 ? "필수" : "선택"}</b>${esc(a.t)}</div>`).join("")}</div>${pBtn(d.btn, true)}</div>`,
+  done: (d) => `${tag("화면 : 완료")}<div class="sect" style="text-align:center"><div style="width:30px;height:30px;border-radius:50%;background:#e2f8f2;color:#07705f;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-weight:800">✓</div>
+    <div style="font-size:9.5px;color:#8b9089">가입한 직후</div><b style="font-size:12.5px">${esc(String(d.newTitle).replace("{이름}", "김민지"))}</b><p style="font-size:10px;color:#767676;margin:3px 0 8px">${esc(d.newDesc)}</p>
+    <div style="font-size:9.5px;color:#8b9089">다시 로그인한 경우</div><b style="font-size:12.5px">${esc(String(d.oldTitle).replace("{이름}", "김민지"))}</b><p style="font-size:10px;color:#767676;margin:3px 0 8px">${esc(d.oldDesc)}</p>
+    <div style="display:flex;gap:6px;justify-content:center">${pBtn(d.btn1, true)}${pBtn(d.btn2)}</div></div>`,
+};
+
 export const PREVIEWS: Record<ContentPageKey, Record<string, R>> = {
-  main: PV_MAIN, list: PV_LIST, detail: PV_DET, about: PV_ABOUT, guide: PV_GUIDE, my: PV_MY, pay: PV_PAY,
+  main: PV_MAIN, list: PV_LIST, detail: PV_DET, about: PV_ABOUT, guide: PV_GUIDE, my: PV_MY, pay: PV_PAY, login: PV_LOGIN,
 };

@@ -3,16 +3,40 @@
  * Supabase 키가 아직 없으면 src/data 목업을 그대로 돌려줘서 화면 확인은 계속 할 수 있다.
  * 브라우저 컴포넌트는 이 파일을 import 하지 말고, 서버 page 에서 조회해 props 로 받는다.
  */
-import { CLASS_ALIASES, classes as mockClasses } from "@/data/classes";
+import { CLASS_ALIASES, classes as seedClasses } from "@/data/classes";
 import { instructors as mockInstructors } from "@/data/instructors";
 import { payments as mockPayments } from "@/data/payments";
 import { getAdminSupabase } from "./supabase/admin";
+import { parseDate, today } from "./format";
 import { serviceRoleConfigured } from "./supabase/env";
 import type { AcademyClass, ClassDetail, Instructor, Payment } from "./types";
 
 import { getClassDetail } from "./classes";
 
 export { getClassDetail, refundPolicy } from "./classes";
+
+/*
+ * 목업 개강일은 2026-10-14를 '오늘'로 두고 정해둔 값이다. 날짜가 지나도 모집중·마감임박 등
+ * 설계한 상태가 그대로 보이도록, 지난 날수만큼 개강일을 함께 미룬다. (Supabase 키가 없을 때만)
+ */
+const MOCK_TODAY = "2026-10-14";
+const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+let shifted: { day: string; list: AcademyClass[] } | null = null;
+
+function mockClasses(): AcademyClass[] {
+  const t = today();
+  const day = iso(t);
+  if (shifted?.day === day) return shifted.list;
+  const offset = Math.max(0, Math.round((t.getTime() - parseDate(MOCK_TODAY).getTime()) / 86400000));
+  const list = seedClasses.map((c) => {
+    if (!c.date || offset === 0) return c;
+    const d = parseDate(c.date);
+    d.setDate(d.getDate() + offset);
+    return { ...c, date: iso(d) };
+  });
+  shifted = { day, list };
+  return list;
+}
 
 /** class_with_counts view 한 행 (snake_case) */
 type ClassRow = {
@@ -54,7 +78,7 @@ function rowToClass(r: ClassRow): AcademyClass {
 
 /** GET /api/classes — 고객 화면은 임시저장(draft) 클래스를 빼고, 관리자는 includeDraft */
 export async function getClasses(opts: { includeDraft?: boolean } = {}): Promise<AcademyClass[]> {
-  if (!serviceRoleConfigured()) return mockClasses;
+  if (!serviceRoleConfigured()) return mockClasses();
   let q = getAdminSupabase().from("class_with_counts").select("*").order("sort_order").order("id");
   if (!opts.includeDraft) q = q.eq("draft", false);
   const { data, error } = await q;
@@ -66,7 +90,7 @@ export async function getClasses(opts: { includeDraft?: boolean } = {}): Promise
 export async function getClass(slugOrAlias: string | null | undefined): Promise<AcademyClass | undefined> {
   if (!slugOrAlias) return undefined;
   const slug = CLASS_ALIASES[slugOrAlias] ?? slugOrAlias;
-  if (!serviceRoleConfigured()) return mockClasses.find((c) => c.slug === slug);
+  if (!serviceRoleConfigured()) return mockClasses().find((c) => c.slug === slug);
   const { data, error } = await getAdminSupabase().from("class_with_counts").select("*").eq("slug", slug).eq("draft", false).maybeSingle();
   if (error) throw new Error(`클래스 조회 실패: ${error.message}`);
   return data ? rowToClass(data as ClassRow) : undefined;
@@ -75,7 +99,7 @@ export async function getClass(slugOrAlias: string | null | undefined): Promise<
 /** GET /api/admin/classes/:id */
 export async function getClassById(id: number): Promise<AcademyClass | undefined> {
   if (!Number.isFinite(id)) return undefined;
-  if (!serviceRoleConfigured()) return mockClasses.find((c) => c.id === id);
+  if (!serviceRoleConfigured()) return mockClasses().find((c) => c.id === id);
   const { data, error } = await getAdminSupabase().from("class_with_counts").select("*").eq("id", id).maybeSingle();
   if (error) throw new Error(`클래스 조회 실패: ${error.message}`);
   return data ? rowToClass(data as ClassRow) : undefined;
