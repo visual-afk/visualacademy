@@ -16,6 +16,7 @@ import "@/styles/pages/admin-payments.css";
 import "@/styles/pages/admin-design.css";
 import "@/styles/pages/auth.css";
 import "@/styles/pages/login.css";
+import "@/styles/pages/legal.css";
 import "@/styles/refund.css";
 import RefundPopup from "@/components/site/RefundPopup";
 

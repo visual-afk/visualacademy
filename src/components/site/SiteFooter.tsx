@@ -37,6 +37,10 @@ export default function SiteFooter() {
           </div>
         </div>
         <div className="foot-bottom">
+          <div className="foot-legal">
+            <Link href={ROUTES.terms}>이용약관</Link>
+            <Link href={ROUTES.privacy}><b>개인정보처리방침</b></Link>
+          </div>
           {footer.biz1}
           <br />
           {footer.biz2}

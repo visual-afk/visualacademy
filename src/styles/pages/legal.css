@@ -1,0 +1,10 @@
+/* 개인정보처리방침 · 이용약관 */
+.site.pg-legal{
+  word-break:keep-all;
+
+  .legal{max-width:760px;padding-top:56px;padding-bottom:64px}
+  .legal h1{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:0 0 28px}
+  .legal h2{font-size:16px;font-weight:800;margin:30px 0 10px}
+  .legal p{margin:0 0 10px;font-size:14px;line-height:1.75;color:var(--ink-2);white-space:pre-line}
+  @media (max-width:480px){.legal{padding-top:36px}.legal h1{font-size:24px}}
+}
