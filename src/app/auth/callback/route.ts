@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   // 고객 — 회원 행 준비, 휴대폰이 없으면(카카오 전화번호 동의 전) 한 번 입력받는다
   const profile = await ensureProfile(user);
   if (!profile.phone || !profile.name) {
-    return NextResponse.redirect(`${origin}/login/profile?next=${encodeURIComponent(next)}`);
+    return NextResponse.redirect(`${origin}/signup?next=${encodeURIComponent(next)}`);
   }
   return NextResponse.redirect(`${origin}${next}`);
 }
