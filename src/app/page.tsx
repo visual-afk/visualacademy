@@ -6,10 +6,18 @@ import SiteHeader from "@/components/site/SiteHeader";
 import { ROUTES } from "@/data/site";
 import { getMainContent, type MainContent } from "@/data/siteContent";
 import { getClasses } from "@/lib/api";
-import { dday, priceLabel, shortDate } from "@/lib/format";
-import { badgeClass, computeStatus } from "@/lib/status";
+import { dday, ddayLabel, priceLabel, shortDate } from "@/lib/format";
+import { badgeClass, CATEGORY_LABELS, computeStatus } from "@/lib/status";
 import type { AcademyClass, ClassStatus } from "@/lib/types";
 import HeroSearch from "./HeroSearch";
+import InstructorSlider from "./InstructorSlider";
+
+/** 프로그램 카드 아이콘 (01 정석 · 02 특강 · 03 경영) */
+const PROG_ICONS = [
+  ["M4 20V10M10 20V4M16 20v-8M22 20H2"],
+  ["M13 2 4 14h7l-1 8 9-12h-7z"],
+  ["M3 9l9-5 9 5-9 5z", "M7 11.5V16c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.5"],
+];
 
 /*
  * 메인 페이지 — 영역 순서·노출과 모든 문구는 디자인 모드(페이지 관리 › 메인 페이지) 콘텐츠를 따른다.
@@ -58,22 +66,46 @@ function pickRecruit(all: AcademyClass[], rule: string, count: number) {
   return rows.slice(0, count);
 }
 
-function RecruitCard({ c }: { c: AcademyClass & { status: ClassStatus } }) {
+/** 모집중 카드 — 상단(배지·D-day) · 일정/장소 · 모집 현황 바 · 가격. 모든 값은 클래스 데이터에서 계산 */
+function RecruitCard({ c, hot }: { c: AcademyClass & { status: ClassStatus }; hot: boolean }) {
   const online = c.type === "online";
   const wait = c.type === "waitlist";
   const badge = online ? "상시 수강" : wait ? "개설 대기" : c.status;
+  const applied = c.applied ?? 0;
+  const info: [string, string][] = online
+    ? [["구성", `영상 강의 · 수강 기간 ${c.months}개월`], ["시작", "결제 후 바로 시작 가능"]]
+    : wait
+      ? [["일정", "인원이 차면 일정 안내"], ["구성", `${CATEGORY_LABELS[c.cat] ?? c.cat} · ${c.weeks ? `${c.weeks}주 과정` : "1일 과정"}`]]
+      : [["일정", `${shortDate(c.date!)} 개강${c.weeks ? ` · 총 ${c.weeks}주` : ""}`], ["장소", `${c.place} · ${c.day}요일${c.weeks ? "반" : ""}`]];
+  const seat = online
+    ? { label: "모집 현황", value: <>인원 제한 없음</>, pct: 100, dim: true }
+    : wait
+      ? { label: "개설 기준", value: <><b>{applied}명</b> / 개설 기준 {c.goal ?? applied}명</>, pct: c.goal ? Math.min(100, (applied / c.goal) * 100) : 0, dim: false }
+      : { label: "모집 현황", value: <><b>잔여 {Math.max(0, (c.capacity ?? 0) - applied)}석</b> / {c.capacity}석</>, pct: c.capacity ? Math.min(100, (applied / c.capacity) * 100) : 0, dim: false };
   return (
-    <div className="class-card ph">
-      <span className={`badge ${online || wait ? "badge-line" : badgeClass(c.status)}`}>{badge}</span>
+    <div className={`class-card${hot ? " hot" : ""}`}>
+      <div className="cc-top">
+        <span className={`badge ${online || wait ? "badge-line" : badgeClass(c.status)}`}>{badge}</span>
+        {online ? (
+          <span className="dday mute">온라인</span>
+        ) : wait ? (
+          <span className="dday mute">{applied}명 대기 중</span>
+        ) : (
+          <span className="dday">개강 {ddayLabel(c.date!)}</span>
+        )}
+      </div>
       <h3><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
-      {online ? (
-        <><p className="meta">영상 강의 · 수강 기간 {c.months}개월</p><p className="meta">언제든 시작 가능</p></>
-      ) : wait ? (
-        <><p className="meta">일정 미정</p><p className="meta">알림 신청 {c.applied}명</p></>
-      ) : (
-        <><p className="meta">{shortDate(c.date!)} 개강{c.weeks ? ` · 총 ${c.weeks}주` : ""}</p><p className="meta">{c.place} · {c.day}요일{c.weeks ? "반" : ""}</p></>
-      )}
-      <p className="price">{priceLabel(c)}</p>
+      <ul className="cc-info">
+        {info.map(([k, v]) => <li key={k}><b>{k}</b><span>{v}</span></li>)}
+      </ul>
+      <div className="seat">
+        <div className="seat-top"><span>{seat.label}</span><span>{seat.value}</span></div>
+        <div className="seat-bar"><i style={{ width: `${seat.pct}%`, opacity: seat.dim ? 0.35 : undefined }} /></div>
+      </div>
+      <p className="price">
+        {priceLabel(c)}
+        {!!c.price && <small>{c.taxType === "exempt" ? "면세" : "VAT 포함"}</small>}
+      </p>
       {wait ? (
         <Link className="btn btn-ghost" href={ROUTES.classDetail(c.slug)}>개설 알림 신청</Link>
       ) : (
@@ -135,7 +167,7 @@ export default async function HomePage() {
         <div className="wrap">
           <div className="section-head"><h2>{C.recruit.title}</h2><p>{C.recruit.desc}</p></div>
           <div className="cards3">
-            {pickRecruit(classes, C.recruit.rule, Number(C.recruit.count) || 3).map((c) => <RecruitCard key={c.id} c={c} />)}
+            {pickRecruit(classes, C.recruit.rule, Number(C.recruit.count) || 3).map((c, i) => <RecruitCard key={c.id} c={c} hot={i === 0} />)}
           </div>
         </div>
       </section>
@@ -145,10 +177,17 @@ export default async function HomePage() {
         <div className="wrap">
           <div className="section-head"><h2>{C.programs.title}</h2><p>{C.programs.desc}</p></div>
           <div className="prog3">
-            {C.programs.cards.map((p) => (
+            {C.programs.cards.map((p, i) => (
               <div key={p.title} className="prog-card">
+                <span className="prog-no">{String(i + 1).padStart(2, "0")}</span>
+                <div className="prog-ic">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    {(PROG_ICONS[i % PROG_ICONS.length]).map((d) => <path key={d} d={d} />)}
+                  </svg>
+                </div>
                 <h3>{p.title}</h3>
                 <p>{p.desc}</p>
+                <div className="chips">{split(p.chips).map((t) => <span key={t}>{t}</span>)}</div>
                 <Link href={p.link ? ROUTES.classList(p.link) : ROUTES.classes}>전체 보기</Link>
               </div>
             ))}
@@ -160,8 +199,16 @@ export default async function HomePage() {
       <section key="online" className="bg-surface tight" id="online">
         <div className="wrap">
           <div className="online-banner">
-            <div><h3>{C.online.title}</h3><p>{C.online.desc}</p></div>
-            <Link className="btn btn-ghost" href={ROUTES.classList("온라인")}>{C.online.btn}</Link>
+            <div>
+              {C.online.tag && <div className="ob-tag"><i />{C.online.tag}</div>}
+              <h3>{C.online.title}</h3>
+              <p>{C.online.desc}</p>
+              <div className="ob-feat">{split(C.online.feats).map((t) => <span key={t}>{t}</span>)}</div>
+            </div>
+            <div className="ob-cta">
+              <Link className="btn btn-mint" href={ROUTES.classList("온라인")}>{C.online.btn}</Link>
+              {C.online.price && <small>{C.online.priceName} <b>{C.online.price}</b></small>}
+            </div>
           </div>
         </div>
       </section>
@@ -170,17 +217,7 @@ export default async function HomePage() {
       <section key="instructors">
         <div className="wrap">
           <div className="section-head"><h2>{C.instructors.title}</h2><p>{C.instructors.desc}</p></div>
-          <div className="instr-grid">
-            {C.instructors.list.map((ins, i) => (
-              <div key={i} className={`instr-card${ins.img ? "" : " ph"}`}>
-                <div className="instr-photo" style={ins.img ? { backgroundImage: `url(${ins.img})`, backgroundSize: "cover", border: "none" } : undefined}>
-                  {ins.img ? "" : "사진"}
-                </div>
-                <p className="in">{ins.name}</p>
-                <p className="ir">{ins.role}</p>
-              </div>
-            ))}
-          </div>
+          <InstructorSlider data={C.instructors} />
         </div>
       </section>
     ),
@@ -190,7 +227,15 @@ export default async function HomePage() {
           <div className="section-head"><h2>{C.reviews.title}</h2><p>{C.reviews.desc}</p></div>
           <div className="testi-grid">
             {C.reviews.list.map((r, i) => (
-              <div key={i} className="testi-card ph"><p className="tq">&ldquo;{r.q}&rdquo;</p><p className="ta">{r.a}</p></div>
+              <div key={i} className="testi-card">
+                <div className="qm" aria-hidden>&ldquo;</div>
+                {r.course && <span className="tcourse">{r.course}</span>}
+                <p className="tq">{r.q}</p>
+                <div className="testi-who">
+                  <div className="testi-av" aria-hidden>{r.a.slice(0, 1)}</div>
+                  <div><b>{r.a}</b><span>{r.sub}</span></div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -200,7 +245,12 @@ export default async function HomePage() {
       <section key="salon" className="tight">
         <div className="wrap">
           <div className="salon-band">
-            <div><h3>{C.salon.title}</h3><p>{C.salon.desc}</p></div>
+            <div>
+              {C.salon.tag && <div className="sb-tag">{C.salon.tag}</div>}
+              <h3>{C.salon.title}</h3>
+              <p>{C.salon.desc}</p>
+              <div className="sb-regions">{split(C.salon.regions).map((t) => <span key={t}>{t}</span>)}</div>
+            </div>
             <Link className="btn btn-ghost" href={ROUTES.about("intro")}>{C.salon.btn}</Link>
           </div>
         </div>
