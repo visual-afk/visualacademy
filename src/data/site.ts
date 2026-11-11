@@ -23,6 +23,8 @@ export const ROUTES = {
   login: (next?: string) => (next ? `/login?next=${encodeURIComponent(next)}` : "/login"),
   /** 회원가입 — 카카오 연결 → 정보·약관 → 완료 */
   signup: (next?: string) => (next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"),
+  privacy: "/privacy",
+  terms: "/terms",
   admin: "/admin",
   adminPayments: "/admin/payments",
   adminNewClass: "/admin/classes/new",

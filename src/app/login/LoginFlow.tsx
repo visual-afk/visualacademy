@@ -154,7 +154,7 @@ export default function LoginFlow({ next, real = false, error = "" }: { next: st
                 <span className={`tag${i < 3 ? "" : " o"}`}>{i < 3 ? "필수" : "선택"}</span>
                 {a.t}
                 {i < 2 && (
-                  <a className="view" href="#terms" onClick={(e) => { e.preventDefault(); showToast("약관 전문은 실제 사이트에서 연결돼요"); }}>보기</a>
+                  <a className="view" href={i === 0 ? ROUTES.terms : ROUTES.privacy} target="_blank" rel="noreferrer">보기</a>
                 )}
               </label>
             ))}

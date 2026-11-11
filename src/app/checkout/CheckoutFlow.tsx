@@ -138,7 +138,7 @@ export default function CheckoutFlow({ c, prefill, loggedIn }: { c: AcademyClass
   const requiredChecks = [
     ...(d.needPrereq ? [{ k: "prereq", label: "선수 과정 이수 여부를 확인했어요", link: null }] : []),
     { k: "refund", label: "환불 규정을 확인했어요", link: "refund" },
-    { k: "terms", label: "이용약관 및 개인정보 수집에 동의해요", link: ROUTES.guide("faq") },
+    { k: "terms", label: "이용약관 및 개인정보 수집에 동의해요", link: ROUTES.privacy },
   ];
   const allChecked = requiredChecks.every((r) => checks[r.k]);
 
