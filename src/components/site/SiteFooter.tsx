@@ -37,6 +37,10 @@ export default function SiteFooter() {
           </div>
         </div>
         <div className="foot-bottom">
+          <div className="foot-legal">
+            <Link href={ROUTES.terms}>이용약관</Link>
+            <Link href={ROUTES.privacy}><b>개인정보처리방침</b></Link>
+          </div>
           <ul className="foot-biz">
             {footer.biz.filter((b) => b.v.trim()).map((b) => (
               <li key={b.k}><b>{b.k}</b>{b.v}</li>

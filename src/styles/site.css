@@ -129,6 +129,8 @@
   .site-footer{border-top:1px solid var(--line);padding:52px 0 40px;margin-top:16px}
   .foot-top{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;margin-bottom:32px}
   .foot-links{display:flex;gap:32px;flex-wrap:wrap}
+  .foot-legal{display:flex;gap:16px;margin-bottom:10px}
+  .foot-legal a{color:var(--ink-2);text-decoration:none}
   .foot-col h4{font-size:13px;color:var(--ink-3);margin:0 0 12px;font-weight:600}
   .foot-col a{display:block;font-size:14px;color:var(--ink-2);text-decoration:none;margin-bottom:8px}
   .foot-col a:hover{color:var(--ink)}

@@ -146,6 +146,9 @@ export default function SignupFlow({
                 />
                 <span className={`tag${i < 3 ? "" : " o"}`}>{i < 3 ? "필수" : "선택"}</span>
                 {a.t}
+                {i < 2 && (
+                  <a className="view" href={i === 0 ? ROUTES.terms : ROUTES.privacy} target="_blank" rel="noreferrer">보기</a>
+                )}
               </label>
             ))}
           </div>
