@@ -12,7 +12,9 @@ export const metadata: Metadata = { title: "회원가입" };
 export default async function SignupPage({ searchParams }: PageProps<"/signup">) {
   const sp = await searchParams;
   const next = safeNext(typeof sp.next === "string" ? sp.next : null, "") || null;
-  const real = supabaseConfigured();
+  /* ?preview=1 — 카카오 로그인 없이 가입 화면을 끝까지 넘겨 보는 미리보기 (카카오 심사·시연용, 저장 안 함) */
+  const preview = sp.preview === "1";
+  const real = supabaseConfigured() && !preview;
   const user = real ? await getUser() : null;
   const profile = user ? await getProfile(user.id) : null;
   /* 이미 가입을 마친 회원 */
