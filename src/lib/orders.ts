@@ -150,7 +150,6 @@ async function onConfirmed(order: OrderRow, cls: ClassInfo) {
     "#{이름}": order.applicant?.name ?? "",
     "#{클래스명}": cls.name,
     "#{주문번호}": order.order_no,
-    "#{금액}": order.amount ? won(order.amount) : "무료",
     "#{일정}": online ? `결제일로부터 ${cls.months ?? ""}개월` : cls.date ? `${fullDate(cls.date)} ${cls.time?.split("~")[0] ?? ""}`.trim() : "추후 안내",
     "#{장소}": online ? "온라인 (마이페이지 > 온라인 수강권한)" : cls.place ?? "",
   });
