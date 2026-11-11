@@ -35,7 +35,7 @@ Node.js 20 이상 필요 (개발 환경: Node 24, Next.js 16, React 19, TypeScri
 
 결제 흐름: 신청서 → `POST /api/orders`(결제대기, 금액은 서버가 DB 가격으로) → 토스 결제위젯 → `/checkout/success`에서 금액 대조 · `hold_seat`로 정원 확인 · 승인. 0원 클래스는 결제 없이 바로 수강확정.
 
-로그인 흐름: 고객 `/login`(카카오) → `/auth/callback` → 휴대폰이 없으면 `/login/profile`. 관리자 `/admin/login`(visual-auto 계정 또는 카카오). 접근 제어는 `src/proxy.ts`.
+로그인 흐름: 고객 `/login`(카카오) → `/auth/callback` → 처음이면 `/signup`(정보 입력·약관 동의, SQL 0003). 관리자 `/admin/login`(visual-auto 계정 또는 카카오). 접근 제어는 `src/proxy.ts`.
 
 ## 화면 (라우트)
 

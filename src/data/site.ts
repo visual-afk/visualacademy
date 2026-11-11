@@ -21,6 +21,8 @@ export const ROUTES = {
   mypage: "/mypage",
   /** 카카오 로그인 · 가입. next = 로그인 후 돌아갈 주소 */
   login: (next?: string) => (next ? `/login?next=${encodeURIComponent(next)}` : "/login"),
+  /** 회원가입 — 카카오 연결 → 정보·약관 → 완료 */
+  signup: (next?: string) => (next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"),
   admin: "/admin",
   adminPayments: "/admin/payments",
   adminNewClass: "/admin/classes/new",

@@ -26,10 +26,27 @@ async function get(path: string) {
   console.log(`  지금 설정: ${process.env.KAKAO_SENDER_KEY || "(비어 있음)"} — 아카데미 채널 검색ID는 @_bipxhn`);
 
   const tp = await get("/kakao/v2/templates?limit=100");
-  const templates = (tp.templateList ?? tp.list ?? []) as { templateId: string; name: string; status: string; channelId: string }[];
+  const templates = (tp.templateList ?? tp.list ?? []) as { templateId: string; name: string; status: string; channelId: string; content?: string }[];
   console.log("\n▶ 알림톡 템플릿");
   for (const t of templates) console.log(`  ${t.templateId}  [${t.status}]  ${t.name}  (채널 ${t.channelId})`);
-  const keys = ["KAKAO_TMPL_PAID", "KAKAO_TMPL_VBANK", "KAKAO_TMPL_D3", "KAKAO_TMPL_EXPIRE30", "KAKAO_TMPL_WAITLIST_OPEN"];
+  // 코드가 보내는 변수 (docs/alimtalk-templates.md) — 템플릿과 하나라도 다르면 발송이 실패한다
+  const expected: Record<string, string[]> = {
+    KAKAO_TMPL_PAID: ["이름", "클래스명", "주문번호", "일정", "장소"],
+    KAKAO_TMPL_VBANK: ["이름", "클래스명", "금액", "은행", "계좌번호", "입금기한", "주문번호"],
+    KAKAO_TMPL_D3: ["이름", "클래스명", "일정", "장소", "준비물"],
+    KAKAO_TMPL_EXPIRE30: ["이름", "클래스명", "만료일"],
+    KAKAO_TMPL_WAITLIST_OPEN: ["클래스명", "일정", "링크"],
+  };
+  console.log("\n▶ 템플릿 변수 대조 (이름이 환경변수와 같은 템플릿)");
+  for (const [k, want] of Object.entries(expected)) {
+    const t = templates.find((x) => x.name === k);
+    if (!t) { console.log(`  ${k}: 템플릿 없음`); continue; }
+    const have = [...new Set([...(t.content ?? "").matchAll(/#\{([^}]+)\}/g)].map((m) => m[1]))];
+    const missing = want.filter((v) => !have.includes(v));
+    const extra = have.filter((v) => !want.includes(v));
+    console.log(`  ${k}: ${missing.length || extra.length ? `✗ 템플릿에 없음 [${missing.join(", ")}] / 코드가 안 보냄 [${extra.join(", ")}]` : "✓ 일치"}`);
+  }
+  const keys = Object.keys(expected);
   console.log("\n▶ 템플릿 환경변수");
   for (const k of keys) {
     const id = process.env[k];

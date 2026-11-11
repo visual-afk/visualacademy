@@ -13,7 +13,7 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
  * 카카오 로그인 · 가입 (일반 회원가입 없음)
  * 카카오로 시작하기 → 카카오 동의 화면 → 처음 오는 회원: 정보 확인 + 약관 동의 → 가입 완료
  *                                     → 이미 가입한 회원: 바로 로그인
- * real(Supabase 키 있음): 카카오 → /auth/callback → 휴대폰이 없으면 /login/profile → next 로 이동
+ * real(Supabase 키 있음): 카카오 → /auth/callback → 처음이면 /signup(정보·약관) → next 로 이동
  * 목업: 동의 화면과 회원 정보는 예시. 실제 버튼은 카카오 디자인 가이드를 따라야 한다.
  */
 
@@ -104,7 +104,7 @@ export default function LoginFlow({ next, real = false, error = "" }: { next: st
             {C.start.notes.map((n) => <li key={n.t}>{n.t}</li>)}
           </ul>
         </div>
-        <p className="small">{C.start.small}</p>
+        <p className="small">{C.start.small}<br />처음이라면 <Link href={next ? ROUTES.signup(next) : ROUTES.signup()}>회원가입</Link></p>
         {error && <p className="small" role="alert" style={{ color: "#d33" }}>{error}</p>}
         {!real && <div className="test-who" role="group" aria-label="테스트용 회원 상태">
           <span>(테스트)</span>
