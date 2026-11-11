@@ -12,7 +12,7 @@ import { saveSignup, type SignupState } from "./actions";
 /*
  * 회원가입 — 카카오 연결 → 정보 입력·약관 동의 → 완료
  * real(Supabase 키 있음): 1단계는 실제 카카오 로그인 → /auth/callback → 다시 /signup 2단계
- * 목업: 1단계 버튼이 바로 2단계로 넘어가고, 완료 시 브라우저에만 로그인 표시
+ * 목업·미리보기(?preview=1): 1단계 버튼이 바로 2단계로 넘어가고, 완료 시 브라우저에만 로그인 표시
  */
 const STEPS = ["카카오 연결", "정보 입력 · 약관 동의", "가입 완료"];
 const AGREE_KEYS = ["terms", "privacy", "age", "marketing"] as const;
