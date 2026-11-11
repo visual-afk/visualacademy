@@ -37,9 +37,12 @@ export default function SiteFooter() {
           </div>
         </div>
         <div className="foot-bottom">
-          {footer.biz1}
-          <br />
-          {footer.biz2}
+          <ul className="foot-biz">
+            {footer.biz.filter((b) => b.v.trim()).map((b) => (
+              <li key={b.k}><b>{b.k}</b>{b.v}</li>
+            ))}
+          </ul>
+          <p className="foot-copy">{footer.copy}</p>
         </div>
       </div>
     </footer>

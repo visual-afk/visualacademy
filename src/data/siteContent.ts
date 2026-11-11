@@ -38,25 +38,65 @@ export const DEF_MAIN = {
   programs: {
     title: "프로그램", desc: "목적에 맞는 세 갈래 — 세부 클래스는 각 페이지에서 필터로 찾을 수 있어요.",
     cards: [
-      { title: "디자이너의 정석", desc: "레벨 1~4 순차 과정. 10주 주기로 네 단계가 동시에 열려요.", link: "정석" },
-      { title: "단독 특강", desc: "퍼스널 컬러, 손상모 연화 등 필요할 때 골라 듣는 단기 과정.", link: "특강" },
-      { title: "경영 · 컨설팅", desc: "브랜딩, CS, 창업까지 — 원장을 위한 실무 강의.", link: "경영" },
+      { title: "디자이너의 정석", desc: "레벨 1~4 순차 과정. 10주 주기로 네 단계가 동시에 열려요.", chips: "레벨 1~4, 10주 과정", link: "정석" },
+      { title: "단독 특강", desc: "퍼스널 컬러, 손상모 연화 등 필요할 때 골라 듣는 단기 과정.", chips: "1일 과정, 골라 듣기", link: "특강" },
+      { title: "경영 · 컨설팅", desc: "브랜딩, CS, 창업까지 — 원장을 위한 실무 강의.", chips: "브랜딩, CS, 창업", link: "경영" },
     ],
   },
-  online: { title: "시간이 안 맞아도, 온라인으로", desc: "월 2000플랜 · 오토사장 — 수강 기간 9개월, 원하는 시간에 들으세요.", btn: "온라인 강의 보기" },
+  online: {
+    tag: "ONLINE", title: "시간이 안 맞아도, 온라인으로", desc: "월 2000플랜 · 오토사장 — 수강 기간 9개월, 원하는 시간에 들으세요.",
+    feats: "수강 기간 9개월, 언제든 시작, 반복 시청", btn: "온라인 강의 보기", priceName: "월 2000플랜", price: "550,000원",
+  },
+  /*
+   * 강사 슬라이더 — 목록 순서 = '전체' 탭 순서. cats(쉼표)가 분류 탭, '레벨교육' 분류는 카드에 '레벨 전문 강사'로 표시.
+   * career·career2·intro는 줄바꿈으로 구분, **글자**는 굵게(소개는 형광펜). link가 있으면 카드 전체가 프로필로 연결.
+   */
   instructors: {
     title: "강사 소개", desc: "아카데미는 결국 가르치는 사람이 상품입니다.",
-    list: [{ name: "이유경", role: "대표원장", img: "" }, { name: "순돌", role: "이사 · 원장", img: "" }, { name: "강사명", role: "직함", img: "" }, { name: "강사명", role: "직함", img: "" }],
+    cats: "레벨교육, 어프로치·연화, 모발과학",
+    levelOrder: "리현, 준모, 창민, 성실, 호승",
+    list: [
+      { name: "이유경", role: "대표원장", img: "/images/instructors/lee-yukyung.jpg", insta: "", cats: "", tags: "", career: "", career2Title: "", career2: "", intro: "", link: "/about?tab=inst" },
+      { name: "순돌", role: "이사 · 원장", img: "/images/instructors/soondol.jpg", insta: "visual_soondol", cats: "모발과학", tags: "",
+        career: "현) 복구매직 전문 살롱 10년 운영\n현) 비주얼 아카데미 교육이사\n현) 비주얼랩 교육이사\n현) 트리필드 이사\n현) 비주얼뷰티 부사장",
+        career2Title: "그 외 이력",
+        career2: "2001년 미용 입문 25년차 경력 디자이너\n국/내외 모발 과학 교육 & 세미나 다수 이수\nm-nrt 대표 스터디 소수 그룹 10년 운영\n모발 과학 단일 교육 최대 인원 모집\n모발 과학 단일 교육 최장 기간 교육 매진\n최신 모발 과학 서적 출간\n트리필드 전제품 연구 개발 및 출시\ns3아카데미 (서울·천안·수원·창원)외 다수 아카데미 모발 과학 교육 및 입점교육\n레베 전국지사 모발 과학 세미나 & 펌 원리 교육 서울·부산 모발 과학 특강 20기 배출\n부산 보건 대학교 졸업생 출강 & 재직자 특강 다수 진행중",
+        intro: "", link: "" },
+      { name: "지성", role: "원장", img: "/images/instructors/jiseong.jpg", insta: "", cats: "어프로치·연화", tags: "레이어드컷&리프컷, 하이퍼포머전략",
+        career: "비주얼살롱 창립멤버\n**현)비주얼살롱 마곡나루점 원장**\n개인 순수 매출 6000만 원 이상\n복구 시술 7500건 진행\n비엠모리스 강의\n스타일마스터 강사\n미용 경력 17년 차",
+        career2Title: "", career2: "",
+        intro: "복구의신 지성원장 입니다 손상모가 점점 많아지는 시대에\n손상모 연화를 하지 못한다면 살아남을 수 없습니다.\n**쉽고 간단한 이론으로 연화의 정점에 이를 수 있게 도와드리겠습니다.**", link: "" },
+      { name: "호승", role: "원장", img: "/images/instructors/hoseung.jpg", insta: "", cats: "레벨교육", tags: "퍼스널컬러",
+        career: "**비주얼살롱 창시멤버**\n**현)비주얼살롱 성수점 2호점 원장**\n**현)비주얼살롱 본점 원장**\n(주)비주얼랩 인사 담당.\n비주얼 아카데미 레벨 과정 강사\n현)퍼스널컬러 강사\n현)컬러강사\nKBP 퍼스널컬러 연구소\n뷰티 퍼스널 컨설턴트 과정 수료\n퍼스널 컬러 전문가 과정 수료\n퍼스널 컬러 교육지도사 과정 수료\n국제미용과학협회 정회원\n퓨어모션 제품 기획",
+        career2Title: "", career2: "",
+        intro: "한 끗 차이로 이미지를 바꾸는 법!\n**개인에게 어울리는 컬러를 쉽게 알 수 있는 기초부터 알려드립니다!**", link: "" },
+      { name: "리현", role: "실장", img: "/images/instructors/rihyun.jpg", insta: "", cats: "레벨교육", tags: "롱·중단발 레이어, 복구매직",
+        career: "L'Oréal Professional 컬러 디플로마 수료\nSHISEIDO Professional 컬러 디플로마 수료\nBOFS Science Basic Cut 과정 수료\n경인여자대학교 iBelle 헤어과 졸업\nVISUAL SALON 마곡나루점 실장\nVISUAL ACADEMY 레벨 과정 강사",
+        career2Title: "", career2: "",
+        intro: "롱·중단발 레이어 디자인 전문으로,\n**형태와 무게, 움직임의 원리를 이해**하는 교육을 지향합니다.\n정해진 공식을 따라가기보다 **고객이 가진 장점을 디자인으로 풀어내고**\n**스스로 판단하고 응용**할 수 있는 디자이너로 성장하도록 돕겠습니다.", link: "" },
+      { name: "창민", role: "원장", img: "/images/instructors/changmin.jpg", insta: "", cats: "레벨교육", tags: "블랑컷, 레이어드 컷",
+        career: "VIDAL SASSON Academy ABC CUT 수료\nVIDAL SASSON Color 수료\nJUNO Academy diploma 수료\nBaleyage color 수료 (염색)\nJUNO 하이드로펌 수료 (펌)\nEXLOOP 증모술 수료\nAir painting 수료 (라인 or 달모보완)\nKAIJUNG Teaching 수료\nOho (전) 대표원장\nVISUALSALON 서초방배점 (현) 대표원장\nVISUALSALON 아카데미 강사재직중",
+        career2Title: "", career2: "",
+        intro: "안녕하세요!\n고객님의 일상에 특별한 변화를 더해드리는 김창민 원장입니다.\n**블랑컷, 레이어드 컷부터 전문적인 시술까지,**\n**손질은 편하면서도 가장 빛나는 스타일을 찾아드립니다.**\n지속적인 연구와 아카데미 강의 경험을 바탕으로,\n믿고 맡길 수 있는 최상의 헤어 디자인을 경험해 보세요.", link: "" },
+      { name: "성실", role: "원장", img: "/images/instructors/seongsil.jpg", insta: "", cats: "레벨교육", tags: "시니어컷, 숏컷",
+        career: "KPC 퍼스널컬러 전문가 과정 수료\nCS 고객관리전문가 1·2급 수료\nDAMO Scalp & Hair Loss Course 수료 (두피&탈모 전문 과정)\nBrand Shop Manager (13Years) (서비스·고객관리 전문가)\n권홍아카데미 압구정본점 강사\nVISUALSALON 사가정점 대표원장\nVISUAL Academy 레벨 과정 강사",
+        career2Title: "", career2: "",
+        intro: "시니어컷과 숏컷 전문으로,\n기술을 가르치는 강사가 아닌,\n생각하는 디자이너를 만드는 교육을 지향합니다.\n고객의 이미지와 **라이프스타일을 분석하고**\n**디자인으로 연결하는 실전 중심의 교육**을 진행합니다.", link: "" },
+      { name: "준모", role: "디자이너", img: "/images/instructors/junmo.jpg", insta: "", cats: "레벨교육", tags: "약성곱슬매직, 숏컷",
+        career: "Visual academy 레벨 과정 강사\n2025 visual award 크리에이터상\nmilbon diploma\ncopyingcut diploma\n003 diploma",
+        career2Title: "", career2: "",
+        intro: "쉽게 해결하기 **어려운 모발을 중심으로,**\n**모발의 상태를 정확하게 진단**하고 그에 맞는 기술을 설계하듯이\n디자이너로 올라가는데 **정확한 지식과 기술로 성장**할 수 있는\n교육을 진행합니다", link: "" },
+    ],
   },
   reviews: {
     title: "수강생 후기", desc: "실제 수강생들의 이야기입니다.",
     list: [
-      { q: "모발과학 너무 좋은 교육입니다. 실무에 바로 적용할 수 있었어요.", a: "양스헤어" },
-      { q: "교육비가 부담이었는데 첫 주차부터 오히려 값지다고 느꼈습니다.", a: "손수인" },
-      { q: "궁금한 부분, 어려운 부분을 교육이 끝난 후에도 물어보면 답을 주셔서 좋았어요.", a: "수강생 후기" },
+      { q: "모발과학 너무 좋은 교육입니다. 실무에 바로 적용할 수 있었어요.", a: "양스헤어", course: "디자이너의 정석", sub: "수강생 · 헤어 디자이너" },
+      { q: "교육비가 부담이었는데 첫 주차부터 오히려 값지다고 느꼈습니다.", a: "손수인", course: "디자이너의 정석", sub: "수강생 · 헤어 디자이너" },
+      { q: "궁금한 부분, 어려운 부분을 교육이 끝난 후에도 물어보면 답을 주셔서 좋았어요.", a: "수강생", course: "수강 후기", sub: "수강생 · 헤어 디자이너" },
     ],
   },
-  salon: { title: "비주얼살롱 8개 지점", desc: "서울 · 경기 · 부산 — 직접 방문해서 체험해보세요.", btn: "지점 찾기" },
+  salon: { tag: "VISUAL SALON", title: "비주얼살롱 8개 지점", desc: "서울 · 경기 · 부산 — 직접 방문해서 체험해보세요.", regions: "서울, 경기, 부산", btn: "지점 찾기" },
   footer: {
     desc: "모발과학을 기반으로 한 헤어 전문가 교육 기관",
     cols: [
@@ -64,8 +104,12 @@ export const DEF_MAIN = {
       { h: "수강 안내", links: "수강 절차, 자주 묻는 질문, 환불 규정" },
       { h: "관련 사이트", links: "비주얼살롱 ↗, 트리필드 ↗" },
     ],
-    biz1: "(주)비주얼뷰티 · 대표 이유경 · 사업자등록번호 652-81-03393",
-    biz2: "서울 강남구 언주로 622 (논현동, 구암빌딩) 1층 · 대표전화 010-2755-7452 · Copyright ⓒ 비주얼아카데미. All rights reserved.",
+    /* 사업자 정보 — 내용이 빈 항목은 표시하지 않음 (통신판매업 신고번호는 확정 후 입력) */
+    biz: [
+      { k: "상호", v: "(주)비주얼뷰티" }, { k: "대표", v: "이유경" }, { k: "사업자등록번호", v: "652-81-03393" }, { k: "통신판매업", v: "" },
+      { k: "주소", v: "서울 강남구 언주로 622 (논현동, 구암빌딩) 1층" }, { k: "대표전화", v: "010-2755-7452" },
+    ],
+    copy: "Copyright ⓒ 비주얼아카데미. All rights reserved.",
     /* 푸터 '환불 규정'을 누르면 뜨는 안내 창 (모든 페이지 공통) */
     rfTitle: "환불 규정",
     rfTh: [{ t: "구분" }, { t: "환불 기준" }, { t: "환불 비율" }],

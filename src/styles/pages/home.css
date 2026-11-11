@@ -1,10 +1,5 @@
 /* 메인 페이지 */
 .site.pg-home{
-  /* "예시 데이터" 자리표시 태그 — 실제 콘텐츠로 교체 전 표시 */
-  .ph{position:relative;border:1.5px dashed var(--line-strong)!important}
-  .ph::after{content:"예시 데이터";position:absolute;top:-10px;right:14px;background:var(--bg);
-    padding:0 8px;font-size:10.5px;color:var(--ink-3);border:1px solid var(--line-strong);border-radius:20px}
-
   /* hero — immersive */
   .hero{position:relative;overflow:hidden;min-height:86vh;display:flex;align-items:center;justify-content:center;
     text-align:center;padding:140px 24px 100px;
@@ -74,51 +69,145 @@
 
   .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   @media(max-width:900px){.cards3{grid-template-columns:1fr}}
-  .class-card{border:1px solid var(--line);border-radius:22px;padding:24px;background:var(--bg);display:flex;flex-direction:column}
-  .class-card .badge{align-self:flex-start;font-size:12px;padding:5px 12px;margin-bottom:14px}
+  /* 이번 기수 모집중 카드 — 상단(배지·D-day) · 일정/장소 · 모집 현황 바 · 가격 */
+  .class-card{border:1px solid var(--line);border-radius:22px;padding:26px 24px 24px;background:var(--bg);display:flex;flex-direction:column;transition:.2s}
+  .class-card:hover{border-color:var(--ink-3);transform:translateY(-2px)}
+  .class-card.hot{border-color:var(--mint);box-shadow:0 0 0 3px var(--mint-l)}
+  .cc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px}
+  .class-card .badge{font-size:12px;padding:5px 12px}
   .class-card .badge-line{background:var(--surface);border:1px solid var(--line)}
-  .class-card h3{font-size:18px;line-height:1.4;margin:0 0 8px;font-weight:700;letter-spacing:-.012em}
+  .dday{font-size:12.5px;font-weight:800;color:var(--mint-d);font-variant-numeric:tabular-nums}
+  .dday.mute{color:var(--ink-3);font-weight:600}
+  .class-card h3{font-size:18.5px;line-height:1.4;margin:0 0 14px;font-weight:700;letter-spacing:-.014em}
   .class-card h3 a{text-decoration:none}
   .class-card h3 a:hover{text-decoration:underline}
-  .class-card .meta{font-size:13.5px;color:var(--ink-2);margin:2px 0;font-variant-numeric:tabular-nums}
-  .class-card .price{font-size:21px;font-weight:800;margin:16px 0 18px;font-variant-numeric:tabular-nums;letter-spacing:-.015em}
-  .class-card .btn{width:100%;margin-top:auto}
+  .cc-info{list-style:none;margin:0 0 18px;padding:14px 0 0;border-top:1px solid var(--line);display:grid;gap:9px}
+  .cc-info li{display:flex;gap:12px;font-size:13.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .cc-info li b{flex:0 0 38px;font-weight:600;color:var(--ink-3)}
+  .cc-info li span{color:var(--ink)}
+  .seat{margin:0 0 18px}
+  .seat-top{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2);margin-bottom:7px}
+  .seat-top b{color:var(--mint-d);font-weight:800}
+  .seat-bar{height:6px;border-radius:6px;background:var(--surface-2);overflow:hidden}
+  .seat-bar i{display:block;height:100%;border-radius:6px;background:var(--mint-grad)}
+  .class-card .price{font-size:22px;font-weight:800;margin:auto 0 16px;font-variant-numeric:tabular-nums;letter-spacing:-.015em;display:flex;align-items:baseline;gap:8px}
+  .class-card .price small{font-size:12.5px;font-weight:500;color:var(--ink-3);letter-spacing:0}
+  .class-card .btn{width:100%}
   .class-card .btn-ghost{color:var(--ink);border-width:1px}
 
+  /* 칩 (프로그램·강사 공용) */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;min-height:26px}
+  .chips span{font-size:11.5px;font-weight:600;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+  .chips .insta{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:500}
+  .chips .insta b{font-weight:800}
+  .chips .cat{background:var(--mint-l);color:var(--mint-d);border-color:transparent;font-weight:700}
+
+  /* 프로그램 3종 — 번호 · 아이콘 · 칩 */
   .prog3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   @media(max-width:900px){.prog3{grid-template-columns:1fr}}
-  .prog-card{padding:28px;border-radius:22px;background:var(--bg);border:1px solid var(--line)}
+  .prog-card{position:relative;padding:28px;border-radius:22px;background:var(--bg);border:1px solid var(--line);display:flex;flex-direction:column;transition:.2s;overflow:hidden}
+  .prog-card:hover{border-color:var(--mint);transform:translateY(-2px)}
+  .prog-ic{width:44px;height:44px;border-radius:14px;background:var(--mint-l);color:var(--mint-d);display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+  .prog-ic svg{width:22px;height:22px}
+  .prog-no{position:absolute;top:24px;right:26px;font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--ink-3)}
   .prog-card h3{font-size:19px;line-height:1.35;margin:0 0 10px;font-weight:700;letter-spacing:-.014em}
-  .prog-card p{font-size:14px;color:var(--ink-2);margin:0 0 16px}
-  .prog-card a{font-size:14px;font-weight:600;color:var(--mint-d);text-decoration:none}
-  .prog-card a:hover{text-decoration:underline}
+  .prog-card p{font-size:14px;color:var(--ink-2);margin:0 0 16px;flex:1}
+  .prog-card .chips{margin-bottom:20px}
+  .prog-card a{font-size:14px;font-weight:700;color:var(--mint-d);text-decoration:none;display:flex;align-items:center;gap:6px;border-top:1px solid var(--line);padding-top:16px}
+  .prog-card a::after{content:"→";transition:.2s}
+  .prog-card:hover a::after{transform:translateX(4px)}
 
-  .online-banner{background:radial-gradient(520px circle at 100% 0%,rgba(52,209,201,.22),transparent 60%),var(--mint-grad-soft);
+  /* 온라인 배너 — 태그 · 특징 칩 · 가격 CTA, 장식 원 2개 */
+  .online-banner{position:relative;overflow:hidden;background:radial-gradient(520px circle at 100% 0%,rgba(52,209,201,.22),transparent 60%),var(--mint-grad-soft);
     border:1px solid #d3ecea;border-radius:28px;padding:48px 44px;display:flex;justify-content:space-between;align-items:center;gap:30px;flex-wrap:wrap}
-  .online-banner h3{font-size:24px;line-height:1.32;margin:0 0 8px;font-weight:700;letter-spacing:-.018em}
-  .online-banner p{font-size:14.5px;color:var(--ink-2);margin:0;max-width:440px}
-  .online-banner .btn-ghost{color:var(--ink);border-width:1px}
+  .online-banner::before,.online-banner::after{content:"";position:absolute;border-radius:50%;border:1.5px solid var(--mint);opacity:.35;pointer-events:none}
+  .online-banner::before{width:320px;height:320px;right:-70px;top:-120px}
+  .online-banner::after{width:200px;height:200px;right:60px;bottom:-110px}
+  .online-banner>*{position:relative;z-index:1}
+  .online-banner h3{font-size:26px;line-height:1.32;margin:0 0 10px;font-weight:800;letter-spacing:-.02em}
+  .online-banner p{font-size:14.5px;color:var(--ink-2);margin:0 0 18px;max-width:460px}
+  .ob-tag{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.1em;color:var(--mint-d);margin-bottom:14px}
+  .ob-tag i{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px var(--mint-l)}
+  .ob-feat{display:flex;flex-wrap:wrap;gap:8px}
+  .ob-feat span{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--bg);border-radius:20px;padding:6px 13px}
+  .ob-feat span::before{content:"✓";color:var(--mint-d);font-weight:800}
+  .ob-cta{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+  .ob-cta small{font-size:12.5px;color:var(--ink-2)}
+  .ob-cta small b{color:var(--ink);font-size:15px;font-variant-numeric:tabular-nums}
 
-  .instr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
-  @media(max-width:900px){.instr-grid{grid-template-columns:repeat(2,1fr)}}
-  .instr-card{text-align:left;border-radius:14px;padding:10px}
-  .instr-photo{aspect-ratio:1;border-radius:14px;background:var(--surface);border:1.5px dashed var(--line-strong);
-    display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12.5px;margin-bottom:12px}
-  .instr-card .in{font-weight:700;font-size:15.5px;margin:0 0 3px}
-  .instr-card .ir{font-size:13px;color:var(--ink-2);margin:0}
+  /* 강사 소개 — 분류 탭 + 가로 슬라이더 */
+  .ins-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 26px}
+  .ins-tab{border:1px solid var(--line-strong);background:var(--bg);color:var(--ink-2);border-radius:100px;padding:10px 18px;font-size:14.5px;font-weight:600;font-family:var(--font);cursor:pointer;transition:.2s;letter-spacing:-.003em}
+  .ins-tab:hover{border-color:var(--ink-3);color:var(--ink)}
+  .ins-tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .ins-tab em{font-style:normal;font-size:12px;font-weight:700;margin-left:6px;opacity:.55;font-variant-numeric:tabular-nums}
+  @media(max-width:560px){
+    .ins-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-20px;padding-right:20px}
+    .ins-tabs::-webkit-scrollbar{display:none}
+    .ins-tab{white-space:nowrap;flex-shrink:0;padding:9px 15px;font-size:14px}
+  }
+  .ins-wrap{position:relative}
+  .ins-track{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;align-items:flex-start;-webkit-overflow-scrolling:touch}
+  .ins-track::-webkit-scrollbar{display:none}
+  .instr-card{flex:0 0 calc((100% - 60px)/4);scroll-snap-align:start;text-align:left}
+  @media(max-width:900px){.instr-card{flex-basis:calc((100% - 20px)/2.3)}}
+  @media(max-width:560px){.instr-card{flex-basis:78%}}
+  .instr-photo{position:relative;aspect-ratio:4/5;border-radius:18px;overflow:hidden;margin-bottom:16px;background:var(--surface)}
+  .instr-photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .instr-card .in{font-weight:800;font-size:18px;margin:0 0 2px;letter-spacing:-.015em}
+  .instr-card .ir{font-size:13.5px;color:var(--ink-2);margin:0 0 12px}
+  .instr-card.link{display:block;text-decoration:none;color:inherit;cursor:pointer}
+  .instr-card.link .instr-photo img{transition:transform .5s}
+  .instr-card.link:hover .instr-photo img{transform:scale(1.04)}
+  .ins-body{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+  .ins-body h4{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--mint-d);margin:0 0 8px}
+  .ins-career{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:5px}
+  .ins-career li{position:relative;padding-left:11px;font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+  .ins-career li::before{content:"";position:absolute;left:0;top:.62em;width:4px;height:4px;border-radius:50%;background:var(--mint)}
+  .ins-career li b{font-weight:800;color:var(--ink)}
+  .ins-intro{font-size:13px;line-height:1.7;color:var(--ink);margin:0}
+  .ins-intro b{font-weight:800;background:linear-gradient(transparent 62%,var(--mint-l) 62%)}
+  .ins-more{display:inline-block;font-size:13px;font-weight:700;color:var(--mint-d)}
+  .instr-card.link:hover .ins-more{text-decoration:underline}
+  .ins-soon{font-size:12.5px;color:var(--ink-3);background:var(--surface);border-radius:12px;padding:12px 14px;margin:0}
+  .ins-arrow{position:absolute;top:130px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);
+    box-shadow:0 4px 14px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;transition:.2s;font-size:18px;line-height:1;font-family:var(--font)}
+  .ins-arrow:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .ins-arrow:disabled{opacity:0;pointer-events:none}
+  .ins-arrow.prev{left:-22px}
+  .ins-arrow.next{right:-22px}
+  @media(max-width:1180px){.ins-arrow.prev{left:-8px}.ins-arrow.next{right:-8px}}
+  @media(max-width:560px){.ins-arrow{width:38px;height:38px;top:110px}}
+  .ins-bar{height:3px;border-radius:3px;background:var(--surface-2);margin-top:26px;position:relative;overflow:hidden}
+  .ins-bar i{position:absolute;left:0;top:0;height:100%;border-radius:3px;background:var(--ink);transition:left .2s,width .2s}
 
+  /* 수강생 후기 — 따옴표 · 과정 칩 · 작성자 */
   .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   @media(max-width:900px){.testi-grid{grid-template-columns:1fr}}
-  .testi-card{background:var(--bg);border:1px solid var(--line);border-radius:22px;padding:24px}
-  .testi-card .tq{font-size:14.5px;color:var(--ink);margin:0 0 16px;line-height:1.6}
-  .testi-card .ta{font-size:12.5px;color:var(--ink-3);margin:0}
+  .testi-card{background:var(--bg);border:1px solid var(--line);border-radius:22px;padding:26px 24px 22px;display:flex;flex-direction:column}
+  .testi-card .qm{font-size:38px;line-height:.6;font-weight:800;color:var(--mint-d);height:18px;margin-bottom:6px;font-family:Georgia,serif}
+  .testi-card .tq{font-size:15px;color:var(--ink);margin:0 0 22px;line-height:1.7;letter-spacing:-.005em;flex:1}
+  .testi-card .tcourse{align-self:flex-start;font-size:11.5px;font-weight:700;color:var(--mint-d);background:var(--mint-l);border-radius:20px;padding:3px 10px;margin-bottom:14px}
+  .testi-who{display:flex;align-items:center;gap:11px;border-top:1px solid var(--line);padding-top:16px}
+  .testi-av{width:36px;height:36px;border-radius:50%;background:var(--mint-l);color:var(--mint-d);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .testi-who b{display:block;font-size:13.5px;font-weight:700}
+  .testi-who span{font-size:12px;color:var(--ink-3)}
 
-  .salon-band{background:radial-gradient(600px circle at 90% 10%,rgba(10,166,161,.35),transparent 60%),
+  /* 비주얼살롱 밴드 — 태그 · 지역 칩 */
+  .salon-band{position:relative;overflow:hidden;background:radial-gradient(600px circle at 90% 10%,rgba(10,166,161,.35),transparent 60%),
     linear-gradient(135deg,#14161a 0%,#0b2a29 100%);color:#fff;border-radius:28px;padding:44px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
-  .salon-band h3{font-size:21px;line-height:1.35;margin:0 0 6px;font-weight:700;letter-spacing:-.015em}
-  .salon-band p{font-size:14px;color:#c7cbc6;margin:0}
+  .salon-band h3{font-size:24px;line-height:1.35;margin:0 0 8px;font-weight:800;letter-spacing:-.018em}
+  .salon-band p{font-size:14px;color:#c7cbc6;margin:0 0 18px}
+  .sb-tag{font-size:11.5px;font-weight:800;letter-spacing:.1em;color:#7fe8d6;margin-bottom:12px}
+  .sb-regions{display:flex;flex-wrap:wrap;gap:8px}
+  .sb-regions span{font-size:12.5px;font-weight:600;color:#e2f8f2;border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:5px 13px}
   .salon-band .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff}
-  .salon-band .btn-ghost:hover{border-color:#fff}
+  .salon-band .btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+  @media(max-width:560px){
+    .ob-cta{align-items:stretch;width:100%}
+    .ob-cta .btn,.salon-band .btn{width:100%}
+    .online-banner h3{font-size:22px}
+  }
 
   .site-footer{margin-top:0}
 
@@ -128,7 +217,6 @@
     .section-head{margin-bottom:28px}
     .section-head h2{font-size:24px}
     .online-banner{padding:30px 24px;border-radius:22px}
-    .online-banner h3{font-size:21px}
     .salon-band{padding:30px 24px;border-radius:22px}
     .class-card,.prog-card{padding:22px}
   }
