@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { ROUTES } from "@/data/site";
+import { getAdmin } from "@/lib/auth";
 
 /** 관리자 상단바 — 신청자 목록·배치 상담·개설 알림은 아직 화면이 없어 비활성 표시 */
-export default function AdminTopbar({ active }: { active?: "dashboard" | "payments" }) {
+export default async function AdminTopbar({ active }: { active?: "dashboard" | "payments" }) {
+  const admin = await getAdmin();
+  const name = admin?.name ?? "관리자";
   return (
     <div className="topbar">
       <div className="wrap topbar-inner">
@@ -23,8 +26,11 @@ export default function AdminTopbar({ active }: { active?: "dashboard" | "paymen
           디자인 모드
         </Link>
         <div className="who">
-          <div className="avatar">하나</div>하나 실장님
+          <div className="avatar">{name.slice(0, 2)}</div>{name}님
           <Link className="site-link" href={ROUTES.home}>사이트 보기 ↗</Link>
+          <form action="/auth/logout?next=/admin/login" method="post">
+            <button type="submit" className="site-link logout-btn">로그아웃</button>
+          </form>
         </div>
       </div>
     </div>

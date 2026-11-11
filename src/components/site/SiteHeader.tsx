@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ROUTES } from "@/data/site";
 import { getMainContent } from "@/data/siteContent";
-import { useLoginName } from "@/lib/auth";
+import { useLoginName } from "@/lib/loginState";
 
 type NavKey = "classes" | "online" | "academy" | "guide";
 

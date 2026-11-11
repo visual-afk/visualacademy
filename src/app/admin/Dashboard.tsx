@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import { ROUTES } from "@/data/site";
-import { getClasses } from "@/lib/api";
 import { dayLabel, ddayLabel, today, won } from "@/lib/format";
 import { CATEGORY_LABELS, computeStatus, stepLabel } from "@/lib/status";
 import type { AcademyClass, ClassStatus } from "@/lib/types";
@@ -28,8 +27,8 @@ function computeRevenue(classes: AcademyClass[]) {
   return { total, paidCount, catMap };
 }
 
-export default function Dashboard() {
-  const [classes, setClasses] = useState<AcademyClass[]>(() => getClasses().map((c) => ({ ...c })));
+export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
+  const [classes, setClasses] = useState<AcademyClass[]>(() => initial.map((c) => ({ ...c })));
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [catFilter, setCatFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
@@ -38,8 +37,21 @@ export default function Dashboard() {
   const { toast, showToast } = useToast();
 
   const rows = useMemo(() => classes.map((c) => ({ ...c, status: computeStatus(c) as ClassStatus })), [classes]);
-  const update = (id: number, patch: Partial<AcademyClass>) =>
+  /* 화면에 먼저 반영하고 서버에 저장 — 실패하면 원래 값으로 되돌린다 */
+  const update = (id: number, patch: Pick<Partial<AcademyClass>, "capacity" | "date" | "manualEnd">) => {
+    const before = classes.find((c) => c.id === id);
     setClasses((cs) => cs.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+    fetch(`/api/admin/classes/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) })
+      .then(async (res) => {
+        if (res.ok) return;
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "저장하지 못했어요");
+      })
+      .catch((e: Error) => {
+        if (before) setClasses((cs) => cs.map((c) => (c.id === id ? before : c)));
+        showToast(`${e.message} · 원래 값으로 되돌렸어요`);
+      });
+  };
 
   const { total, paidCount, catMap } = computeRevenue(classes);
   const avg = paidCount ? Math.round(total / paidCount) : 0;
@@ -207,7 +219,7 @@ export default function Dashboard() {
                 <span className="cat">{c.cat}</span>
                 <span className={`status s-${c.status}`}>{c.status}</span>
               </div>
-              <p className="ctitle">{c.name}</p>
+              <p className="ctitle">{c.draft && <span className="badge badge-line" style={{ marginRight: 6 }}>임시저장 · 비공개</span>}{c.name}</p>
               <p className="cmeta">
                 <span>{dayLabel(c.day)}</span><span className="sep">·</span><span>{c.time ?? "-"}</span><span className="sep">·</span><span>{c.place ?? "장소 미정"}</span>
                 {dated && (

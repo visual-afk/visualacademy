@@ -36,6 +36,7 @@
     display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
   .site-link{font-size:12.5px;color:var(--ink-3);border-left:1px solid var(--line);padding-left:14px}
   .site-link:hover{color:var(--ink)}
+  .logout-btn{background:none;border-top:0;border-right:0;border-bottom:0;cursor:pointer;font:inherit;font-size:12.5px}
 
   .page-head{display:flex;justify-content:space-between;align-items:flex-end;padding:38px 0 24px;flex-wrap:wrap;gap:16px}
   .page-head h1{font-size:24px;line-height:1.35;margin:0 0 8px;font-weight:700;letter-spacing:-.016em}

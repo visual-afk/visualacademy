@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
-import CheckoutFlow from "./CheckoutFlow";
+import { getClass } from "@/lib/api";
+import { getProfile, getUser } from "@/lib/auth";
+import { formatPhone } from "@/lib/format";
+import { supabaseConfigured } from "@/lib/supabase/env";
+import CheckoutFlow, { type Prefill } from "./CheckoutFlow";
 
 export const metadata: Metadata = { title: "신청 · 결제" };
 
@@ -8,9 +12,15 @@ export default async function CheckoutPage({ searchParams }: PageProps<"/checkou
   await connection();
   const raw = (await searchParams).cls;
   const cls = Array.isArray(raw) ? raw[0] : raw;
+  const c = await getClass(cls);
+  const user = await getUser();
+  const p = user ? await getProfile(user.id) : null;
+  const prefill: Prefill | undefined = p
+    ? { name: p.name ?? "", phone: p.phone ? formatPhone(p.phone) : "", email: p.email ?? "", shop: p.shop ?? "" }
+    : undefined;
   return (
     <div className="site pg-checkout">
-      <CheckoutFlow slug={cls ?? null} />
+      <CheckoutFlow c={c} prefill={prefill} loggedIn={supabaseConfigured() ? !!user : undefined} />
     </div>
   );
 }

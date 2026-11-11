@@ -6,13 +6,15 @@ import { useToast } from "@/components/common/useToast";
 import SiteHeader from "@/components/site/SiteHeader";
 import { ROUTES } from "@/data/site";
 import { getLoginContent } from "@/data/siteContent";
-import { login } from "@/lib/auth";
+import { login } from "@/lib/loginState";
+import { getBrowserSupabase } from "@/lib/supabase/client";
 
 /*
  * 카카오 로그인 · 가입 (일반 회원가입 없음)
  * 카카오로 시작하기 → 카카오 동의 화면 → 처음 오는 회원: 정보 확인 + 약관 동의 → 가입 완료
  *                                     → 이미 가입한 회원: 바로 로그인
- * 카카오 연동 전이라 동의 화면과 회원 정보는 예시. 실제 버튼은 카카오 디자인 가이드를 따라야 한다.
+ * real(Supabase 키 있음): 카카오 → /auth/callback → 휴대폰이 없으면 /login/profile → next 로 이동
+ * 목업: 동의 화면과 회원 정보는 예시. 실제 버튼은 카카오 디자인 가이드를 따라야 한다.
  */
 
 type Who = "new" | "old";
@@ -29,7 +31,7 @@ function KakaoIcon({ size = 20 }: { size?: number }) {
   );
 }
 
-export default function LoginFlow({ next }: { next: string | null }) {
+export default function LoginFlow({ next, real = false, error = "" }: { next: string | null; real?: boolean; error?: string }) {
   const C = getLoginContent();
   const [who, setWho] = useState<Who>("new");
   const [screen, setScreen] = useState<Screen>({ kind: "start" });
@@ -59,7 +61,19 @@ export default function LoginFlow({ next }: { next: string | null }) {
   };
 
   /** 이미 동의한 계정은 카카오 동의 화면 없이 바로 로그인된다 */
-  const startKakao = () => {
+  const startKakao = async () => {
+    if (real) {
+      show({ kind: "loading" });
+      const { error } = await getBrowserSupabase().auth.signInWithOAuth({
+        provider: "kakao",
+        options: { redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next ?? "/mypage")}` },
+      });
+      if (error) {
+        show({ kind: "start" });
+        showToast("카카오 로그인을 시작하지 못했어요. 잠시 후 다시 시도해 주세요.");
+      }
+      return;
+    }
     if (who === "old") {
       show({ kind: "loading" });
       timer.current = setTimeout(() => finish("old", KAKAO_NAME), 1100);
@@ -91,11 +105,12 @@ export default function LoginFlow({ next }: { next: string | null }) {
           </ul>
         </div>
         <p className="small">{C.start.small}</p>
-        <div className="test-who" role="group" aria-label="테스트용 회원 상태">
+        {error && <p className="small" role="alert" style={{ color: "#d33" }}>{error}</p>}
+        {!real && <div className="test-who" role="group" aria-label="테스트용 회원 상태">
           <span>(테스트)</span>
           <button type="button" className={who === "new" ? "on" : ""} onClick={() => setWho("new")}>처음 오는 회원</button>
           <button type="button" className={who === "old" ? "on" : ""} onClick={() => setWho("old")}>이미 가입한 회원</button>
-        </div>
+        </div>}
       </>
     );
   } else if (screen.kind === "loading") {

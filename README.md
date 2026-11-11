@@ -14,6 +14,29 @@ npm run lint
 
 Node.js 20 이상 필요 (개발 환경: Node 24, Next.js 16, React 19, TypeScript).
 
+## 백엔드 설정 (Supabase)
+
+`.env.local`(git 제외)에 키를 넣는다. 키가 없으면 지금처럼 `src/data/` 목업으로 동작한다.
+
+| 변수 | 설명 |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 아카데미 Supabase 프로젝트 |
+| `SUPABASE_SERVICE_ROLE_KEY` | 서버 전용 (DB 쓰기·조회) |
+| `VISUAL_AUTO_SUPABASE_URL` / `VISUAL_AUTO_SUPABASE_ANON_KEY` | 관리자 로그인 — visual-auto 본사(hq_admin) 계정 확인 |
+| `ADMIN_SESSION_SECRET` | 관리자 쿠키 서명. 설정하면 `/admin`이 로그인으로 잠긴다 |
+| 알림톡 · 본사 채팅 · Cron | [docs/alimtalk-templates.md](docs/alimtalk-templates.md) 참고 (`SOLAPI_*`, `KAKAO_SENDER_KEY`, `KAKAO_TMPL_*`, `ACADEMY_CHAT_WEBHOOK_URL`, `CRON_SECRET`) — 없으면 알림만 건너뛴다 |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` | 토스페이먼츠 **결제위젯 연동 키** (`gck_` / `gsk_`). API 개별 연동 키(`ck_`/`sk_`)와 섞어 쓰면 승인이 실패한다 |
+
+1. Supabase SQL Editor에서 `supabase/migrations/0001_init.sql` 실행
+2. `npm run seed` — 목업 클래스·강사를 DB에 넣기
+3. `supabase/migrations/0002_orders.sql` 실행 (신청·결제)
+4. 토스 개발자센터 > 웹훅에 `https://<도메인>/api/payments/webhook` 등록 (가상계좌 입금 반영)
+5. 카카오 관리자 등록: `admins` 테이블에 `name`, `email`(카카오 계정 이메일) 행 추가 → 첫 로그인 때 연결
+
+결제 흐름: 신청서 → `POST /api/orders`(결제대기, 금액은 서버가 DB 가격으로) → 토스 결제위젯 → `/checkout/success`에서 금액 대조 · `hold_seat`로 정원 확인 · 승인. 0원 클래스는 결제 없이 바로 수강확정.
+
+로그인 흐름: 고객 `/login`(카카오) → `/auth/callback` → 휴대폰이 없으면 `/login/profile`. 관리자 `/admin/login`(visual-auto 계정 또는 카카오). 접근 제어는 `src/proxy.ts`.
+
 ## 화면 (라우트)
 
 | 구분 | 경로 | 내용 |

@@ -2,21 +2,38 @@
 
 import { useState } from "react";
 
-/** 제휴·가맹 문의 — 백엔드 연동 시 POST /api/inquiries 로 전송 */
+/** 제휴·가맹 문의 — POST /api/inquiries (DB 저장 + 본사 채팅 알림) */
 export default function PartnerForm() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    const formEl = e.currentTarget;
+    const fd = new FormData(formEl);
     if (!String(fd.get("name")).trim() || !String(fd.get("phone")).trim()) {
       setError("담당자명과 연락처를 입력해주세요");
       return;
     }
     setError("");
-    setSent(true);
-    e.currentTarget.reset();
+    setBusy(true);
+    try {
+      const res = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.fromEntries(fd.entries())),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error ?? "접수하지 못했어요. 잠시 후 다시 시도해주세요.");
+        return;
+      }
+      setSent(true);
+      formEl.reset();
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -38,7 +55,9 @@ export default function PartnerForm() {
         <textarea id="pf-body" name="body" placeholder="문의하실 내용을 자유롭게 남겨주세요" />
         {error && <p className="err">{error}</p>}
       </div>
-      <button type="submit" className="btn btn-mint">문의 남기기</button>
+      {/* 스팸 봇 걸러내기용 — 사람에게는 보이지 않는다 */}
+      <input name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden style={{ position: "absolute", left: "-9999px" }} />
+      <button type="submit" className="btn btn-mint" disabled={busy}>{busy ? "접수 중…" : "문의 남기기"}</button>
       {sent && <div className="sent-box">문의가 접수됐어요. 담당자가 확인 후 연락드릴게요.</div>}
     </form>
   );

@@ -68,3 +68,11 @@ export function taxNote(price: number, taxType: TaxType): string {
   const { supply, vat } = taxBreakdown(price, taxType);
   return `공급가액 ${won(supply)} + 부가세 ${won(vat)}`;
 }
+
+/** 01012345678 → 010-1234-5678 */
+export function formatPhone(digits: string): string {
+  const d = digits.replace(/\D/g, "");
+  if (d.length === 11) return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+  return digits;
+}

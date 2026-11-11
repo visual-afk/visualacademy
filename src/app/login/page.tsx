@@ -1,20 +1,23 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import SiteFooter from "@/components/site/SiteFooter";
+import { getUser } from "@/lib/auth";
+import { safeNext } from "@/lib/safeNext";
+import { supabaseConfigured } from "@/lib/supabase/env";
 import LoginFlow from "./LoginFlow";
 
 export const metadata: Metadata = { title: "로그인" };
 
-/** 로그인 후 돌아갈 주소는 사이트 내부 경로만 허용 */
-function safeNext(v: string | string[] | undefined): string | null {
-  const s = Array.isArray(v) ? v[0] : v;
-  return s && s.startsWith("/") && !s.startsWith("//") ? s : null;
-}
-
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
-  const next = safeNext((await searchParams).next);
+  const sp = await searchParams;
+  /* 로그인 후 돌아갈 주소 — 신청·결제에서 넘어왔을 때만 있다 */
+  const next = safeNext(typeof sp.next === "string" ? sp.next : null, "") || null;
+  const error = typeof sp.error === "string" ? sp.error : "";
+  if (await getUser()) redirect(next ?? "/mypage");
+
   return (
     <div className="site pg-login">
-      <LoginFlow next={next} />
+      <LoginFlow next={next} real={supabaseConfigured()} error={error} />
       <SiteFooter />
     </div>
   );

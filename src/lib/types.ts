@@ -86,6 +86,10 @@ export interface AcademyClass {
   /** 온라인 수강 기간(개월) */
   months?: number;
   manualEnd?: boolean;
+  /** 임시저장(고객 화면 미노출) — 관리자 화면에서만 */
+  draft?: boolean;
+  /** 관리자 콘텐츠 관리에서 올린 이미지 주소 */
+  images?: { thumb?: string; banner?: string; detail?: string };
   detail?: ClassDetail;
 }
 
@@ -109,6 +113,10 @@ export interface Payment {
   taxType: TaxType;
   paidAt: string;
   status: PaymentStatus;
+  /** 카드 승인번호 (실제 결제만) */
+  approvedNo?: string;
+  /** 고객이 마이페이지에서 취소를 요청한 건 */
+  cancelRequested?: boolean;
   refund?: { type: "full" | "partial"; amount: number; reason: string; refundedAt: string };
   invoice?: { bizNo: string; bizName: string; ceo: string; email: string; issuedAt: string };
 }
