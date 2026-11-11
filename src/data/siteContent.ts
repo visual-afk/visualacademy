@@ -4,7 +4,7 @@
  * 백엔드 연동 시: GET /api/content/:page 가 '게시된' 콘텐츠를 돌려주고, 없으면 이 기본값을 쓴다.
  */
 
-export type ContentPageKey = "main" | "list" | "detail" | "about" | "guide" | "my" | "pay";
+export type ContentPageKey = "main" | "list" | "detail" | "about" | "guide" | "my" | "pay" | "login";
 
 /** 페이지 콘텐츠: 영역 순서·노출 여부 + 영역별 자유 형식 데이터 (스키마는 admin/design/schemas.ts) */
 export interface PageContent {
@@ -66,6 +66,16 @@ export const DEF_MAIN = {
     ],
     biz1: "(주)비주얼뷰티 · 대표 이유경 · 사업자등록번호 652-81-03393",
     biz2: "서울 강남구 언주로 622 (논현동, 구암빌딩) 1층 · 대표전화 010-2755-7452 · Copyright ⓒ 비주얼아카데미. All rights reserved.",
+    /* 푸터 '환불 규정'을 누르면 뜨는 안내 창 (모든 페이지 공통) */
+    rfTitle: "환불 규정",
+    rfTh: [{ t: "구분" }, { t: "환불 기준" }, { t: "환불 비율" }],
+    rfCats: [
+      { name: "정규 레벨 과정", sub: "(디자이너의 정석)", rows: [{ c: "개강 7일 전까지", r: "전액 환불" }, { c: "개강 3일 전까지", r: "50% 환불" }, { c: "개강 3일 전 이후 / 1회차 출석 이후", r: "환불 불가" }] },
+      { name: "단독 특강 · 세미나", sub: "(1일 과정)", rows: [{ c: "개강 7일 전까지", r: "전액 환불" }, { c: "개강 3일 전까지", r: "50% 환불" }, { c: "개강 3일 전 이후", r: "환불 불가" }] },
+      { name: "온라인 강의", sub: "", rows: [{ c: "첫 강의 시청 전", r: "전액 환불" }, { c: "첫 강의 시청 후", r: "환불 제한" }] },
+    ],
+    rfNoteTitle: "안내",
+    rfNote: "위 환불 규정은 전자상거래 등에서의 소비자보호에 관한 법률 등 관련 법령에 따라 운영돼요. 천재지변, 강사·시설 사정 등 학원 귀책 사유로 인한 휴강·폐강 시에는 규정과 무관하게 전액 환불돼요.\n환불 신청은 마이페이지 또는 카카오채널을 통해 접수하며, 신청일로부터 영업일 기준 3~5일 이내 처리돼요.",
   },
 };
 export type MainContent = typeof DEF_MAIN;
@@ -192,10 +202,10 @@ export const DEF_ABOUT = {
 };
 
 export const DEF_GUIDE = {
-  order: ["pagehead", "tabs", "proc", "faq", "refund"],
-  visible: { pagehead: true, tabs: true, proc: true, faq: true, refund: true },
+  order: ["pagehead", "tabs", "proc", "faq"],
+  visible: { pagehead: true, tabs: true, proc: true, faq: true },
   pagehead: { title: "수강 안내", desc: "신청부터 수료까지 궁금한 점을 한 곳에서 확인하세요." },
-  tabs: { list: [{ t: "수강 절차" }, { t: "자주 묻는 질문" }, { t: "환불 규정" }] },
+  tabs: { list: [{ t: "수강 절차" }, { t: "자주 묻는 질문" }] },
   proc: {
     title: "신청부터 수료까지, 이렇게 진행돼요",
     steps: [
@@ -221,23 +231,13 @@ export const DEF_GUIDE = {
         { q: "정원이 마감되면 신청할 수 없나요?", a: "정원이 마감된 클래스는 개설 대기 신청을 해두시면, 추가 기수가 열릴 때 가장 먼저 안내해드려요." },
       ] },
       { g: "환불 · 변경", items: [
-        { q: "신청한 클래스를 취소하고 싶어요", a: "마이페이지 > 신청 내역에서 직접 취소 신청할 수 있어요. 환불 비율은 환불 규정 탭을 확인해주세요." },
+        { q: "신청한 클래스를 취소하고 싶어요", a: "마이페이지 > 신청 내역에서 직접 취소 신청할 수 있어요. 환불 비율은 화면 맨 아래 '환불 규정'을 눌러 확인해주세요." },
         { q: "다른 기수로 일정을 변경할 수 있나요?", a: "개강 3일 전까지는 1회에 한해 다른 기수로 일정 변경이 가능해요. 카카오채널로 문의해주세요." },
       ] },
       { g: "수료증", items: [
         { q: "수료증은 모든 과정에서 발급되나요?", a: "정규 레벨 과정과 일부 온라인 강의는 수료증이 발급돼요. 단회차 특강은 참가확인증이 제공돼요. 클래스 상세 페이지의 \"수료증 발급\" 여부를 확인해주세요." },
       ] },
     ],
-  },
-  refund: {
-    title: "환불 규정", th: [{ t: "구분" }, { t: "환불 기준" }, { t: "환불 비율" }],
-    cats: [
-      { name: "정규 레벨 과정", sub: "(디자이너의 정석)", rows: [{ c: "개강 7일 전까지", r: "전액 환불" }, { c: "개강 3일 전까지", r: "50% 환불" }, { c: "개강 3일 전 이후 / 1회차 출석 이후", r: "환불 불가" }] },
-      { name: "단독 특강 · 세미나", sub: "(1일 과정)", rows: [{ c: "개강 7일 전까지", r: "전액 환불" }, { c: "개강 3일 전까지", r: "50% 환불" }, { c: "개강 3일 전 이후", r: "환불 불가" }] },
-      { name: "온라인 강의", sub: "", rows: [{ c: "첫 강의 시청 전", r: "전액 환불" }, { c: "첫 강의 시청 후", r: "환불 제한" }] },
-    ],
-    noteTitle: "안내",
-    note: "위 환불 규정은 전자상거래 등에서의 소비자보호에 관한 법률 등 관련 법령에 따라 운영돼요. 천재지변, 강사·시설 사정 등 학원 귀책 사유로 인한 휴강·폐강 시에는 규정과 무관하게 전액 환불돼요.\n환불 신청은 마이페이지 또는 카카오채널을 통해 접수하며, 신청일로부터 영업일 기준 3~5일 이내 처리돼요.",
   },
 };
 
@@ -276,11 +276,39 @@ export const DEF_PAY = {
   },
 };
 
+/* 로그인 · 가입 (카카오 연동 전용, 일반 회원가입 없음) */
+export const DEF_LOGIN = {
+  order: ["start", "profile", "done"],
+  visible: { start: true, profile: true, done: true },
+  start: {
+    title: "카카오로 시작하세요", lead: "별도 가입 없이 카카오 계정으로 바로 로그인해요.", btn: "카카오로 3초 만에 시작하기",
+    notes: [{ t: "비밀번호를 따로 만들거나 외울 필요가 없어요" }, { t: "클래스 신청 내역과 결제 내역, 온라인 수강을 한곳에서 볼 수 있어요" }, { t: "처음이라면 약관 동의만 하면 가입이 끝나요" }],
+    small: "카카오 계정이 없으면 카카오 가입을 먼저 해야 해요.",
+  },
+  profile: {
+    title: "처음 오셨네요", lead: "아래 정보를 확인하고 약관에 동의하면 가입이 끝나요.",
+    nameNote: "카카오에서 가져왔어요", phoneNote: "카카오에서 가져왔어요 · 수강 안내 문자를 이 번호로 보내드려요", shop: "근무 매장",
+    agree: [{ t: "이용약관에 동의해요" }, { t: "개인정보 수집·이용에 동의해요" }, { t: "만 14세 이상이에요" }, { t: "개강·혜택 소식을 문자·알림톡으로 받을게요" }],
+    btn: "시작하기",
+  },
+  done: {
+    newTitle: "환영해요, {이름} 님", newDesc: "이제 클래스를 신청하고 마이페이지에서 내역을 확인할 수 있어요.",
+    oldTitle: "다시 오셨네요, {이름} 님", oldDesc: "마이페이지에서 신청 내역과 수강 현황을 확인해보세요.",
+    btn1: "클래스 둘러보기", btn2: "마이페이지 보기",
+  },
+};
+export type LoginContent = typeof DEF_LOGIN;
+
 export const DEFAULT_CONTENT: Record<ContentPageKey, PageContent> = {
-  main: DEF_MAIN, list: DEF_LIST, detail: DEF_DET, about: DEF_ABOUT, guide: DEF_GUIDE, my: DEF_MY, pay: DEF_PAY,
+  main: DEF_MAIN, list: DEF_LIST, detail: DEF_DET, about: DEF_ABOUT, guide: DEF_GUIDE, my: DEF_MY, pay: DEF_PAY, login: DEF_LOGIN,
 };
 
 /** GET /api/content/main 자리 — 지금은 기본값 */
 export function getMainContent(): MainContent {
   return DEF_MAIN;
+}
+
+/** GET /api/content/login 자리 — 지금은 기본값 */
+export function getLoginContent(): LoginContent {
+  return DEF_LOGIN;
 }

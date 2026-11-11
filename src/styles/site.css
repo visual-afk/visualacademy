@@ -35,6 +35,13 @@
     display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);text-decoration:none}
   .icon-btn:hover{border-color:var(--line-strong);color:var(--ink)}
   @media(max-width:820px){.navlinks{display:none}}
+  .navutil .nav-login{padding:12px 18px;border-width:1px}
+  @media(max-width:560px){
+    .nav{gap:12px}
+    .navutil{gap:8px}
+    .navutil .btn{padding:10px 14px;font-size:13px}
+    .navutil .icon-btn{display:none}
+  }
 
   /* 메인 페이지: 히어로 위 어두운 헤더 → 스크롤하면 밝게 */
   .site-header.is-hero{background:#04100f;border-bottom:1px solid rgba(255,255,255,.08);color:#fff;
@@ -47,6 +54,9 @@
   .site-header.is-hero.scrolled .navlinks{color:var(--ink-2)}
   .site-header.is-hero.scrolled .navlinks a:hover{color:var(--ink)}
   .site-header.is-hero.scrolled .icon-btn{border-color:var(--line);color:var(--ink-2)}
+  .site-header.is-hero .nav-login{background:transparent;border-color:rgba(255,255,255,.28);color:rgba(255,255,255,.85)}
+  .site-header.is-hero .nav-login:hover{border-color:#fff;color:#fff}
+  .site-header.is-hero.scrolled .nav-login{background:var(--bg);border-color:var(--line-strong);color:var(--ink-2)}
 
   /* buttons — 완전 캡슐형 */
   .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:100px;

@@ -1,0 +1,23 @@
+/* 환불 규정 팝업 — 모든 페이지 공통 (body 바로 아래에 렌더되므로 자체 색상값을 가진다) */
+.rf-bg{position:fixed;inset:0;background:rgba(20,22,26,.55);display:flex;align-items:center;justify-content:center;z-index:900;padding:20px;
+  font-family:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,sans-serif;word-break:keep-all}
+.rf-box{background:#fff;color:#14161a;border-radius:22px;width:100%;max-width:640px;max-height:86vh;overflow:auto;padding:30px 30px 26px;
+  box-shadow:0 24px 60px -20px rgba(20,22,26,.4);line-height:1.6}
+.rf-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.rf-head h2{margin:0;font-size:20px;font-weight:800;letter-spacing:-.02em}
+.rf-x{border:none;background:#f5f6f5;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;color:#5b615a;line-height:1;font-family:inherit}
+.rf-scroll{overflow-x:auto}
+.rf-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13.5px}
+.rf-table th,.rf-table td{border:1px solid #e1e4e0;padding:12px 13px;text-align:left;vertical-align:top}
+.rf-table th{background:#f5f6f5;font-weight:700;color:#5b615a;font-size:12.5px}
+.rf-table td.hl{font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
+.rf-table .cat{font-weight:700;background:#fafbfa;white-space:nowrap}
+.rf-table .cat span{font-weight:400;color:#8b9089}
+.rf-note{background:#f5f6f5;border-radius:14px;padding:16px 18px;font-size:13px;color:#5b615a;line-height:1.75;white-space:pre-line}
+.rf-note b{display:block;color:#14161a;margin-bottom:4px}
+.rf-close{width:100%;margin-top:18px;border:none;background:#14161a;color:#fff;border-radius:100px;padding:14px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit}
+@media(max-width:640px){
+  .rf-box{padding:24px 18px 20px}
+  .rf-table{font-size:12.5px}
+  .rf-table th,.rf-table td{padding:9px}
+}

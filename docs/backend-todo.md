@@ -29,7 +29,8 @@
 
 | 메서드 | 경로 | 비고 |
 |---|---|---|
-| POST | `/api/auth/login`, `/api/auth/logout` | 로그인 화면 신규 필요 |
+| GET | `/api/auth/kakao` → `/api/auth/kakao/callback` | 카카오 로그인(OAuth). 처음 오는 회원이면 가입 화면(정보 확인·약관 동의)으로, 기존 회원이면 바로 로그인. 이름·휴대폰 필수, 이메일 선택 |
+| POST | `/api/auth/signup`, `/api/auth/logout` | 가입 완료(약관 동의 항목·근무 매장 저장) · 로그아웃. 프론트 교체 지점: `src/lib/auth.ts`(현재 localStorage) |
 | GET/PATCH | `/api/me` | 내 정보 수정·비밀번호 변경 |
 | DELETE | `/api/me` | 회원 탈퇴 (진행 중 수강 확인) |
 | GET | `/api/me/applications` | 신청 내역 |
@@ -60,7 +61,7 @@
 | POST | `/api/admin/payments/:id/refund` | 전액/부분 환불 (PG 환불 API) |
 | POST | `/api/admin/payments/:id/invoice` | 세금계산서 발행·재발행 |
 | GET | `/api/admin/payments.csv` | CSV 내보내기 |
-| GET | `/api/content/:page` | 고객용 페이지 게시본 (main/list/detail/about/guide/my/pay) — 없으면 `siteContent.ts` 기본값 |
+| GET | `/api/content/:page` | 고객용 페이지 게시본 (main/list/detail/about/guide/my/pay/login) — 없으면 `siteContent.ts` 기본값. 환불 규정 팝업은 main.footer.rf* |
 | PUT | `/api/admin/content/:page` | 디자인 모드 게시 (변경 메모 포함) → 새 버전 생성 |
 | GET | `/api/admin/content/:page/versions` | 버전 기록 · 특정 버전 내용 (복구는 초안으로 불러온 뒤 다시 게시) |
 | — | 신청자 목록 · 배치 상담 · 개설 알림 | 관리자 화면 미구현 (프로토타입 없음) |

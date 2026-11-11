@@ -19,6 +19,8 @@ export const ROUTES = {
   about: (tab?: string) => (tab ? `/about?tab=${tab}` : "/about"),
   guide: (tab?: string) => (tab ? `/guide?tab=${tab}` : "/guide"),
   mypage: "/mypage",
+  /** 카카오 로그인 · 가입. next = 로그인 후 돌아갈 주소 */
+  login: (next?: string) => (next ? `/login?next=${encodeURIComponent(next)}` : "/login"),
   admin: "/admin",
   adminPayments: "/admin/payments",
   adminNewClass: "/admin/classes/new",

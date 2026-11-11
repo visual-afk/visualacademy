@@ -7,6 +7,7 @@ import SiteHeader from "@/components/site/SiteHeader";
 import TabBar from "@/components/site/TabBar";
 import { applications, me, MY_TABS, myCourses, myPayments, type ApplicationStatus, type MyPaymentStatus } from "@/data/mypage";
 import { ROUTES } from "@/data/site";
+import { logout } from "@/lib/auth";
 import { taxNote, won } from "@/lib/format";
 
 type MyTab = (typeof MY_TABS)[number]["key"];
@@ -225,10 +226,10 @@ export default function MyPageView({ tab }: { tab: MyTab }) {
             {modal.kind === "logout" && (
               <>
                 <h3>로그아웃할까요?</h3>
-                <p>로그인 기능은 백엔드 연동 후 동작해요.</p>
+                <p>카카오 로그인은 백엔드 연동 후 실제로 동작해요. 지금은 이 브라우저의 로그인 표시만 지워요.</p>
                 <div className="modal-actions">
                   <button type="button" className="btn btn-ghost" onClick={() => setModal(null)}>취소</button>
-                  <Link className="btn btn-mint" href={ROUTES.home}>로그아웃</Link>
+                  <Link className="btn btn-mint" href={ROUTES.home} onClick={() => logout()}>로그아웃</Link>
                 </div>
               </>
             )}

@@ -58,10 +58,16 @@ const SEC_MAIN: Record<string, SectionSchema> = {
     { k: "list", l: "후기", t: "list", item: "후기", max: 6, f: [{ k: "q", l: "후기 내용", t: "textarea" }, { k: "a", l: "작성자", t: "text" }] }] },
   salon: { name: "비주얼살롱 배너", sub: "문구 · 버튼", fields: [
     { k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "text" }, { k: "btn", l: "버튼 문구", t: "text" }] },
-  footer: { name: "푸터", sub: "소개 · 링크 모음 · 사업자 정보", fields: [
+  footer: { name: "푸터", sub: "소개 · 링크 모음 · 사업자 정보 · 환불 규정 창", fields: [
     { k: "desc", l: "한 줄 소개", t: "text" },
     { k: "cols", l: "링크 모음", t: "list", item: "묶음", fixed: true, f: [{ k: "h", l: "묶음 제목", t: "text" }, { k: "links", l: "링크 이름들", t: "text", hint: "쉼표로 구분" }] },
-    { k: "biz1", l: "사업자 정보 (1줄)", t: "textarea" }, { k: "biz2", l: "주소 · 연락처 · 저작권 (2줄)", t: "textarea" }] },
+    { k: "biz1", l: "사업자 정보 (1줄)", t: "textarea" }, { k: "biz2", l: "주소 · 연락처 · 저작권 (2줄)", t: "textarea" },
+    { sub: "아래는 푸터의 \"환불 규정\"을 눌렀을 때 뜨는 안내 창이에요. 모든 페이지에 똑같이 적용돼요." },
+    { k: "rfTitle", l: "환불 규정 창 제목", t: "text" },
+    { k: "rfTh", l: "표 머리글", t: "list", item: "칸", fixed: true, f: [{ k: "t", l: "머리글", t: "text" }] },
+    { k: "rfCats", l: "과정별 환불 기준", t: "list", item: "과정", max: 8, f: [{ k: "name", l: "과정 이름", t: "text" }, { k: "sub", l: "작은 설명 (선택)", t: "text" },
+      { k: "rows", l: "기준 · 비율", t: "list", item: "기준", max: 8, f: [{ k: "c", l: "환불 기준", t: "text" }, { k: "r", l: "환불 비율", t: "text" }] }] },
+    { k: "rfNoteTitle", l: "안내 박스 제목", t: "text" }, { k: "rfNote", l: "안내 박스 내용", t: "textarea", hint: "줄바꿈 가능" }] },
 };
 
 const SEC_LIST: Record<string, SectionSchema> = {
@@ -167,9 +173,9 @@ const SEC_ABOUT: Record<string, SectionSchema> = {
 
 const SEC_GUIDE: Record<string, SectionSchema> = {
   pagehead: { name: "페이지 제목", sub: "제목 · 설명", fields: [{ k: "title", l: "페이지 제목", t: "text" }, { k: "desc", l: "설명", t: "textarea" }] },
-  tabs: { name: "탭 이름 (3개)", sub: "수강 절차 · 자주 묻는 질문 · 환불 규정", fields: [
+  tabs: { name: "탭 이름 (2개)", sub: "수강 절차 · 자주 묻는 질문", fields: [
     { k: "list", l: "탭", t: "list", item: "탭", fixed: true, f: [{ k: "t", l: "탭 이름", t: "text" }] },
-    { note: "푸터의 \"수강 절차 · 자주 묻는 질문 · 환불 규정\" 링크가 이 탭들로 바로 연결돼요." }] },
+    { note: "푸터의 \"수강 절차 · 자주 묻는 질문\" 링크가 이 탭들로 바로 연결돼요. 환불 규정은 탭이 아니라 푸터 링크를 눌렀을 때 뜨는 안내 창이에요(메인 페이지 → 푸터에서 수정)." }] },
   proc: { name: "수강 절차 탭", sub: "제목 · 단계(번호는 자동)", fields: [
     { k: "title", l: "제목", t: "text" },
     { k: "steps", l: "단계", t: "list", item: "단계", max: 12, f: [{ k: "t", l: "단계 이름", t: "text" }, { k: "d", l: "설명", t: "textarea" },
@@ -177,13 +183,6 @@ const SEC_GUIDE: Record<string, SectionSchema> = {
   faq: { name: "자주 묻는 질문 탭", sub: "묶음 4개 · 질문과 답", fields: [
     { k: "groups", l: "질문 묶음", t: "list", item: "묶음", max: 8, f: [{ k: "g", l: "묶음 제목", t: "text" },
       { k: "items", l: "질문", t: "list", item: "질문", max: 12, f: [{ k: "q", l: "질문", t: "text" }, { k: "a", l: "답변", t: "textarea" }] }] }] },
-  refund: { name: "환불 규정 탭", sub: "제목 · 환불 표 · 안내 문구", fields: [
-    { k: "title", l: "제목", t: "text" },
-    { k: "th", l: "표 머리글", t: "list", item: "칸", fixed: true, f: [{ k: "t", l: "머리글", t: "text" }] },
-    { k: "cats", l: "과정별 환불 기준", t: "list", item: "과정", max: 8, f: [{ k: "name", l: "과정 이름", t: "text" }, { k: "sub", l: "작은 설명 (선택)", t: "text" },
-      { k: "rows", l: "기준 · 비율", t: "list", item: "기준", max: 8, f: [{ k: "c", l: "환불 기준", t: "text" }, { k: "r", l: "환불 비율", t: "text" }] }] },
-    { k: "noteTitle", l: "안내 박스 제목", t: "text" }, { k: "note", l: "안내 박스 내용", t: "textarea", hint: "줄바꿈 가능" },
-    { note: "클래스 상세의 \"반품/교환\" 탭에는 클래스별 환불 규정이 따로 들어가요(클래스 등록에서 입력)." }] },
 };
 
 const SEC_MY: Record<string, SectionSchema> = {
@@ -237,6 +236,24 @@ const SEC_PAY: Record<string, SectionSchema> = {
     { note: "주문번호·가상계좌·입금기한은 결제 시스템에서 자동으로 들어와요." }] },
 };
 
+const SEC_LOGIN: Record<string, SectionSchema> = {
+  start: { name: "로그인 첫 화면", sub: "제목 · 카카오 버튼 · 안내 문구", fields: [
+    { k: "title", l: "제목", t: "text" }, { k: "lead", l: "설명", t: "text" }, { k: "btn", l: "카카오 버튼 글자", t: "text" },
+    { k: "notes", l: "혜택 안내 (3줄)", t: "list", item: "안내", fixed: true, f: [{ k: "t", l: "문구", t: "text" }] },
+    { k: "small", l: "하단 작은 안내", t: "text" },
+    { note: "카카오 로그인 동의 화면(이름·휴대폰·이메일 요청)은 카카오가 보여주는 화면이라 여기서 고칠 수 없어요." }] },
+  profile: { name: "처음 오는 회원 · 정보 확인", sub: "제목 · 안내 · 약관 동의 문구", fields: [
+    { k: "title", l: "제목", t: "text" }, { k: "lead", l: "설명", t: "text" },
+    { k: "nameNote", l: "이름 칸 아래 안내", t: "text" }, { k: "phoneNote", l: "휴대폰 칸 아래 안내", t: "text" }, { k: "shop", l: "근무 매장 칸 이름", t: "text", hint: "(선택) 표시는 자동으로 붙어요" },
+    { k: "agree", l: "약관 동의 문구 (필수 3개 · 선택 1개)", t: "list", item: "문구", fixed: true, f: [{ k: "t", l: "문구", t: "text" }] },
+    { k: "btn", l: "가입 버튼 글자", t: "text" },
+    { note: "이름·휴대폰 번호는 카카오에서 받아 자동으로 채워져요. 약관 전문 연결과 필수/선택 구분은 개발 단계에서 정해요." }] },
+  done: { name: "완료 화면", sub: "가입 완료 · 다시 로그인 · 버튼", fields: [
+    { k: "newTitle", l: "가입 완료 제목", t: "text", hint: "{이름} 자리에 회원 이름이 들어가요" }, { k: "newDesc", l: "가입 완료 설명", t: "text" },
+    { k: "oldTitle", l: "다시 로그인 제목", t: "text", hint: "{이름} 자리에 회원 이름이 들어가요" }, { k: "oldDesc", l: "다시 로그인 설명", t: "text" },
+    { k: "btn1", l: "첫 번째 버튼", t: "text" }, { k: "btn2", l: "두 번째 버튼", t: "text" }] },
+};
+
 export interface PageMeta {
   name: string;
   h1: string;
@@ -258,7 +275,8 @@ export const PAGES: Record<ContentPageKey, PageMeta> = {
   list: { name: "클래스 목록", h1: "페이지 관리 — 클래스 목록", sub: "클래스 목록 페이지의 문구와 구성을 고쳐요. 카드 속 일정·정원·수강료는 클래스 관리에서 입력한 값이 자동으로 들어와요.", url: "visualacademy — 클래스", pv: "클래스 목록 화면", sec: SEC_LIST, first: "pagehead", common: true },
   detail: { name: "클래스 상세", h1: "페이지 관리 — 클래스 상세", sub: "모든 클래스 상세 페이지에 공통으로 쓰는 문구예요. 클래스마다 다른 내용(일정·가격·소개·이미지)은 클래스 등록에서 입력해요.", url: "visualacademy — 클래스 상세 (예시: 퍼스널 컬러)", pv: "클래스 상세 화면 (예시)", sec: SEC_DET, first: "tabs", common: true, fixed: true },
   about: { name: "아카데미 소개", h1: "페이지 관리 — 아카데미 소개", sub: "아카데미 소개 페이지의 모든 글과 사진을 고쳐요. 5개 탭(소개·강사·갤러리·오시는 길·제휴 문의)의 내용이 모두 들어 있어요. 글 입력칸 오른쪽 'Aa 글자 스타일'로 크기·자간·줄 간격·굵기·정렬도 바꿀 수 있어요.", url: "visualacademy — 아카데미 소개", pv: "아카데미 소개 화면", sec: SEC_ABOUT, first: "intro", common: true, fixed: true, tstyle: true },
-  guide: { name: "수강 안내", h1: "페이지 관리 — 수강 안내", sub: "수강 절차, 자주 묻는 질문, 환불 규정 3개 탭의 내용을 고쳐요. 질문·단계·환불 기준은 자유롭게 추가하고 지울 수 있어요.", url: "visualacademy — 수강 안내", pv: "수강 안내 화면", sec: SEC_GUIDE, first: "proc", common: true, fixed: true },
+  guide: { name: "수강 안내", h1: "페이지 관리 — 수강 안내", sub: "수강 절차, 자주 묻는 질문 2개 탭의 내용을 고쳐요. 질문·단계는 자유롭게 추가하고 지울 수 있어요.", url: "visualacademy — 수강 안내", pv: "수강 안내 화면", sec: SEC_GUIDE, first: "proc", common: true, fixed: true },
   my: { name: "마이페이지", h1: "페이지 관리 — 마이페이지", sub: "회원이 로그인하면 보는 마이페이지의 문구를 고쳐요. 신청·결제·수강 내용 자체는 회원 데이터가 자동으로 들어와요.", url: "visualacademy — 마이페이지 (예시 회원)", pv: "마이페이지 화면 (예시)", sec: SEC_MY, first: "pagehead", common: true, fixed: true },
   pay: { name: "신청 · 결제", h1: "페이지 관리 — 신청 · 결제", sub: "클래스 신청부터 결제 완료까지 이어지는 화면들의 문구를 고쳐요. 클래스 정보·금액·주문번호는 자동으로 들어와요.", url: "visualacademy — 신청 · 결제 (예시)", pv: "신청 · 결제 화면 (예시)", sec: SEC_PAY, first: "form", fixed: true },
+  login: { name: "로그인 · 가입", h1: "페이지 관리 — 로그인 · 가입", sub: "카카오톡으로 로그인하는 화면의 문구를 고쳐요. 일반 회원가입은 없고, 처음 오는 회원은 약관 동의만 하면 가입이 끝나요.", url: "visualacademy — 로그인 (카카오)", pv: "로그인 · 가입 화면 (예시)", sec: SEC_LOGIN, first: "start", common: true, fixed: true },
 };

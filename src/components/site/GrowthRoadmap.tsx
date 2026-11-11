@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 /*
- * 성장 로드맵 — 4단 상향 곡선 그래프 (메인·클래스 목록 공용 컴포넌트)
+ * 성장 로드맵 — 4단 상향 직선 그래프 (메인·클래스 목록 공용 컴포넌트)
  * 경력 탭을 고르면 추천 단계가 바뀌고, 컬럼에 hover/클릭하면 해당 단계의 카드가 아래에 나타난다.
  * 모바일에서는 선택된 단계의 카드만 보이며, 첫 진입 시 추천 단계가 자동 선택된다.
  */
@@ -21,8 +21,6 @@ export interface RoadmapCard {
 }
 
 export interface RoadmapColumn {
-  /** 곡선 위 점의 세로 위치(%) */
-  y: number;
   labelPos: "top" | "bottom";
   title: string;
   name: string;
@@ -33,7 +31,12 @@ export interface RoadmapColumn {
   card: RoadmapCard;
 }
 
-const EXP_TABS = ["1년 미만", "1~3년", "3년 이상"];
+/** 상향 직선: 왼쪽 아래(0%, LINE_START%) → 오른쪽 위(100%, LINE_END%). 각 단계 점은 이 선 위 25% 간격 */
+const LINE_START = 81;
+const LINE_END = 7;
+const dotY = (i: number) => LINE_START + ((LINE_END - LINE_START) * i) / 4;
+
+const EXP_TABS =["1년 미만", "1~3년", "3년 이상"];
 /** 경력 탭 → 추천 단계 (0-based) */
 const EXP_RECOMMEND = [0, 1, 3];
 
@@ -81,7 +84,7 @@ export default function GrowthRoadmap({
             <svg className="rgraph-svg" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden>
               <path
                 className="rgraph-line"
-                d="M0,81 C125,81 125,68 250,68 C375,68 375,42 500,42 C625,42 625,19 750,19 C875,19 875,7 1000,7"
+                d={`M0,${LINE_START} L1000,${LINE_END}`}
                 fill="none"
                 stroke="#c7ccc7"
                 strokeWidth="2.4"
@@ -89,7 +92,7 @@ export default function GrowthRoadmap({
                 vectorEffect="non-scaling-stroke"
               />
             </svg>
-            <div className="rdot-end" style={{ left: "100%", top: "7%" }} />
+            <div className="rdot-end" style={{ left: "100%", top: `${LINE_END}%` }} />
             {[0, 25, 50, 75].map((l) => (
               <div key={l} className="rdivider" style={{ left: `${l}%` }} />
             ))}
@@ -100,7 +103,7 @@ export default function GrowthRoadmap({
                 key={i}
                 className={`rcol${active === i ? " active" : ""}${recommended === i ? " recommended" : ""}`}
                 data-step={i}
-                style={{ "--y": `${col.y}%` } as React.CSSProperties}
+                style={{ "--y": `${dotY(i)}%` } as React.CSSProperties}
                 onMouseEnter={() => setHovered(i)}
                 onMouseLeave={() => setHovered(null)}
                 onClick={() => setHovered(i)}

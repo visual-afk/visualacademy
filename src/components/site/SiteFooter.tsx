@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { ROUTES } from "@/data/site";
 import { getMainContent } from "@/data/siteContent";
+import { RefundLink } from "./RefundPopup";
 
-/* 링크 이름은 디자인 모드(메인 페이지 › 푸터)에서 바꾸고, 연결 주소는 순서대로 고정 */
+/* 링크 이름은 디자인 모드(메인 페이지 › 푸터)에서 바꾸고, 연결 주소는 순서대로 고정. "refund"는 환불 규정 팝업 */
 const FOOTER_HREFS = [
   [ROUTES.about(), ROUTES.about("inst"), ROUTES.about("way")],
-  [ROUTES.guide(), ROUTES.guide("faq"), ROUTES.guide("refund")],
+  [ROUTES.guide(), ROUTES.guide("faq"), "refund"],
   ["#", "#"], // 비주얼살롱·트리필드 — 실제 URL 확정 전
 ];
 
@@ -28,6 +29,7 @@ export default function SiteFooter() {
                 <h4>{col.h}</h4>
                 {split(col.links).map((label, li) => {
                   const href = FOOTER_HREFS[ci]?.[li] ?? "#";
+                  if (href === "refund") return <RefundLink key={label}>{label}</RefundLink>;
                   return href === "#" ? <a key={label} href="#">{label}</a> : <Link key={label} href={href}>{label}</Link>;
                 })}
               </div>

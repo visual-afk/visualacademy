@@ -5,23 +5,47 @@
  */
 import { CLASS_ALIASES, classes } from "@/data/classes";
 import { payments } from "@/data/payments";
+import { parseDate, today } from "./format";
 import type { AcademyClass, ClassDetail } from "./types";
+
+/*
+ * 목업 개강일은 2026-10-14를 '오늘'로 두고 정해둔 값이다. 날짜가 지나도 모집중·마감임박 등
+ * 설계한 상태가 그대로 보이도록, 지난 날수만큼 개강일을 함께 미룬다. (백엔드 연동 시 삭제)
+ */
+const MOCK_TODAY = "2026-10-14";
+const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+let shifted: { day: string; list: AcademyClass[] } | null = null;
+
+function mockClasses(): AcademyClass[] {
+  const t = today();
+  const day = iso(t);
+  if (shifted?.day === day) return shifted.list;
+  const offset = Math.max(0, Math.round((t.getTime() - parseDate(MOCK_TODAY).getTime()) / 86400000));
+  const list = classes.map((c) => {
+    if (!c.date || offset === 0) return c;
+    const d = parseDate(c.date);
+    d.setDate(d.getDate() + offset);
+    return { ...c, date: iso(d) };
+  });
+  shifted = { day, list };
+  return list;
+}
 
 /** GET /api/classes */
 export function getClasses(): AcademyClass[] {
-  return classes;
+  return mockClasses();
 }
 
 /** GET /api/classes/:slug */
 export function getClass(slugOrAlias: string | null | undefined): AcademyClass | undefined {
   if (!slugOrAlias) return undefined;
   const slug = CLASS_ALIASES[slugOrAlias] ?? slugOrAlias;
-  return classes.find((c) => c.slug === slug);
+  return mockClasses().find((c) => c.slug === slug);
 }
 
 /** GET /api/admin/classes/:id */
 export function getClassById(id: number): AcademyClass | undefined {
-  return classes.find((c) => c.id === id);
+  return mockClasses().find((c) => c.id === id);
 }
 
 /** GET /api/admin/payments */

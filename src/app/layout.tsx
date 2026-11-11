@@ -14,6 +14,9 @@ import "@/styles/pages/admin-dashboard.css";
 import "@/styles/pages/admin-class-form.css";
 import "@/styles/pages/admin-payments.css";
 import "@/styles/pages/admin-design.css";
+import "@/styles/pages/login.css";
+import "@/styles/refund.css";
+import RefundPopup from "@/components/site/RefundPopup";
 
 export const metadata: Metadata = {
   title: {
@@ -33,7 +36,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <RefundPopup />
+      </body>
     </html>
   );
 }

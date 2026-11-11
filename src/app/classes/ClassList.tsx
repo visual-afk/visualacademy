@@ -229,7 +229,6 @@ export default function ClassList() {
       ? `${["월", "화", "수", "목"][i]}요일반 · ${oc.weeks}주 · 레벨${i} 수료 필요`
       : `${oc.day}요일반 · ${oc.weeks}주 · ${i === 0 ? oc.place : `레벨${i} 수료 필요`}`;
     return {
-      y: [81, 68, 42, 19][i],
       labelPos: i < 2 ? "top" : "bottom",
       title: STEP_NAMES[i],
       name: `레벨 ${oc.level}`,
