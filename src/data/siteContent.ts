@@ -4,7 +4,7 @@
  * 백엔드 연동 시: GET /api/content/:page 가 '게시된' 콘텐츠를 돌려주고, 없으면 이 기본값을 쓴다.
  */
 
-export type ContentPageKey = "main" | "list" | "detail" | "about" | "guide" | "my" | "pay" | "login";
+export type ContentPageKey = "main" | "list" | "detail" | "about" | "greeting" | "guide" | "my" | "pay" | "login";
 
 /** 페이지 콘텐츠: 영역 순서·노출 여부 + 영역별 자유 형식 데이터 (스키마는 admin/design/schemas.ts) */
 export interface PageContent {
@@ -18,7 +18,7 @@ export const ROADMAP_IMAGES = ["/images/roadmap/step1.jpg", "/images/roadmap/ste
 export const DEF_MAIN = {
   order: ["nav", "hero", "roadmap", "recruit", "programs", "online", "instructors", "reviews", "salon", "footer"],
   visible: { nav: true, hero: true, roadmap: true, recruit: true, programs: true, online: true, instructors: true, reviews: true, salon: true, footer: true },
-  nav: { logo: "비주얼아카데미", links: [{ label: "클래스" }, { label: "온라인 강의" }, { label: "아카데미 소개" }, { label: "수강 안내" }], cta: "상담 신청" },
+  nav: { logo: "비주얼아카데미", links: [{ label: "클래스" }, { label: "온라인 강의" }, { label: "아카데미 소개" }], cta: "상담 신청" },
   hero: {
     eyebrow: "비주얼아카데미", title: "무엇이 궁금하세요? 물어보시면 바로 찾아드릴게요.", placeholder: "예) 3년차인데 뭐부터 들어야 할까요?",
     suggest: [{ t: "펌 배우고 싶어요" }, { t: "3년차인데 뭐부터?" }, { t: "지방에서도 되나요?" }],
@@ -53,10 +53,10 @@ export const DEF_MAIN = {
    */
   instructors: {
     title: "강사 소개", desc: "아카데미는 결국 가르치는 사람이 상품입니다.",
-    cats: "레벨교육, 어프로치·연화, 모발과학",
+    cats: "레벨교육, 어프로치·연화, 모발과학, 온라인 클래스",
     levelOrder: "리현, 준모, 창민, 성실, 호승",
     list: [
-      { name: "이유경", role: "대표원장", img: "/images/instructors/lee-yukyung.jpg", insta: "", cats: "", tags: "", career: "", career2Title: "", career2: "", intro: "", link: "/about?tab=inst" },
+      { name: "이유경", role: "대표원장", img: "/images/instructors/lee-yukyung.jpg", insta: "", cats: "온라인 클래스", tags: "오토사장, 월 2000플랜", career: "", career2Title: "", career2: "", intro: "", link: "/about/greeting" },
       { name: "순돌", role: "이사 · 원장", img: "/images/instructors/soondol.jpg", insta: "visual_soondol", cats: "모발과학", tags: "",
         career: "현) 복구매직 전문 살롱 10년 운영\n현) 비주얼 아카데미 교육이사\n현) 비주얼랩 교육이사\n현) 트리필드 이사\n현) 비주얼뷰티 부사장",
         career2Title: "그 외 이력",
@@ -96,12 +96,12 @@ export const DEF_MAIN = {
       { q: "궁금한 부분, 어려운 부분을 교육이 끝난 후에도 물어보면 답을 주셔서 좋았어요.", a: "수강생", course: "수강 후기", sub: "수강생 · 헤어 디자이너" },
     ],
   },
-  salon: { tag: "VISUAL SALON", title: "비주얼살롱 8개 지점", desc: "서울 · 경기 · 부산 — 직접 방문해서 체험해보세요.", regions: "서울, 경기, 부산", btn: "지점 찾기" },
+  salon: { tag: "VISUAL SALON", title: "비주얼살롱 7개 지점", desc: "서울 · 부산 — 직접 방문해서 체험해보세요.", regions: "서울, 부산", btn: "지점 찾기" },
   footer: {
     desc: "모발과학을 기반으로 한 헤어 전문가 교육 기관",
     cols: [
-      { h: "아카데미", links: "아카데미 소개, 강사 소개, 오시는 길" },
-      { h: "수강 안내", links: "수강 절차, 자주 묻는 질문, 환불 규정" },
+      { h: "아카데미", links: "아카데미 소개, 대표 인사, 강사 소개, 오시는 길" },
+      { h: "이용 안내", links: "환불 규정" },
       { h: "관련 사이트", links: "비주얼살롱 ↗, 트리필드 ↗" },
     ],
     /* 사업자 정보 — 내용이 빈 항목은 표시하지 않음 (통신판매업 신고번호는 확정 후 입력) */
@@ -162,8 +162,8 @@ export const DEF_DET = {
 };
 
 export const DEF_ABOUT = {
-  order: ["pagehead", "tabs", "intro", "introPhoto", "diff", "price", "facility", "ifbs", "welcome", "stats", "quote", "history", "inst", "gallery", "way", "partner"],
-  visible: { pagehead: true, tabs: true, intro: true, introPhoto: true, diff: true, price: true, facility: true, ifbs: true, welcome: true, stats: true, quote: true, history: true, inst: true, gallery: true, way: true, partner: true },
+  order: ["pagehead", "tabs", "intro", "introPhoto", "diff", "price", "facility", "ifbs", "welcome", "stats", "quote", "inst", "gallery", "way", "partner"],
+  visible: { pagehead: true, tabs: true, intro: true, introPhoto: true, diff: true, price: true, facility: true, ifbs: true, welcome: true, stats: true, quote: true, inst: true, gallery: true, way: true, partner: true },
   pagehead: { title: "아카데미 소개", desc: "모발 과학을 기반으로 헤어 전문가를 길러내는 비주얼아카데미를 소개합니다." },
   tabs: { list: [{ t: "아카데미 소개" }, { t: "강사 소개" }, { t: "갤러리" }, { t: "오시는 길" }, { t: "제휴 문의" }] },
   intro: {
@@ -182,7 +182,7 @@ export const DEF_ABOUT = {
       { img: "", b: "각 분야의 숙련된 강사진과", d: "다양한 케이스를 직접 실습하며 완성도를 확인" },
     ],
   },
-  price: { q: "Q. 합리적인 수강료, 어떻게 가능한가요?", title: "비주얼살롱 8개 지점을 직접\n운영하기에 가능합니다.", text: "현장에서 검증하지 않은 커리큘럼은 만들지 않아요. 매장을 직접 운영하며 얻은 데이터와 노하우로 군더더기 없는 교육을 설계해, 합리적인 수강료를 유지할 수 있습니다.", img: "" },
+  price: { q: "Q. 합리적인 수강료, 어떻게 가능한가요?", title: "비주얼살롱 7개 지점을 직접\n운영하기에 가능합니다.", text: "현장에서 검증하지 않은 커리큘럼은 만들지 않아요. 매장을 직접 운영하며 얻은 데이터와 노하우로 군더더기 없는 교육을 설계해, 합리적인 수강료를 유지할 수 있습니다.", img: "" },
   facility: {
     title: "시설 안내",
     list: [
@@ -208,42 +208,54 @@ export const DEF_ABOUT = {
   },
   stats: {
     title: "비주얼아카데미가 만들어온 시간",
-    list: [{ n: "4,200+", l: "누적 수강생" }, { n: "180+", l: "배출 원장" }, { n: "8개", l: "비주얼살롱 지점" }, { n: "11년", l: "교육 운영 연차" }],
-    salon: "비주얼살롱 8개 지점과 함께합니다", branches: "강남점, 홍대점, 신촌점, 분당점, 일산점, 수원점, 인천점, 부산 서면전포점",
+    list: [{ n: "4,200+", l: "누적 수강생" }, { n: "180+", l: "배출 원장" }, { n: "7개", l: "비주얼살롱 지점" }, { n: "11년", l: "교육 운영 연차" }],
+    salon: "비주얼살롱 7개 지점과 함께합니다", region: "서울·부산",
+    branches: "사가정1호점, 사가정2호점, 마곡나루점, 성수점, 강남신사점, 서면전포점, 서초방배점",
   },
   quote: {
     paras: [
-      { p: "우리가 전하는 것은 단순한 기술이 아니라, 함께 걸어가는 여정입니다. 여러분이 걸어가는 길에 있어 비주얼 뷰티는 언제나 신뢰할 수 있는 동반자가 될 것을 약속드립니다. 여러분이 마주할 아름다움의 세계에서, 비주얼아카데미는 변함없는 지원과 격려를 아끼지 않겠습니다." },
+      { p: "우리가 전하는 것은 단순한 기술이 아니라, 함께 걸어가는 여정입니다. 여러분이 걸어가는 길에 있어 **비주얼 뷰티**는 언제나 신뢰할 수 있는 동반자가 될 것을 약속드립니다. 여러분이 마주할 아름다움의 세계에서, **비주얼아카데미**는 변함없는 지원과 격려를 아끼지 않겠습니다." },
       { p: "**미용 인생의 매 순간, 우리는 여러분 곁에 있겠습니다.**\n여러분의 열정이 빛날 수 있도록, 함께 걸어가며 그 길을 더욱 아름답게 빚어내겠습니다." },
     ],
   },
-  history: {
-    title: "연혁",
-    list: [
-      { y: "2015", d: "비주얼살롱 1호점 오픈, 사내 교육 프로그램 시작" }, { y: "2019", d: "비주얼아카데미 정식 출범, 디자이너의 정석 커리큘럼 개발" },
-      { y: "2022", d: "비주얼살롱 8개 지점 확장, 트리필드 헤어케어 브랜드 론칭" }, { y: "2024", d: "오토사장반 경영 컨설팅 과정 개설, 온라인 강의 플랫폼 오픈" },
-      { y: "2026", d: "누적 수강생 4,200명 돌파, 비주얼아카데미 홈페이지 자체 개발 리뉴얼" },
-    ],
-  },
-  inst: {
-    title: "비주얼아카데미 강사진",
-    list: [
-      { name: "이유경 대표", role: "비주얼그룹 대표 · 매장 운영 컨설턴트", desc: "8개 지점을 직접 운영하며 쌓은 경영 노하우로 오토사장반, 월 2000플랜 등 경영 과정을 이끌어요." },
-      { name: "순돌 이사", role: "비주얼뷰티 공동대표 · 모발 과학 분석사", desc: "부산 서면전포점을 운영하며, 데이터 기반 모발 진단 프로그램인 시그니처 프로그램을 개발했어요." },
-      { name: "김지은 강사", role: "비주얼아카데미 수석 강사 · 실무 경력 14년", desc: "디자이너의 정석 전 레벨을 총괄하며, 브랜드 컨셉부터 포트폴리오 완성까지 지도해요." },
-      { name: "박서연 강사", role: "비주얼아카데미 컬러 전문 강사 · 실무 경력 11년", desc: "퍼스널 컬러 진단을 상담과 매출로 연결하는 실전 컬러 특강을 담당해요." },
-    ],
-  },
+  /** 강사 목록·분류 탭은 메인 페이지 강사 소개(DEF_MAIN.instructors)를 그대로 쓴다 — 여기서는 제목만 */
+  inst: { title: "비주얼아카데미 강사진" },
   gallery: {
     title: "아카데미 공간 & 수업 현장",
     list: [{ img: "", c: "프로페셔널 스튜디오 A" }, { img: "", c: "프로페셔널 스튜디오 B" }, { img: "", c: "라운지 & 셀프바" }, { img: "", c: "프라이빗 락커" }, { img: "", c: "미팅룸 / CEO룸" }, { img: "", c: "IFBS 협회 인증 현장" }],
   },
-  way: { title: "비주얼아카데미 강남 본원", mapNote: "지도 영역 (실제 서비스에서는 지도 API가 표시돼요)", addr: "**서울 강남구 언주로 622** (논현동, 구암빌딩) 1층", tel: "010-2755-7452", hours: "평일 10:00 ~ 19:00 (주말·공휴일 휴무)" },
+  way: { title: "비주얼아카데미 강남 본원", mapImg: "", mapNote: "지도 영역 (약도 이미지가 준비되면 이 자리에 들어가요)", addr: "**서울 강남구 언주로 622** (논현동, 구암빌딩) 1층", tel: "010-2755-7452", hours: "평일 10:00 ~ 19:00 (주말·공휴일 휴무)" },
   partner: {
     title: "제휴 · 가맹 문의", lead: "매장 제휴, 가맹 개설, 교육 협업 등 궁금하신 점을 남겨주시면 담당자가 확인 후 연락드려요.",
     types: [{ t: "가맹 개설 문의" }, { t: "교육 제휴 문의" }, { t: "기업 단체 교육 문의" }, { t: "기타" }], btn: "문의 남기기",
   },
 };
+
+export type AboutContent = typeof DEF_ABOUT;
+
+/** 대표 인사 (11.12) — 헤더 → 경력 패널 → 본문 → 서명. 아카데미 소개·푸터에서 연결 */
+export const DEF_GREETING = {
+  order: ["head", "panel", "body", "sign"],
+  visible: { head: true, panel: true, body: true, sign: true },
+  head: { title: "A Message from Our CEO", hello: "반갑습니다.\n비주얼 아카데미 이유경 대표입니다.", photo: "/images/greeting/ceo.jpg", photoAlt: "비주얼아카데미 이유경 대표" },
+  panel: {
+    list: [
+      { t: "㈜비주얼뷰티 대표이사" }, { t: "㈜비주얼랩 대표이사" }, { t: "비주얼 아카데미 대표원장" }, { t: "비주얼살롱 대표원장" },
+      { t: "퓨어모션 코스메틱 브랜드 론칭" }, { t: "트리필드 프로페셔널 브랜드 론칭" }, { t: "최신 모발과학 도서 저자" },
+    ],
+  },
+  body: {
+    quote: "\"사랑(Agape)\"",
+    paras: [
+      { p: "우리는 사랑을 뷰티 디자인의 필수 요소로 여깁니다." },
+      { p: "타인을 귀중히 여기고 배려하는 사랑의 마음은\n고객의 니즈를 깊이 반영하는 과정과 다르지 않습니다." },
+      { p: "비주얼 뷰티 그룹의 사명은 편견 없이\n타인의 아름다움을 사랑하는 뷰티 아티스트,\n그리고 세상을 밝히는 경영인을 양성하는 것입니다." },
+      { p: "우리는 \"사랑(Agape)\"의 경영 철학을 통해\n이타적인 동행자들이 모인 공간을 만들고,\n구성원과 고객 모두가 지속 가능한 행복을\n실현할 수 있도록 노력하고 있습니다." },
+    ],
+  },
+  sign: { label: "비주얼 살롱 아카데미 대표", img: "/images/greeting/signature.png", alt: "이유경 서명" },
+};
+export type GreetingContent = typeof DEF_GREETING;
 
 export const DEF_GUIDE = {
   order: ["pagehead", "tabs", "proc", "faq"],
@@ -344,7 +356,7 @@ export const DEF_LOGIN = {
 export type LoginContent = typeof DEF_LOGIN;
 
 export const DEFAULT_CONTENT: Record<ContentPageKey, PageContent> = {
-  main: DEF_MAIN, list: DEF_LIST, detail: DEF_DET, about: DEF_ABOUT, guide: DEF_GUIDE, my: DEF_MY, pay: DEF_PAY, login: DEF_LOGIN,
+  main: DEF_MAIN, list: DEF_LIST, detail: DEF_DET, about: DEF_ABOUT, greeting: DEF_GREETING, guide: DEF_GUIDE, my: DEF_MY, pay: DEF_PAY, login: DEF_LOGIN,
 };
 
 /** GET /api/content/main 자리 — 지금은 기본값 */
@@ -355,4 +367,14 @@ export function getMainContent(): MainContent {
 /** GET /api/content/login 자리 — 지금은 기본값 */
 export function getLoginContent(): LoginContent {
   return DEF_LOGIN;
+}
+
+/** GET /api/content/about 자리 — 지금은 기본값 */
+export function getAboutContent(): AboutContent {
+  return DEF_ABOUT;
+}
+
+/** GET /api/content/greeting 자리 — 지금은 기본값 */
+export function getGreetingContent(): GreetingContent {
+  return DEF_GREETING;
 }
