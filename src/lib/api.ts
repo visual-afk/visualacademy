@@ -4,12 +4,13 @@
  * 브라우저 컴포넌트는 이 파일을 import 하지 말고, 서버 page 에서 조회해 props 로 받는다.
  */
 import { CLASS_ALIASES, classes as seedClasses } from "@/data/classes";
+import { inquiries as mockInquiries } from "@/data/inquiries";
 import { instructors as mockInstructors } from "@/data/instructors";
 import { payments as mockPayments } from "@/data/payments";
 import { getAdminSupabase } from "./supabase/admin";
 import { parseDate, today } from "./format";
 import { serviceRoleConfigured } from "./supabase/env";
-import type { AcademyClass, ClassDetail, Instructor, Payment } from "./types";
+import type { AcademyClass, ClassDetail, Inquiry, InquiryType, Instructor, Payment } from "./types";
 
 import { getClassDetail } from "./classes";
 
@@ -147,4 +148,35 @@ export async function getPayments(): Promise<Payment[]> {
     ...(r.refund ? { refund: { ...r.refund, refundedAt: kstStamp(r.refund.refundedAt) } } : {}),
     ...(r.invoice ? { invoice: r.invoice } : {}),
   }));
+}
+
+type InquiryRow = {
+  id: string; handled: boolean; created_at: string;
+  payload: { name?: string; shop?: string; phone?: string; type?: string; body?: string; status?: Inquiry["status"]; memo?: string } | null;
+};
+const INQUIRY_TYPES: InquiryType[] = ["가맹 개설 문의", "교육 제휴 문의", "기업 단체 교육 문의", "기타"];
+
+/** GET /api/admin/inquiries — 제휴·가맹 문의함, 최근 순 */
+export async function getInquiries(): Promise<Inquiry[]> {
+  if (!serviceRoleConfigured()) return mockInquiries;
+  const { data, error } = await getAdminSupabase()
+    .from("inquiries")
+    .select("id, handled, created_at, payload")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`문의 조회 실패: ${error.message}`);
+  return ((data ?? []) as InquiryRow[]).map((r) => {
+    const p = r.payload ?? {};
+    // TODO(backend): 처리 상태(신규/확인중/완료)·메모 컬럼이 아직 없다 — 지금은 handled=완료, 나머지=신규 (docs/backend-todo.md)
+    return {
+      id: r.id,
+      date: kstStamp(r.created_at),
+      name: p.name || "-",
+      shop: p.shop || "-",
+      phone: p.phone || "-",
+      type: INQUIRY_TYPES.find((t) => t === p.type) ?? "기타",
+      status: p.status ?? (r.handled ? "done" : "new"),
+      body: p.body ?? "",
+      memo: p.memo ?? "",
+    };
+  });
 }
