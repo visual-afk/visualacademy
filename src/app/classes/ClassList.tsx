@@ -90,10 +90,10 @@ function OrderCard({ c, flash }: { c: Row; flash: boolean }) {
     <div className={`order-card ${upcoming ? "muted" : "active"}${flash ? " flash" : ""}`} id={`level-${c.level}`}>
       <div className={`order-node s${c.level}`}>{c.level}</div>
       <div className="headrow">
-        <ClassThumb src={c.images?.thumb} alt={c.name} />
+        <ClassThumb c={c} />
         <div className="ht">
           <p className="ostep">STEP {c.level} · {STEP_NAMES[(c.level ?? 1) - 1]}</p>
-          <h3><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
+          <h3><Link className="card-link" href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
         </div>
       </div>
       {upcoming ? (
@@ -118,12 +118,12 @@ function OrderCard({ c, flash }: { c: Row; flash: boolean }) {
 function LinkedCard({ c }: { c: Row }) {
   const ended = c.status === "종료";
   return (
-    <div className={`linked-card${ended ? " past" : ""}`}>
+    <div className={`linked-card${ended ? " past" : ""}`} data-cat={c.cat}>
       <div className="linkrow">
-        <ClassThumb src={c.images?.thumb} alt={c.name} />
+        <ClassThumb c={c} />
         <div className="lr-txt">
           <span className={`badge ${ended ? "badge-ended" : "badge-line"}`}>{ended ? "종료" : c.cat}</span>
-          <h4><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h4>
+          <h4><Link className="card-link" href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h4>
         </div>
       </div>
       <p className="lc-meta">
@@ -145,9 +145,9 @@ function RowCard({ c }: { c: Row }) {
         <span className={`badge ${badgeClass(c.status)}`}>{c.status}</span>
       </div>
       <div className="headrow">
-        <ClassThumb src={c.images?.thumb} alt={c.name} />
+        <ClassThumb c={c} />
         <div className="ht">
-          <h3><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
+          <h3><Link className="card-link" href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
         </div>
       </div>
       <p className="meta">
