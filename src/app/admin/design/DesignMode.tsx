@@ -5,39 +5,60 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import { ROUTES } from "@/data/site";
-import { DEFAULT_CONTENT, type ContentPageKey, type PageContent } from "@/data/siteContent";
-import { esc, PREVIEWS } from "./previews";
-import { PAGES, type Field } from "./schemas";
+import { DEFAULT_CONTENT, type PageContent } from "@/data/siteContent";
+import { esc, FRAME_CSS, PREVIEWS, type PvCtx } from "./previews";
+import { EDITOR_KEYS, PAGES, type EditorPageKey, type Field } from "./schemas";
 
 /*
- * 디자인 모드(페이지 관리) — 고객용 8개 페이지(로그인·가입 포함)의 문구·사진·영역 순서/노출을 편집한다.
- * 초안(draft) → 게시(publish) → 버전 기록/복구 흐름.
- * 지금은 게시본·버전 기록을 이 브라우저(localStorage)에 저장한다.
+ * 디자인 모드(페이지 관리) — 고객용 8개 페이지(메인·클래스 목록·상세·소개·대표 인사·마이페이지·결제·로그인)의 문구·사진·영역 순서/노출을 편집한다.
+ * 화면 구성 (프로토타입 11.12): 큰 미리보기 + 오른쪽 편집 서랍(모바일은 아래에서 올라오는 시트).
+ * 미리보기는 실제 고객 페이지와 같은 마크업·클래스를 iframe 안에서 실제 사이트 CSS로 그린다 (PC 1280px / 모바일 390px 뷰포트).
+ * 초안(draft) → 게시(publish) → 버전 기록/복구 흐름. 지금은 게시본·버전 기록을 이 브라우저(localStorage)에 저장한다.
  * 백엔드 연동 시: 게시 = PUT /api/content/:page, 버전 = GET /api/content/:page/versions
+ * 바로가기: /admin/design?page=<페이지>&sec=<영역>(&view=mobile) 으로 특정 페이지·영역 편집을 바로 연다.
  */
 
 interface Version { id: number; time: string; note: string; data: string }
-interface PageState { D: PageContent; saved: string; hist: Version[]; next: number; openSec: string | null }
+interface PageState { D: PageContent; saved: string; hist: Version[]; next: number }
 type Modal = { kind: "publish" } | { kind: "reset" } | { kind: "history" } | { kind: "restore"; id: number } | null;
 
-const KEYS = Object.keys(PAGES) as ContentPageKey[];
-/* 콘텐츠 구조가 바뀌면 v 숫자를 올린다 — 예전 구조로 저장된 초안은 읽지 않음 (v2: 환불 규정 → 푸터 팝업, v3: 메인 강사 슬라이더·푸터 사업자 정보 목록) */
-const LS = (k: ContentPageKey) => `va-design:v3:${k}`;
+/*
+ * 콘텐츠 구조가 바뀌면 v 숫자를 올린다 — 예전 구조로 저장된 초안은 읽지 않음
+ * (v2: 환불 규정 → 푸터 팝업, v3: 메인 강사 슬라이더·푸터 사업자 정보 목록,
+ *  v4(11.12): 메뉴 3개·푸터 링크 개편·온라인/살롱/후기 필드, 소개 연혁 삭제·강사 탭은 메인 데이터 사용, 대표 인사 추가, 수강 안내 편집 제거)
+ */
+const LS = (k: EditorPageKey) => `va-design:v4:${k}`;
 const TSK = ["fs", "ls", "lh", "fw", "al"] as const;
+/** 미리보기 뷰포트 폭 — 실제 페이지 CSS의 @media 가 그대로 적용된다 */
+const VIEW_W = { pc: 1280, mobile: 390 };
 
 const fmt = (d: Date) => d.toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" });
 const clone = <T,>(o: T): T => JSON.parse(JSON.stringify(o));
+const isKey = (k: unknown): k is EditorPageKey => typeof k === "string" && (EDITOR_KEYS as string[]).includes(k);
 
-function loadState(k: ContentPageKey): PageState {
+function loadState(k: EditorPageKey): PageState {
   const def = clone(DEFAULT_CONTENT[k]);
-  const fresh: PageState = { D: def, saved: JSON.stringify(def), hist: [{ id: 1, time: fmt(new Date()), note: "최초 상태", data: JSON.stringify(def) }], next: 2, openSec: PAGES[k].first };
+  const fresh: PageState = { D: def, saved: JSON.stringify(def), hist: [{ id: 1, time: fmt(new Date()), note: "최초 상태", data: JSON.stringify(def) }], next: 2 };
   try {
     const raw = localStorage.getItem(LS(k));
     if (!raw) return fresh;
     const p = JSON.parse(raw) as { saved: string; hist: Version[]; next: number };
-    return { D: JSON.parse(p.saved), saved: p.saved, hist: p.hist, next: p.next, openSec: PAGES[k].first };
+    return { D: JSON.parse(p.saved), saved: p.saved, hist: p.hist, next: p.next };
   } catch {
     return fresh;
+  }
+}
+
+/** 주소의 ?page=&sec= (바로가기) */
+function readQuery(): { page: EditorPageKey; sec: string | null; mobile: boolean } {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const page = q.get("page");
+    const k = isKey(page) ? page : "main";
+    const sec = q.get("sec");
+    return { page: k, sec: sec && PAGES[k].sec[sec] ? sec : null, mobile: q.get("view") === "mobile" };
+  } catch {
+    return { page: "main", sec: null, mobile: false };
   }
 }
 
@@ -73,20 +94,47 @@ function diffCount(a: any, b: any): number {
   return a === b ? 0 : 1;
 }
 
-export default function DesignMode() {
-  const [cur, setCur] = useState<ContentPageKey>("main");
-  const [states, setStates] = useState<Record<ContentPageKey, PageState>>(
-    () => Object.fromEntries(KEYS.map((k) => [k, loadState(k)])) as Record<ContentPageKey, PageState>,
+/** iframe 문서 준비 — 부모 문서의 스타일시트(실제 사이트 CSS)를 그대로 복사하고 미리보기 루트를 만든다 */
+function ensureFrame(f: HTMLIFrameElement | null, bind: (doc: Document) => void): HTMLElement | null {
+  const doc = f?.contentDocument;
+  if (!doc) return null;
+  const ex = doc.getElementById("pv-mount");
+  if (ex) return ex;
+  const styles = [...document.querySelectorAll('link[rel="stylesheet"], style')].map((n) => n.outerHTML).join("");
+  doc.open();
+  doc.write(
+    `<!doctype html><html lang="ko"><head><meta charset="utf-8"><base href="${esc(location.origin)}/">${styles}` +
+      `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap"><style>${FRAME_CSS}</style></head>` +
+      `<body><div id="pv-mount"></div></body></html>`,
   );
+  doc.close();
+  bind(doc);
+  return doc.getElementById("pv-mount");
+}
+
+export default function DesignMode() {
+  const [init] = useState(readQuery);
+  const [cur, setCur] = useState<EditorPageKey>(init.page);
+  const [states, setStates] = useState<Record<EditorPageKey, PageState>>(
+    () => Object.fromEntries(EDITOR_KEYS.map((k) => [k, loadState(k)])) as Record<EditorPageKey, PageState>,
+  );
+  /** 편집 서랍: 열림 여부 + 편집 중인 영역 (null = 영역 목록) */
+  const [drawer, setDrawer] = useState(!!init.sec);
+  const [openSec, setOpenSec] = useState<string | null>(init.sec);
   const [mode, setMode] = useState<"draft" | "live">("draft");
   const [previewVer, setPreviewVer] = useState<number | null>(null);
-  const [mobile, setMobile] = useState(false);
+  const [mobile, setMobile] = useState(init.mobile);
   const [modal, setModal] = useState<Modal>(null);
   const [pubNote, setPubNote] = useState("");
   const [tsOpen, setTsOpen] = useState<Set<string>>(new Set());
+  const [stage, setStage] = useState({ w: 0, h: 0 });
   const { toast, showToast } = useToast(2600);
-  const pvRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const drBodyRef = useRef<HTMLDivElement>(null);
+  /** 다음 미리보기 렌더 후 스크롤할 영역 */
+  const pendingScroll = useRef<string | null>(init.sec);
+  const handlers = useRef<{ click: (e: MouseEvent) => void; key: (e: KeyboardEvent) => void }>({ click: () => {}, key: () => {} });
 
   const meta = PAGES[cur];
   const st = states[cur];
@@ -94,19 +142,44 @@ export default function DesignMode() {
   const savedObj = useMemo(() => JSON.parse(st.saved), [st.saved]);
   const dirty = diffCount(savedObj, D);
   const readOnly = mode === "live" || previewVer !== null;
+  const editSec = drawer && openSec && meta.sec[openSec] ? openSec : null;
 
   const viewData: any = useMemo(() => {
-    if (previewVer !== null) return JSON.parse(st.hist.find((h) => h.id === previewVer)!.data);
+    if (previewVer !== null) return JSON.parse(st.hist.find((h) => h.id === previewVer)?.data ?? st.saved);
     return mode === "live" ? savedObj : D;
-  }, [previewVer, mode, savedObj, D, st.hist]);
+  }, [previewVer, mode, savedObj, D, st.hist, st.saved]);
+  /** 공통 헤더·푸터·강사 목록은 메인 페이지 데이터 (사이트 화면 보기면 게시본) */
+  const mainView: any = useMemo(() => {
+    if (cur === "main") return viewData;
+    return mode === "live" ? JSON.parse(states.main.saved) : states.main.D;
+  }, [cur, viewData, mode, states.main]);
 
   /* 저장되지 않은 초안이 있으면 이탈 경고 */
-  const anyDirty = KEYS.some((k) => states[k].saved !== JSON.stringify(states[k].D));
+  const anyDirty = EDITOR_KEYS.some((k) => states[k].saved !== JSON.stringify(states[k].D));
   useEffect(() => {
     const h = (e: BeforeUnloadEvent) => { if (anyDirty) { e.preventDefault(); e.returnValue = ""; } };
     window.addEventListener("beforeunload", h);
     return () => window.removeEventListener("beforeunload", h);
   }, [anyDirty]);
+
+  /* 바로가기 주소 동기화 (?page=) */
+  useEffect(() => {
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.set("page", cur);
+      u.searchParams.delete("sec");
+      window.history.replaceState(window.history.state, "", u);
+    } catch { /* noop */ }
+  }, [cur]);
+
+  /* 미리보기 영역 크기 */
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setStage({ w: e.contentRect.width, h: e.contentRect.height }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const patchState = useCallback((fn: (s: PageState) => PageState) => {
     setStates((all) => ({ ...all, [cur]: fn(all[cur]) }));
@@ -130,94 +203,147 @@ export default function DesignMode() {
     }
   };
 
-  const scrollPv = (id: string) => {
-    requestAnimationFrame(() => {
-      const el = pvRef.current?.querySelector<HTMLElement>(`[data-s="${id}"]`);
-      const sc = scrollRef.current;
-      if (el && sc) sc.scrollTo({ top: Math.max(0, el.offsetTop - 40), behavior: "smooth" });
-    });
+  const scrollPv = useCallback((id: string) => {
+    const f = frameRef.current;
+    const win = f?.contentWindow;
+    const el = f?.contentDocument?.querySelector<HTMLElement>(`[data-s="${id}"]`);
+    if (win && el) win.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + win.scrollY - 16), behavior: "smooth" });
+  }, []);
+
+  /* ── 서랍 ── */
+  const selectSec = (id: string) => {
+    setOpenSec(id);
+    setDrawer(true);
+    pendingScroll.current = id;
+    drBodyRef.current?.scrollTo({ top: 0 });
   };
-  const selectSec = (id: string, scrollForm = true) => {
-    patchState((s) => ({ ...s, openSec: id }));
-    scrollPv(id);
-    if (scrollForm) {
-      requestAnimationFrame(() => {
-        const el = document.getElementById("sec-" + id);
-        if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 84, behavior: "smooth" });
-      });
+  const openList = () => { setOpenSec(null); setDrawer(true); };
+  const closeDrawer = () => { setOpenSec(null); setDrawer(false); };
+  const switchPage = (k: EditorPageKey, sec: string | null = null) => {
+    if (k !== cur) {
+      setCur(k);
+      setMode("draft");
+      setPreviewVer(null);
+      frameRef.current?.contentWindow?.scrollTo({ top: 0 });
     }
+    setOpenSec(sec);
+    setDrawer(!!sec);
+    pendingScroll.current = sec;
   };
-  const toggleSec = (id: string) => {
-    const next = st.openSec === id ? null : id;
-    patchState((s) => ({ ...s, openSec: next }));
-    if (next) scrollPv(next);
+  /** "page:sec" 형식 바로가기 (공통 헤더·푸터 클릭, 안내 문구 링크) */
+  const goto = (target: string) => {
+    const [p, s] = target.split(":");
+    if (isKey(p)) switchPage(p, s && PAGES[p].sec[s] ? s : null);
   };
-  const switchPage = (k: ContentPageKey) => {
-    if (k === cur) return;
-    setCur(k);
-    setMode("draft");
-    setPreviewVer(null);
-    scrollRef.current?.scrollTo({ top: 0 });
-  };
+
+  /* Esc → 서랍 닫기 */
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => handlers.current.key(e);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, []);
+
+  /* iframe 안 클릭·키 처리 (최신 상태를 쓰도록 매 렌더 갱신) */
+  useEffect(() => {
+    handlers.current = {
+      click: (e) => {
+        e.preventDefault();
+        if (readOnly) return;
+        const t = e.target as HTMLElement;
+        const g = t.closest<HTMLElement>("[data-goto]");
+        if (g?.dataset.goto) { goto(g.dataset.goto); return; }
+        const s = t.closest<HTMLElement>(".pvs");
+        if (s?.dataset.s) selectSec(s.dataset.s);
+      },
+      key: (e) => { if (e.key === "Escape" && drawer && !modal) closeDrawer(); },
+    };
+  });
 
   /* ── 미리보기 HTML ── */
   const html = useMemo(() => {
     const pv = PREVIEWS[cur];
-    const act = readOnly ? null : st.openSec;
-    return viewData.order.map((id: string) => {
+    const ctx: PvCtx = { main: mainView, mobile };
+    const act = readOnly ? null : editSec;
+    const parts = (viewData.order as string[]).map((id) => {
       const on = act === id;
       const nm = meta.sec[id]?.name ?? id;
-      const chip = `<span class="chip ${on ? "edit" : "hov"}">${esc(nm)}</span>`;
-      if (!viewData.visible[id]) return `<div class="pvs off ${on ? "act" : ""}" data-s="${id}">${chip}숨김 영역 — ${esc(nm)}${readOnly ? "" : " (클릭해서 수정)"}</div>`;
-      return `<div class="pvs ${on ? "act" : ""}" data-s="${id}">${chip}${pv[id] ? pv[id](viewData[id], viewData) : ""}</div>`;
-    }).join("");
-  }, [cur, viewData, readOnly, st.openSec, meta]);
-
-  /* 'Aa 글자 스타일' — 미리보기에서 같은 글이 들어간 요소를 찾아 스타일 적용 (프로토타입 applyTS) */
-  useEffect(() => {
-    if (!meta.tstyle || !pvRef.current) return;
-    const norm = (t: string) => String(t).replace(/\*\*/g, "").replace(/\s+/g, "");
-    for (const id of viewData.order as string[]) {
-      if (!viewData.visible[id]) continue;
-      const root = pvRef.current.querySelector(`[data-s="${id}"]`);
-      if (!root) continue;
-      const els = [...root.querySelectorAll<HTMLElement>("*")].filter((e) => !e.closest(".chip"));
-      const used = new Set<HTMLElement>();
-      const walk = (o: any) => {
-        if (!o || typeof o !== "object") return;
-        for (const key of Object.keys(o)) {
-          if (key.endsWith("_st") && o[key] && typeof o[key.slice(0, -3)] === "string") {
-            const s = o[key];
-            const t = norm(o[key.slice(0, -3)]);
-            if (!t || !TSK.some((x) => s[x])) continue;
-            const m = els.filter((e) => !used.has(e) && norm(e.textContent ?? "") === t);
-            const el = m.length ? m[m.length - 1] : null;
-            if (!el) continue;
-            used.add(el);
-            if (s.fs) el.style.fontSize = (parseFloat(getComputedStyle(el).fontSize) * s.fs) / 100 + "px";
-            if (s.ls !== undefined && s.ls !== "") el.style.letterSpacing = s.ls / 100 + "em";
-            if (s.lh) el.style.lineHeight = String(s.lh / 100);
-            if (s.fw) el.style.fontWeight = s.fw;
-            if (s.al) { const b = getComputedStyle(el).display === "inline" ? el.parentElement! : el; b.style.textAlign = s.al; }
-          } else walk(o[key]);
-        }
-      };
-      walk(viewData[id]);
+      const chip = `<span class="pv-chip ${on ? "edit" : "hov"}">${esc(nm)}</span>`;
+      if (!viewData.visible[id]) return { id, html: `<div class="pvs off${on ? " act" : ""}" data-s="${id}">${chip}숨김 영역 — ${esc(nm)}${readOnly ? "" : " (클릭해서 수정)"}</div>` };
+      let inner = "";
+      try {
+        inner = pv.sec[id] ? pv.sec[id](viewData[id] ?? {}, viewData, ctx) : "";
+      } catch {
+        inner = `<div class="pvs off">미리보기를 그리지 못했어요 — ${esc(nm)}</div>`;
+      }
+      return { id, html: `<div class="pvs${on ? " act" : ""}" data-s="${id}">${chip}${inner}</div>` };
+    });
+    let body = "";
+    try {
+      body = (pv.before?.(viewData, ctx) ?? "") + (pv.compose ? pv.compose(parts, viewData, ctx) : parts.map((p) => p.html).join("")) + (pv.after?.(viewData, ctx) ?? "");
+    } catch {
+      body = parts.map((p) => p.html).join("");
     }
-  }, [html, meta.tstyle, viewData]);
+    return `<div class="pv-root ${pv.root}${act ? " has-active" : ""}${readOnly ? " viewonly" : ""}">${body}</div>`;
+  }, [cur, viewData, mainView, mobile, readOnly, editSec, meta]);
 
-  const onPreviewClick = (e: React.MouseEvent) => {
-    if (readOnly) return;
-    const s = (e.target as HTMLElement).closest<HTMLElement>(".pvs");
-    if (s?.dataset.s) selectSec(s.dataset.s);
-  };
+  /* iframe에 그리기 + 'Aa 글자 스타일' 적용 (프로토타입 applyTS) + 대기 중인 스크롤 */
+  useEffect(() => {
+    const mount = ensureFrame(frameRef.current, (doc) => {
+      doc.addEventListener("click", (e) => handlers.current.click(e));
+      doc.addEventListener("submit", (e) => e.preventDefault());
+      doc.addEventListener("keydown", (e) => handlers.current.key(e));
+    });
+    if (!mount) return;
+    mount.innerHTML = html;
+    const win = frameRef.current?.contentWindow;
+    if (meta.tstyle && win) {
+      const norm = (t: string) => String(t).replace(/\*\*/g, "").replace(/\s+/g, "");
+      for (const id of viewData.order as string[]) {
+        if (!viewData.visible[id]) continue;
+        const root = mount.querySelector(`[data-s="${id}"]`);
+        if (!root) continue;
+        const els = [...root.querySelectorAll<HTMLElement>("*")].filter((e) => !e.closest(".pv-chip"));
+        const used = new Set<HTMLElement>();
+        const walk = (o: any) => {
+          if (!o || typeof o !== "object") return;
+          for (const key of Object.keys(o)) {
+            if (key.endsWith("_st") && o[key] && typeof o[key.slice(0, -3)] === "string") {
+              const s = o[key];
+              const t = norm(o[key.slice(0, -3)]);
+              if (!t || !TSK.some((x) => s[x])) continue;
+              const m = els.filter((e) => !used.has(e) && norm(e.textContent ?? "") === t);
+              const el = m.length ? m[m.length - 1] : null;
+              if (!el) continue;
+              used.add(el);
+              if (s.fs) el.style.fontSize = (parseFloat(win.getComputedStyle(el).fontSize) * s.fs) / 100 + "px";
+              if (s.ls !== undefined && s.ls !== "") el.style.letterSpacing = s.ls / 100 + "em";
+              if (s.lh) el.style.lineHeight = String(s.lh / 100);
+              if (s.fw) el.style.fontWeight = s.fw;
+              if (s.al) { const b = win.getComputedStyle(el).display === "inline" ? el.parentElement! : el; b.style.textAlign = s.al; }
+            } else walk(o[key]);
+          }
+        };
+        walk(viewData[id]);
+      }
+    }
+    const ps = pendingScroll.current;
+    if (ps) {
+      pendingScroll.current = null;
+      requestAnimationFrame(() => scrollPv(ps));
+      /* 처음 열 때는 iframe CSS·사진이 늦게 들어와 위치가 바뀌므로 한 번 더 */
+      setTimeout(() => scrollPv(ps), 600);
+    }
+  }, [html, meta.tstyle, viewData, scrollPv]);
 
   /* ── 영역 순서·노출 ── */
-  const moveSec = (id: string, d: number) => editD((x) => {
-    const i = x.order.indexOf(id), j = i + d;
-    if (j < 0 || j >= x.order.length) return;
-    [x.order[i], x.order[j]] = [x.order[j], x.order[i]];
-  });
+  const moveSec = (id: string, d: number) => {
+    editD((x) => {
+      const i = x.order.indexOf(id), j = i + d;
+      if (j < 0 || j >= x.order.length) return;
+      [x.order[i], x.order[j]] = [x.order[j], x.order[i]];
+    });
+    pendingScroll.current = id;
+  };
   const toggleVis = (id: string) => editD((x) => { x.visible[id] = !x.visible[id]; });
 
   /* ── 리스트 항목 ── */
@@ -246,7 +372,8 @@ export default function DesignMode() {
         c.width = Math.round(im.width * sc);
         c.height = Math.round(im.height * sc);
         c.getContext("2d")!.drawImage(im, 0, 0, c.width, c.height);
-        setPath(p, c.toDataURL("image/jpeg", 0.85));
+        /* 투명 배경이 필요한 PNG(서명 등)는 PNG 그대로 */
+        setPath(p, file.type === "image/png" ? c.toDataURL("image/png") : c.toDataURL("image/jpeg", 0.85));
         showToast(warn.length ? warn.join(" · ") : "사진을 등록했어요");
       };
       im.src = String(r.result);
@@ -292,6 +419,15 @@ export default function DesignMode() {
   };
   const askRestore = (id: number) => (dirty ? setModal({ kind: "restore", id }) : doRestore(id));
   const curVer = st.hist[st.hist.length - 1].id;
+
+  /* ── 미리보기 크기: 실제 뷰포트 폭으로 그리고 영역에 맞게 축소 ── */
+  const vw = mobile ? VIEW_W.mobile : VIEW_W.pc;
+  const zoom = stage.w
+    ? mobile
+      ? Math.min((stage.w - 16) / vw, Math.max(0.8, Math.min(1.25, stage.h / 820)))
+      : Math.max(0.25, Math.min(1.25, stage.w / vw))
+    : 1;
+  const frameH = stage.h ? stage.h / zoom : 600;
 
   /* ── 폼 렌더 ── */
   const renderField = (f: Field, path: string, val: any, key: string): React.ReactNode => {
@@ -368,7 +504,7 @@ export default function DesignMode() {
         <div key={key} className="fld">
           {lab}
           <div className="imgfield">
-            <div className="thumb" style={v ? { backgroundImage: `url(${v})` } : undefined}>{v ? "" : "없음"}</div>
+            <div className={`thumb${rw >= rh * 1.2 ? " wide" : ""}`} style={v ? { backgroundImage: `url("${String(v).replace(/["\\\n]/g, "")}")` } : undefined}>{v ? "" : "없음"}</div>
             <div>
               <div className="rec">권장 <b>{rw} × {rh}px</b> · {ratio}</div>
               <div className="meta">JPG·PNG · 5MB 이하 · 가로 최소 {Math.round(rw / 2)}px 이상<br />{v ? "등록됨" : "아직 등록된 사진이 없어요"}</div>
@@ -412,17 +548,31 @@ export default function DesignMode() {
     );
   };
 
+  /** 안내 문구 속 data-goto 링크 (예: 메인 페이지 → 강사 소개) */
+  const onDrawerClick = (e: React.MouseEvent) => {
+    const a = (e.target as HTMLElement).closest<HTMLElement>("a[data-goto]");
+    if (a?.dataset.goto) { e.preventDefault(); goto(a.dataset.goto); }
+  };
+
+  const sch = editSec ? meta.sec[editSec] : null;
+
   return (
     <>
       <div className="dm-topbar">
         <div className="wrap topbar-inner">
-          <div className="logo" style={{ color: "#fff" }}><span className="dot" />비주얼아카데미 <span style={{ fontWeight: 500, opacity: 0.7 }}>· 디자인 모드</span></div>
+          <div className="logo" style={{ color: "#fff" }}><span className="dot" />비주얼아카데미 <span className="dm-sub">· 디자인 모드</span></div>
           <div style={{ flex: 1 }} />
-          <Link className="exit-dm" href={ROUTES.admin}>← 대시보드로 나가기</Link>
+          <Link
+            className="exit-dm"
+            href={ROUTES.admin}
+            onClick={(e) => { if (anyDirty && !window.confirm("게시하지 않은 초안이 있어요. 나가면 초안이 사라져요. 나갈까요?")) e.preventDefault(); }}
+          >
+            ← 대시보드로 나가기
+          </Link>
         </div>
       </div>
 
-      <div className="wrap">
+      <div className={`wrap dm-main${drawer ? " dr-open" : ""}`}>
         <div className="page-head">
           <div>
             <h1>{meta.h1}</h1>
@@ -439,7 +589,7 @@ export default function DesignMode() {
         </div>
 
         <div className="pagechips">
-          {KEYS.map((k) => {
+          {EDITOR_KEYS.map((k) => {
             const d = states[k].saved !== JSON.stringify(states[k].D);
             return (
               <button key={k} type="button" className={`pg${k === cur ? " on" : ""}`} onClick={() => switchPage(k)}>
@@ -451,12 +601,15 @@ export default function DesignMode() {
         </div>
 
         <div className="layout">
-          <aside className="preview-col">
+          <section className="preview-col">
             <div className="pv-head">
               <p>{meta.pv}</p>
-              <div className="pv-tabs">
-                <button type="button" className={!mobile ? "on" : undefined} onClick={() => setMobile(false)}>PC</button>
-                <button type="button" className={mobile ? "on" : undefined} onClick={() => setMobile(true)}>모바일</button>
+              <div className="pv-tools">
+                <button type="button" className={`btn btn-ghost sm${drawer && !editSec ? " on" : ""}`} onClick={openList}>☰ 영역 목록 · 순서 · 숨기기</button>
+                <div className="pv-tabs">
+                  <button type="button" className={!mobile ? "on" : undefined} onClick={() => setMobile(false)}>PC</button>
+                  <button type="button" className={mobile ? "on" : undefined} onClick={() => setMobile(true)}>모바일</button>
+                </div>
               </div>
             </div>
             <div className="modebar">
@@ -481,58 +634,87 @@ export default function DesignMode() {
               </div>
             ) : null}
             <div className="pv-frame">
-              <div className="pv-bar"><i /><i /><i /><span>{meta.url}</span></div>
-              <div className={`pv-scroll${mobile ? " mob" : ""}`} ref={scrollRef}>
-                <div
-                  ref={pvRef}
-                  className={`pv${!readOnly && st.openSec ? " has-active" : ""}${readOnly ? " viewonly" : ""}`}
-                  onClick={onPreviewClick}
-                  dangerouslySetInnerHTML={{ __html: html }}
-                />
+              <div className="pv-bar"><i /><i /><i /><span>{meta.url}{mobile ? " · 모바일 390px" : ""}</span></div>
+              <div className={`pv-stage${mobile ? " mob" : ""}`} ref={stageRef}>
+                <div className="pv-box" style={{ width: mobile ? vw * zoom : "100%", height: stage.h || undefined }}>
+                  <iframe
+                    ref={frameRef}
+                    title={`${meta.name} 미리보기`}
+                    className="pv-iframe"
+                    style={{ width: mobile ? vw : Math.max(vw, stage.w / zoom), height: frameH, transform: `scale(${zoom})` }}
+                  />
+                </div>
               </div>
             </div>
-          </aside>
-
-          <main>
-            <p className="sec-intro">
-              {meta.fixed
-                ? "왼쪽 화면에서 고치고 싶은 곳을 클릭하거나, 아래 목록에서 영역을 골라보세요. 이 페이지는 구성이 고정이라 순서 변경·숨기기는 없어요."
-                : "왼쪽 화면에서 고치고 싶은 곳을 클릭하거나, 아래 목록에서 영역을 골라보세요. ▲▼로 순서를 바꾸고 스위치로 숨길 수 있어요."}
-            </p>
-            <div className="secs">
-              {meta.common && (
-                <div className="note" style={{ margin: "0 0 4px" }}>
-                  <b>상단 메뉴 · 푸터</b>는 모든 페이지 공통이에요.{" "}
-                  <a href="#" onClick={(e) => { e.preventDefault(); switchPage("main"); setStates((all) => ({ ...all, main: { ...all.main, openSec: "nav" } })); }}>메인 페이지에서 수정</a>하면 이 페이지에도 똑같이 적용돼요.
-                </div>
-              )}
-              {D.order.map((id, i) => {
-                const s = meta.sec[id];
-                if (!s) return null;
-                const on = D.visible[id];
-                const open = st.openSec === id;
-                return (
-                  <section key={id} id={`sec-${id}`} className={`sec${open ? " open focus" : ""}${on ? "" : " hidden-sec"}`}>
-                    <div className="sec-head" onClick={() => toggleSec(id)}>
-                      <span className="sec-num">{i + 1}</span>
-                      <h3 className="sec-title">{s.name}<small>{on ? s.sub : `숨김 — ${meta.name}에 보이지 않아요`}</small></h3>
-                      {!meta.fixed && (
-                        <div className="sec-tools" onClick={(e) => e.stopPropagation()}>
-                          <button type="button" className="ib" title="위로" disabled={i === 0} onClick={() => moveSec(id, -1)}>▲</button>
-                          <button type="button" className="ib" title="아래로" disabled={i === D.order.length - 1} onClick={() => moveSec(id, 1)}>▼</button>
-                          <button type="button" className={`sw${on ? " on" : ""}`} title={on ? "보이는 중" : "숨김"} aria-label="노출" onClick={() => toggleVis(id)} />
-                        </div>
-                      )}
-                      <span className="chev">▼</span>
-                    </div>
-                    {open && <div className="sec-body">{s.fields.map((f, j) => renderField(f, id, D[id], String(j)))}</div>}
-                  </section>
-                );
-              })}
-            </div>
-          </main>
+          </section>
         </div>
       </div>
+
+      {/* 편집 서랍 — PC: 오른쪽, 1000px 이하: 아래에서 올라오는 시트 */}
+      <aside className={`drawer${drawer ? " open" : ""}`} aria-label="편집 패널" aria-hidden={!drawer}>
+        <div className="dr-head">
+          {sch && editSec ? (
+            <>
+              <h3>{sch.name}<small>{sch.sub}</small></h3>
+              <button type="button" className="btn btn-ghost" onClick={openList}>☰ 목록</button>
+              <button type="button" className="btn btn-mint" onClick={closeDrawer}>완료</button>
+            </>
+          ) : (
+            <>
+              <h3>영역 목록<small>{meta.fixed ? "이 페이지는 구성이 고정이에요" : "▲▼ 순서 · 스위치로 숨기기"}</small></h3>
+              <button type="button" className="btn btn-mint" onClick={closeDrawer}>닫기</button>
+            </>
+          )}
+        </div>
+        <div className="dr-body" ref={drBodyRef} onClick={onDrawerClick}>
+          {sch && editSec ? (
+            <>
+              {!meta.fixed && (
+                <div className="dr-vis">
+                  <span>{D.visible[editSec] ? "이 영역이 사이트에 보여요" : "숨김 — 사이트에 보이지 않아요"}</span>
+                  <button type="button" className={`sw${D.visible[editSec] ? " on" : ""}`} aria-label="노출" onClick={() => toggleVis(editSec)} />
+                </div>
+              )}
+              <section className="sec edit" id={`sec-${editSec}`}>
+                <div className="sec-body">{D[editSec] ? sch.fields.map((f, j) => renderField(f, editSec, D[editSec], String(j))) : null}</div>
+              </section>
+            </>
+          ) : (
+            <>
+              <p className="dr-hint">고칠 영역을 누르세요. 화면에서 직접 클릭해도 돼요.</p>
+              {meta.common && (
+                <div className="note" style={{ margin: "0 0 12px" }}>
+                  <b>상단 메뉴 · 푸터</b>는 모든 페이지 공통이에요.{" "}
+                  <a href="#" data-goto="main:nav">메인 페이지에서 수정</a>하면 이 페이지에도 똑같이 적용돼요.
+                </div>
+              )}
+              <div className="secs">
+                {D.order.map((id, i) => {
+                  const s = meta.sec[id];
+                  if (!s) return null;
+                  const on = D.visible[id];
+                  return (
+                    <section key={id} className={`sec lrow${on ? "" : " hidden-sec"}`}>
+                      <div className="sec-head" onClick={() => selectSec(id)}>
+                        <span className="sec-num">{i + 1}</span>
+                        <h3 className="sec-title">{s.name}<small>{on ? s.sub : "숨김"}</small></h3>
+                        {!meta.fixed && (
+                          <div className="sec-tools" onClick={(e) => e.stopPropagation()}>
+                            <button type="button" className="ib" title="위로" disabled={i === 0} onClick={() => moveSec(id, -1)}>▲</button>
+                            <button type="button" className="ib" title="아래로" disabled={i === D.order.length - 1} onClick={() => moveSec(id, 1)}>▼</button>
+                            <button type="button" className={`sw${on ? " on" : ""}`} title={on ? "보이는 중" : "숨김"} aria-label="노출" onClick={() => toggleVis(id)} />
+                          </div>
+                        )}
+                        <span className="chev">›</span>
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </aside>
 
       {modal && (
         <div className="ov" onClick={(e) => e.target === e.currentTarget && setModal(null)}>
