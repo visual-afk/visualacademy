@@ -4,11 +4,13 @@
  *   숨김 상품은 페이지가 열리지 않으니, 상품 전체 엑셀의 '상품상세정보'를 {상품번호: html} JSON 으로 뽑아 넘기면 그걸 쓴다
  * - 이미지는 우리 Storage(class-images/imweb/detail/)로 복사해 주소를 바꾼다 (아임웹을 닫아도 남게)
  * - 허용한 태그·속성만 남긴다: 스크립트·이벤트 속성·외부 iframe(유튜브·비메오 제외)은 버린다
+ * - 아임웹 쇼핑몰 공통 꼬리말(고객센터·배송안내)과 맨 위 '결제 후 3일 이내 안내사항' 문구는 뺀다
  * 실행: npx tsx --env-file=.env.local scripts/import-imweb-details.ts [엑셀상세.json]
  */
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { getAdminSupabase } from "@/lib/supabase/admin";
+import { sanitizeDetailHtml } from "@/lib/detailHtml";
 import { IMAGE_BUCKET } from "@/lib/uploads";
 
 const SITE = "https://www.visualacademy.co.kr";
@@ -19,57 +21,28 @@ const SLUG_TO_IDX: Record<string, number> = {
   "level-1": 155, "level-2": 161, "level-3": 214, "level-4": 163,
 };
 
-const ALLOWED_TAGS = new Set([
-  "p", "br", "div", "span", "section", "strong", "b", "em", "i", "u", "h1", "h2", "h3", "h4", "h5",
-  "ul", "ol", "li", "img", "a", "hr", "table", "thead", "tbody", "tr", "td", "th", "iframe", "blockquote",
-]);
-const VOID_TAGS = new Set(["br", "img", "hr"]);
-
-function cleanStyle(v: string): string | null {
-  const s = v.replace(/\s+/g, " ").trim();
-  if (/url\s*\(|expression|javascript:|behavior|position\s*:\s*(fixed|absolute)/i.test(s)) return null;
-  return s || null;
+/** 본문 끝의 쇼핑몰 공통 안내(고객센터 · 배송안내 ...)와 그 앞뒤 빈 줄을 뺀다 */
+function stripShopFooter(html: string): string {
+  const at = html.indexOf("<strong>고객센터</strong>");
+  let out = html;
+  if (at >= 0 && html.indexOf("배송안내", at) > 0) out = html.slice(0, html.lastIndexOf("<p", at));
+  return out.replace(/(\s*<p>\s*<br>\s*<\/p>)+\s*$/, "");
 }
 
-function attrsOf(raw: string): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const m of raw.matchAll(/([a-zA-Z-:]+)\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/g)) {
-    out[m[1].toLowerCase()] = m[3] ?? m[4] ?? m[5] ?? "";
-  }
-  return out;
-}
-
-const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/&amp;(\w+|#\d+);/g, "&$1;");
-
-/** 허용 태그·속성만 남긴 HTML. 이미지 주소는 rewrite 로 바꾼다 */
-function sanitize(html: string, rewrite: (src: string) => string | null): string {
-  const body = html
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/<(script|style|noscript|form|button|input|select|textarea)\b[\s\S]*?<\/\1>/gi, "");
-  return body.replace(/<(\/?)([a-zA-Z0-9]+)([^>]*)>/g, (_all, close: string, tagRaw: string, rest: string) => {
-    const tag = tagRaw.toLowerCase();
-    if (!ALLOWED_TAGS.has(tag)) return "";
-    if (close) return VOID_TAGS.has(tag) ? "" : `</${tag}>`;
-    const a = attrsOf(rest);
-    const keep: [string, string][] = [];
-    const style = a.style ? cleanStyle(a.style) : null;
-    if (style) keep.push(["style", style]);
-    if (tag === "img") {
-      const src = a.src ? rewrite(a.src) : null;
-      if (!src) return "";
-      keep.push(["src", src], ["alt", a.alt ?? ""], ["loading", "lazy"]);
-    } else if (tag === "a") {
-      if (a.href && /^https?:\/\//i.test(a.href)) keep.push(["href", a.href], ["target", "_blank"], ["rel", "noopener noreferrer"]);
-    } else if (tag === "iframe") {
-      const src = a.src ?? "";
-      if (!/^https:\/\/(www\.youtube\.com\/embed\/|player\.vimeo\.com\/video\/)/.test(src)) return "";
-      keep.push(["src", src], ["allowfullscreen", ""], ["loading", "lazy"]);
-      return `<iframe ${keep.map(([k, v]) => `${k}="${esc(v)}"`).join(" ")}>`;
-    } else if (tag === "td" || tag === "th") {
-      if (a.colspan) keep.push(["colspan", a.colspan]);
-      if (a.rowspan) keep.push(["rowspan", a.rowspan]);
-    }
-    return `<${tag}${keep.map(([k, v]) => ` ${k}="${esc(v)}"`).join("")}>`;
+/* 맨 위 결제 안내 문구 — 사진 없는 문단 중 글이 이 문구들뿐인 것만 지운다 (2026-11-18 사용자 요청) */
+const NOTICE = [
+  /결제\s*(완료)?\s*후.{0,30}3일.{0,40}(보내드립니다|발송됩니다)?/,
+  /안내사항을\s*(보내드립니다|발송됩니다)/,
+  /\*?\s*못\s*받으신\s*(경우|분은)/,
+  /카카오채널\s*\[비주얼\s*아카데미\]\s*로\s*(연락주세요|보내주세요)/,
+  /문의사항은\s*카카오채널\s*\[비주얼아카데미\]\s*로\s*연락주세요/,
+  /혹시\s*못\s*받으셨다면\s*010-2755-7452/,
+];
+function stripPaymentNotice(html: string): string {
+  return html.replace(/<p\b[^>]*>((?:(?!<\/p>)[\s\S])*)<\/p>/g, (all, inner: string) => {
+    if (/<img|<iframe/i.test(inner)) return all;
+    const text = inner.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim();
+    return text && NOTICE.some((re) => re.test(text)) ? "" : all;
   });
 }
 
@@ -129,7 +102,7 @@ async function main() {
     const srcs = [...raw.matchAll(/<img[^>]+src="([^"]+)"/gi)].map((m) => m[1]);
     const map = new Map<string, string | null>();
     for (const s of srcs) if (!map.has(s)) map.set(s, await copyImage(s));
-    const detailHtml = sanitize(raw, (s) => map.get(s) ?? null);
+    const detailHtml = stripPaymentNotice(stripShopFooter(sanitizeDetailHtml(raw, (s) => map.get(s) ?? null)));
 
     const { data: cc } = await db.from("class_contents").select("detail").eq("class_id", c.id).maybeSingle();
     const detail = { ...((cc?.detail as Record<string, unknown> | null) ?? {}), detailHtml };

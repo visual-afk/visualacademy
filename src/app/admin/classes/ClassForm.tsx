@@ -11,6 +11,7 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import { IMAGE_BUCKET, IMAGE_TYPES, MAX_IMAGE_BYTES } from "@/lib/uploads";
 import { stepLabel } from "@/lib/status";
 import type { AcademyClass, ClassCategory, PriceOption, RoadmapStep, SaleStatus, TaxType } from "@/lib/types";
+import DetailHtmlEditor from "./DetailHtmlEditor";
 
 type Tab = "basic" | "content";
 type OpType = "offline" | "waitlist" | "online";
@@ -157,6 +158,9 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
     return url ? { kind: "file", url, w: 0, h: 0 } : null;
   };
   const [images, setImages] = useState<Record<Slot, Img>>(() => ({ thumb: saved("thumb"), banner: saved("banner"), detail: saved("detail") }));
+  /* 상세 본문(글·사진) — 아임웹에서 옮겨 온 본문도 여기서 고친다. 바꿨을 때만 저장 */
+  const [detailHtml, setDetailHtml] = useState(src?.detail?.detailHtml ?? "");
+  const [htmlDirty, setHtmlDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [device, setDevice] = useState<"pc" | "mobile">("pc");
   const [guide, setGuide] = useState(false);
@@ -303,7 +307,8 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
       if (img?.kind !== "file") continue; // 샘플·빈칸은 저장하지 않는다
       next[slot] = img.file ? await uploadImage(id, slot, img.file) : img.url;
     }
-    await api(`/api/admin/classes/${id}/content`, "PUT", next);
+    await api(`/api/admin/classes/${id}/content`, "PUT", htmlDirty ? { ...next, detailHtml } : next);
+    setHtmlDirty(false);
     setImages((im) => {
       const out = { ...im };
       (["thumb", "banner", "detail"] as Slot[]).forEach((s) => {
@@ -313,6 +318,29 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
       return out;
     });
   };
+
+  /* 상세 본문에 넣을 사진 1장 — 고르자마자 저장소에 올린다 */
+  const pickDetailImage = () =>
+    new Promise<string | null>((resolve) => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = Object.keys(IMAGE_TYPES).join(",");
+      input.onchange = async () => {
+        const f = input.files?.[0];
+        if (!f) return resolve(null);
+        if (!IMAGE_TYPES[f.type] || f.size > MAX_IMAGE_BYTES) {
+          showToast("JPG · PNG · WEBP · GIF 10MB 이하 이미지만 올릴 수 있어요");
+          return resolve(null);
+        }
+        try {
+          resolve(await uploadImage(classId!, "detail", f));
+        } catch (e) {
+          showToast((e as Error).message);
+          resolve(null);
+        }
+      };
+      input.click();
+    });
 
   const save = async () => {
     const err = mode === "basic" ? validate() : null;
@@ -687,6 +715,23 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
 
               <div className="card">
                 <h2>상세페이지 본문</h2>
+                <div className="upload-block">
+                  <div className="upload-block-head">
+                    <h3>상세 본문 (글 · 사진)</h3>
+                    {htmlDirty && <span className="ratio-hint">고친 내용 있음 · 저장하기를 눌러주세요</span>}
+                  </div>
+                  <p className="desc" style={{ margin: "-4px 0 11px" }}>
+                    아임웹에서 옮겨 온 상세페이지가 여기 있어요. 아래 &lsquo;상세 이미지&rsquo;를 올리면 이 본문 대신 그 이미지가 보여요.
+                  </p>
+                  <DetailHtmlEditor
+                    initial={detailHtml}
+                    onChange={(h) => {
+                      setDetailHtml(h);
+                      setHtmlDirty(true);
+                    }}
+                    onPickImage={pickDetailImage}
+                  />
+                </div>
                 <div className="upload-block">
                   <div className="upload-block-head">
                     <h3>상세 이미지 (본문용)</h3>
