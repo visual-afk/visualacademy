@@ -4,6 +4,7 @@
  *   숨김 상품은 페이지가 열리지 않으니, 상품 전체 엑셀의 '상품상세정보'를 {상품번호: html} JSON 으로 뽑아 넘기면 그걸 쓴다
  * - 이미지는 우리 Storage(class-images/imweb/detail/)로 복사해 주소를 바꾼다 (아임웹을 닫아도 남게)
  * - 허용한 태그·속성만 남긴다: 스크립트·이벤트 속성·외부 iframe(유튜브·비메오 제외)은 버린다
+ * - 아임웹 쇼핑몰 공통 꼬리말(고객센터·배송안내)은 교육 상세와 맞지 않아 뺀다
  * 실행: npx tsx --env-file=.env.local scripts/import-imweb-details.ts [엑셀상세.json]
  */
 import { createHash } from "node:crypto";
@@ -73,6 +74,14 @@ function sanitize(html: string, rewrite: (src: string) => string | null): string
   });
 }
 
+/** 본문 끝의 쇼핑몰 공통 안내(고객센터 · 배송안내 ...)와 그 앞뒤 빈 줄을 뺀다 */
+function stripShopFooter(html: string): string {
+  const at = html.indexOf("<strong>고객센터</strong>");
+  let out = html;
+  if (at >= 0 && html.indexOf("배송안내", at) > 0) out = html.slice(0, html.lastIndexOf("<p", at));
+  return out.replace(/(\s*<p>\s*<br>\s*<\/p>)+\s*$/, "");
+}
+
 async function fetchDetail(idx: number): Promise<string | null> {
   const res = await fetch(`${SITE}/shop_view/?idx=${idx}`);
   if (!res.ok) throw new Error(`아임웹 상품 ${idx}: ${res.status}`);
@@ -129,7 +138,7 @@ async function main() {
     const srcs = [...raw.matchAll(/<img[^>]+src="([^"]+)"/gi)].map((m) => m[1]);
     const map = new Map<string, string | null>();
     for (const s of srcs) if (!map.has(s)) map.set(s, await copyImage(s));
-    const detailHtml = sanitize(raw, (s) => map.get(s) ?? null);
+    const detailHtml = stripShopFooter(sanitize(raw, (s) => map.get(s) ?? null));
 
     const { data: cc } = await db.from("class_contents").select("detail").eq("class_id", c.id).maybeSingle();
     const detail = { ...((cc?.detail as Record<string, unknown> | null) ?? {}), detailHtml };
