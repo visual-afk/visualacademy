@@ -21,6 +21,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
  */
 export function computeStatus(c: AcademyClass): ClassStatus {
   if (c.manualEnd) return "종료";
+  if (c.saleStatus === "soldout") return "품절";
   if (c.type === "upcoming") return "개설예정";
   if (c.type === "online") return "온라인상시";
   if (c.type === "waitlist") return "개설대기";
@@ -37,7 +38,7 @@ export function badgeClass(status: ClassStatus): string {
   if (status === "모집중" || status === "온라인상시") return "badge-mint";
   if (status === "마감임박") return "badge-amber";
   if (status === "마감") return "badge-red";
-  if (status === "종료") return "badge-ended";
+  if (status === "종료" || status === "품절") return "badge-ended";
   return "badge-line";
 }
 
@@ -45,6 +46,7 @@ export function badgeClass(status: ClassStatus): string {
 export function ctaLabel(c: AcademyClass, status: ClassStatus): string {
   if (status === "종료") return "모집 종료";
   if (status === "마감") return "모집 마감";
+  if (status === "품절") return "품절";
   if (c.type === "online") return "바로 수강 신청";
   if (c.type === "waitlist" || c.type === "upcoming") return "개설 알림 신청";
   return "신청하기";

@@ -21,7 +21,8 @@
 
   .tabbar{margin-bottom:38px}
   .tabbar-btn{padding:15px 6px;font-size:13.5px;letter-spacing:.008em}
-  @media(max-width:640px){.tabbar-btn{font-size:12px;padding:12px 14px}}
+  /* 모바일: 탭 4개가 가로 스크롤 없이 한 줄에 들어가게 (11.12 모바일 여백 수정) */
+  @media(max-width:640px){.tabbar-btn{flex:1 1 0;min-width:0;font-size:11.5px;padding:12px 3px}}
   .tab-panel{padding-bottom:118px}
 
   .section{margin-bottom:42px}
@@ -49,6 +50,12 @@
   .app-cancel:disabled{opacity:.5;cursor:default}
   .empty-note{font-size:14.5px;color:var(--ink-3);padding:36px 0;text-align:center}
   .empty-note a{color:var(--mint-d);font-weight:700;margin-left:6px}
+  /* 빈 상태 카드 (신청 내역·온라인 수강권한) — 연한 민트 그라데이션 + 책갈피 아이콘 */
+  p.empty-note{border:1px solid var(--line);background:linear-gradient(180deg,var(--mint-l),var(--bg) 80%);border-radius:var(--radius);
+    padding:52px 24px;margin:0;font-size:13.5px}
+  p.empty-note::before{content:"";display:block;width:44px;height:44px;margin:0 auto 14px;border-radius:14px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b4a3f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4h14v16l-7-4-7 4z'/%3E%3C/svg%3E") center/22px no-repeat,var(--mint-grad);
+    box-shadow:var(--mint-glow)}
 
   .pay-table{width:100%;border-collapse:collapse;font-size:13.5px}
   .pay-table th{text-align:left;font-size:12px;color:var(--ink-3);font-weight:600;padding:0 12px 12px;border-bottom:1px solid var(--line)}
@@ -106,4 +113,14 @@
   .modal-box .btn-danger{background:var(--red);color:#fff}
 
   .site-footer{padding:65px 0 46px}
+
+  /* 모바일 여백 정리 — 카드 안쪽 여백을 줄여 내용 폭 확보 */
+  @media(max-width:640px){
+    .pagehead{padding-top:40px}
+    .profile-card{padding:22px 20px;gap:16px;margin-bottom:28px}
+    .profile-avatar{width:52px;height:52px;font-size:20px}
+    .app-card,.course-card{padding:18px;gap:14px}
+    .info-form{padding:22px 18px}
+    .tabbar{margin-bottom:28px}
+  }
 }

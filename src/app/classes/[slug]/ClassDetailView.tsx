@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import Accordion from "@/components/site/Accordion";
+import { tileClass } from "@/components/site/ClassThumb";
 import { ROUTES } from "@/data/site";
 import { getClassDetail, refundPolicy } from "@/lib/classes";
-import { fullDate, ddayLabel, priceLabel } from "@/lib/format";
+import { fullDate, ddayLabel, priceLabel, won } from "@/lib/format";
+import { discountPct, earlyActive, optionCompare, optionPrice } from "@/lib/pricing";
 import { badgeClass, CATEGORY_LABELS, computeStatus, ctaLabel } from "@/lib/status";
 import type { AcademyClass, ClassStatus, Instructor } from "@/lib/types";
 
@@ -19,6 +21,7 @@ function ddayChip(c: AcademyClass, status: ClassStatus): { text: string; cls: st
   if (status === "개설예정") return { text: "개설 예정 · 일정이 정해지면 알려드려요", cls: "line" };
   if (status === "종료") return { text: "모집이 종료된 클래스예요", cls: "line" };
   if (status === "마감") return { text: "정원 마감", cls: "red" };
+  if (status === "품절") return { text: "지금은 신청을 받지 않아요", cls: "line" };
   const remain = (c.capacity ?? 0) - (c.applied ?? 0);
   if (status === "마감임박") return { text: `마감임박 · 정원 ${remain}석 남음`, cls: "amber" };
   return { text: `모집중 · 개강까지 ${ddayLabel(c.date!)}`, cls: "mint" };
@@ -39,7 +42,7 @@ function buyboxRows(c: AcademyClass): [string, string][] {
       ["형태", "VOD + 실습 자료 다운로드"],
     ];
   }
-  if (c.type === "upcoming") return [["일정", "개설 예정"], ["과정", `총 ${c.weeks}주`]];
+  if (c.type === "upcoming") return [["일정", "개설 예정"], ...(c.weeks ? [["과정", `총 ${c.weeks}주`] as [string, string]] : [])];
   if (c.type === "waitlist") {
     return [
       ["일정", "미정"],
@@ -166,13 +169,15 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
   const { toast, showToast } = useToast();
 
   const chip = ddayChip(c, status);
+  const thumb = c.images?.thumb;
+  const detailImage = d.detailImage ?? c.images?.detail;
   const [line1, line2] = topLines(c);
   const unit = c.type === "online" ? `${c.months}개월 수강` : c.cat === "정석" ? "/ 전체 과정" : "1인 기준";
   const catLabel = c.cat === "온라인" ? "온라인 강의" : CATEGORY_LABELS[c.cat];
 
   const cta = ctaLabel(c, status);
   const isNotify = c.type === "waitlist" || c.type === "upcoming";
-  const closed = status === "종료" || status === "마감";
+  const closed = status === "종료" || status === "마감" || status === "품절";
   const ctaButton = (cls = "btn btn-mint") =>
     closed ? (
       <button type="button" className={cls} disabled>{cta}</button>
@@ -202,18 +207,25 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
       <div className="wrap detail-grid">
         <div>
           <div className="top-block">
-            <div
-              className="hero-img"
-              style={c.images?.thumb ? { backgroundImage: `url(${c.images.thumb})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
-            >
-              {!c.images?.thumb && <span>{c.name}</span>}
-            </div>
+            {/* 정사각형 썸네일 — 관리자에서 올린 썸네일이 있으면 그 이미지, 없으면 분류·레벨 색 그라데이션 타일 */}
+            {thumb ? (
+              <div className="hero-img has-photo">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={thumb} alt={c.name} />
+              </div>
+            ) : (
+              <div className={`hero-img tg ${tileClass(c)}`} aria-hidden="true">
+                <em className="hi-tag">VISUAL ACADEMY</em>
+                <span>{c.name}</span>
+              </div>
+            )}
             <div className="top-info">
               <div className="tags">
                 <span className="badge badge-line">{catLabel}</span>
                 <span className={`badge ${badgeClass(status)}`}>{status === "개설예정" ? "개설 예정" : status}</span>
               </div>
               <h1 className="dtitle">{c.name}</h1>
+              {c.summary && <p className="top-lead">{c.summary}</p>}
               <p className="top-sum">{line1}</p>
               <p className="top-sum">{line2}</p>
             </div>
@@ -239,13 +251,20 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
 
           {tab === "info" && (
             <div>
-              {d.detailImage ? (
+              {/* 세로로 긴 상세 이미지 — 관리자 > 콘텐츠 관리에서 올린 이미지를 잘리지 않게 그대로 */}
+              {detailImage ? (
                 <div className="hero-photo">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={d.detailImage} alt={`${c.name} 상세 페이지`} />
+                  <img src={detailImage} alt={`${c.name} 상세 페이지`} />
                 </div>
+              ) : d.detailHtml ? (
+                // 아임웹 상세 본문 — 가져올 때 허용한 태그·속성만 남겨 저장해 둔 HTML
+                <div className="imweb-detail" dangerouslySetInnerHTML={{ __html: d.detailHtml }} />
               ) : (
-                <div className="hero-photo hero-photo-ph"><span>{c.name} · 상세페이지 이미지 영역</span></div>
+                <div className="hero-photo hero-photo-ph">
+                  <span>상세 안내를 준비하고 있어요</span>
+                  <small>곧 자세한 커리큘럼과 사례가 올라올 예정이에요. 궁금한 점은 카카오채널로 문의해 주세요.</small>
+                </div>
               )}
 
               <div className="section">
@@ -264,10 +283,12 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
                 <h2>강사 소개</h2>
                 <div className="instructor">
                   <div className="iavatar">{inst.initial}</div>
-                  <div>
+                  <div className="itxt">
+                    <span className="itag">INSTRUCTOR</span>
                     <p className="iname">{inst.name}</p>
                     <p className="irole">{inst.role}</p>
                   </div>
+                  <Link className="ilink" href={ROUTES.about("inst")}>강사 소개 →</Link>
                 </div>
                 <div className="prep-note"><b>준비물 안내</b>{d.prep}</div>
               </div>
@@ -320,6 +341,27 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
               <span className="bb-price">{priceLabel(c)}</span>
               <span className="bb-unit">{unit}</span>
             </div>
+            {c.options && c.options.length > 0 && (
+              <ul className="bb-options">
+                {c.options.map((o) => {
+                  const now = optionPrice(o);
+                  const before = optionCompare(o);
+                  return (
+                    <li key={o.label}>
+                      <span>
+                        {o.label}
+                        {earlyActive(o) && <em className="bb-early">얼리버드 ~{o.earlyUntil!.slice(5).replace("-", "/")}</em>}
+                      </span>
+                      <span className="bb-opt-price">
+                        {before && <s>{won(before)}</s>}
+                        {before && <em className="bb-off">{discountPct(before, now)}%</em>}
+                        <b>{won(now)}</b>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
             <span className={`bb-dday ${chip.cls}`}>{chip.text}</span>
             <dl className="bb-dl">
               {buyboxRows(c).map(([k, v]) => (

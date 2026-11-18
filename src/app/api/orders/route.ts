@@ -3,7 +3,7 @@ import { getProfile, getUser } from "@/lib/auth";
 import { confirmFreeOrder, createOrder, type Applicant } from "@/lib/orders";
 import { tossConfigured } from "@/lib/toss";
 
-type Body = { slug: string; applicant: Applicant; agreements: Record<string, boolean> };
+type Body = { slug: string; applicant: Applicant; agreements: Record<string, boolean>; option?: number };
 
 /** POST /api/orders — 신청서 + 동의 → 주문(결제대기) 생성, 주문번호 발급 */
 export async function POST(request: NextRequest) {
@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
     b.slug,
     { name: a.name.trim(), phone, email: (a.email ?? "").trim(), shop: (a.shop ?? "").trim() },
     b.agreements,
+    typeof b.option === "number" ? b.option : undefined,
   );
   if ("error" in r) return NextResponse.json({ error: r.error }, { status: 409 });
   if (r.amount === 0) {

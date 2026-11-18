@@ -9,6 +9,8 @@ export type ClassStatus =
   | "모집중"
   | "마감임박"
   | "마감"
+  /** 판매 상태 품절 — 아임웹에서 판매가 끝난 교육. 목록에서는 필터·검색·품절 탭에서만 보인다 */
+  | "품절"
   | "종료"
   | "개설대기"
   | "개설예정"
@@ -45,6 +47,8 @@ export interface ClassDetail {
   faqs: Faq[];
   /** 상세페이지 본문 이미지 (세로로 긴 이미지). 없으면 자리표시 */
   detailImage?: string;
+  /** 아임웹에서 옮겨 온 상세페이지 본문 (scripts/import-imweb-details.ts 가 정리·저장). 상세 이미지가 없을 때 보여준다 */
+  detailHtml?: string;
   /** 온라인 강의 1강 무료 미리보기 */
   preview?: { title: string; desc: string; duration: string };
   buyboxQuote: string;
@@ -72,8 +76,14 @@ export interface AcademyClass {
   capacity: number | null;
   /** 신청 인원 (개설 대기는 알림 신청 인원) */
   applied: number | null;
+  /** 개설 대기: 이 인원이 모이면 개설 (메인 모집 카드의 '개설 기준') */
+  goal?: number;
   /** 원 단위, 0 = 무료, null = 미정 */
   price: number | null;
+  /** 가격 옵션이 있으면 고객이 하나를 골라 결제한다 (price 는 가장 싼 옵션) */
+  options?: PriceOption[];
+  /** 품절(신청 불가) · 숨김(고객 화면에서 빠짐). 없으면 판매중 */
+  saleStatus?: Exclude<SaleStatus, "on">;
   type: ClassType;
   cert: boolean;
   noob: boolean;
@@ -102,6 +112,21 @@ export interface Instructor {
   /** 프로필 사진 경로 (public/images/instructors) — 없으면 이름 첫 글자 */
   img?: string | null;
 }
+
+/** 가격 옵션 — 예) { label: "4회", price: 350000 } */
+export interface PriceOption {
+  label: string;
+  /** 판매가 */
+  price: number;
+  /** 정가 — 판매가보다 크면 취소선 + 할인율로 보여준다 */
+  listPrice?: number;
+  /** 얼리버드: earlyUntil(YYYY-MM-DD, 그날 포함)까지 이 가격 */
+  earlyPrice?: number;
+  earlyUntil?: string;
+}
+
+/** 클래스 판매 상태 — 없으면 판매중 */
+export type SaleStatus = "on" | "soldout" | "hidden";
 
 export type PaymentStatus = "결제완료" | "부분환불" | "환불완료" | "입금대기";
 
@@ -139,4 +164,25 @@ export interface InvoiceRecord {
   /** 전액 환불로 발행취소·계약해제된 상태 */
   canceled?: boolean;
   history?: { at: string; kind: "발행" | "발행취소" | "수정발행"; mgtKey: string; amount: number; ntsConfirmNum?: string; modifyCode?: number }[];
+}
+
+/** 제휴·가맹 문의 처리 상태 — new 신규 · prog 확인중 · done 완료 */
+export type InquiryStatus = "new" | "prog" | "done";
+
+export type InquiryType = "가맹 개설 문의" | "교육 제휴 문의" | "기업 단체 교육 문의" | "기타";
+
+/** 관리자 문의함 한 건 (inquiries 테이블 + payload jsonb) */
+export interface Inquiry {
+  id: string;
+  /** KST "YYYY-MM-DD HH:mm" */
+  date: string;
+  name: string;
+  /** 매장·소속 (없으면 "-") */
+  shop: string;
+  phone: string;
+  type: InquiryType;
+  status: InquiryStatus;
+  body: string;
+  /** 담당자 메모 (고객 비공개) */
+  memo: string;
 }
