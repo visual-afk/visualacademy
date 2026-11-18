@@ -18,7 +18,7 @@ export type ClassStatus =
 
 export type TaxType = "taxable" | "exempt";
 
-/** 성장 로드맵 단계 (1 초보 · 2 중급 · 3 고급 · 4 오토사장) */
+/** 성장 로드맵 단계 (1 초보 · 2 중급 · 3 고급 · 4 미용 경영의 신) */
 export type RoadmapStep = 1 | 2 | 3 | 4;
 
 export interface Lesson {
