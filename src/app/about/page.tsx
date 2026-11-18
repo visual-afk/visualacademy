@@ -16,16 +16,13 @@ const TABS = [
   { key: "partner", label: "제휴 문의" },
 ] as const;
 
-/* 사진은 아임웹 브랜드 소개(visualacademy.co.kr/brand)에서 가져온 것 — public/images/about */
-const ph = (name: string) => ({ backgroundImage: `url(/images/about/${name}.jpg)` });
-
 const FACILITIES = [
-  ["studio-a", "프로페셔널 스튜디오 A", "최대 40명, 정규 과정 강의실"],
-  ["studio-b", "프로페셔널 스튜디오 B", "최대 20명, 그룹 수업 공간"],
-  ["lounge", "라운지 / 셀프바", "안락한 휴게 공간"],
-  ["locker", "프라이빗 락커", "36개의 개인 보관함"],
-  ["meeting", "미팅룸 / CEO룸", "상담·회의 전용 공간"],
-  ["desk", "데스크", "수강 안내 · 방문 접수"],
+  ["p1", "프로페셔널 스튜디오 A", "최대 40명, 정규 과정 강의실"],
+  ["p2", "프로페셔널 스튜디오 B", "최대 20명, 그룹 수업 공간"],
+  ["p6", "라운지 / 셀프바", "안락한 휴게 공간"],
+  ["p4", "프라이빗 락커", "36개의 개인 보관함"],
+  ["p5", "미팅룸 / CEO룸", "상담·회의 전용 공간"],
+  ["p3", "데스크", "수강 안내 · 방문 접수"],
 ];
 const SALONS = ["강남점", "홍대점", "신촌점", "분당점", "일산점", "수원점", "인천점", "부산 서면전포점"];
 const HISTORY = [
@@ -36,12 +33,12 @@ const HISTORY = [
   ["2026", "누적 수강생 4,200명 돌파, 비주얼아카데미 홈페이지 자체 개발 리뉴얼"],
 ];
 const GALLERY = [
-  ["studio-a", "프로페셔널 스튜디오 A"],
-  ["studio-b", "프로페셔널 스튜디오 B"],
-  ["lounge", "라운지 & 셀프바"],
-  ["locker", "프라이빗 락커"],
-  ["ceo", "미팅룸 / CEO룸"],
-  ["certificate", "IFBS 협회 인증 현장"],
+  ["g1", "프로페셔널 스튜디오 A"],
+  ["g2", "프로페셔널 스튜디오 B"],
+  ["g3", "라운지 & 셀프바"],
+  ["g4", "프라이빗 락커"],
+  ["g5", "미팅룸 / CEO룸"],
+  ["g6", "IFBS 협회 인증 현장"],
 ];
 
 function IntroPanel() {
@@ -55,7 +52,7 @@ function IntroPanel() {
         <p>비주얼 아카데미는 일회성 교육으로 끝나는 곳이 아닙니다. 우리는 여러분의 평생 동반자가 되어, 미용 인생의 모든 순간을 함께하며 성장하고자 합니다. 처음 미용을 시작하는 날부터, 그리고 나아가 위기와 도전 속에서 여러분이 도움과 힘을 필요로 할 때마다 든든한 존재가 되어드리고 싶습니다.</p>
       </div>
 
-      <div className="big-photo ph" style={ph("desk")}><span>비주얼아카데미 강남 본원</span></div>
+      <div className="big-photo p1"><span>비주얼아카데미 강남 본원</span></div>
 
       <div className="section qa-block">
         <div className="qa-head">
@@ -63,9 +60,9 @@ function IntroPanel() {
           <h2>비주얼아카데미는 무엇이 다른가요?</h2>
         </div>
         <div className="trio-grid">
-          <div><div className="trio-photo ph" style={ph("studio-a")} /><p className="trio-cap"><b>현장에서 검증된 커리큘럼과 함께</b>감이 아닌 데이터로 설명하는 시술 기준을 가르쳐요</p></div>
-          <div><div className="trio-photo ph" style={ph("ceo")} /><p className="trio-cap"><b>원장님들과 함께 고민해</b>매출로 이어지는 실전 경영 노하우를 담아내는 설계</p></div>
-          <div><div className="trio-photo ph" style={ph("studio-b")} /><p className="trio-cap"><b>각 분야의 숙련된 강사진과</b>다양한 케이스를 직접 실습하며 완성도를 확인</p></div>
+          <div><div className="trio-photo p3" /><p className="trio-cap"><b>현장에서 검증된 커리큘럼과 함께</b>감이 아닌 데이터로 설명하는 시술 기준을 가르쳐요</p></div>
+          <div><div className="trio-photo p2" /><p className="trio-cap"><b>원장님들과 함께 고민해</b>매출로 이어지는 실전 경영 노하우를 담아내는 설계</p></div>
+          <div><div className="trio-photo p6" /><p className="trio-cap"><b>각 분야의 숙련된 강사진과</b>다양한 케이스를 직접 실습하며 완성도를 확인</p></div>
         </div>
       </div>
 
@@ -76,7 +73,7 @@ function IntroPanel() {
             <h3>비주얼살롱 8개 지점을 직접<br />운영하기에 가능합니다.</h3>
             <p>현장에서 검증하지 않은 커리큘럼은 만들지 않아요. 매장을 직접 운영하며 얻은 데이터와 노하우로 군더더기 없는 교육을 설계해, 합리적인 수강료를 유지할 수 있습니다.</p>
           </div>
-          <div className="split-photo ph" style={ph("lounge")} />
+          <div className="split-photo p5" />
         </div>
       </div>
 
@@ -84,7 +81,7 @@ function IntroPanel() {
         <h2>시설 안내</h2>
         <div className="trio-grid facility-compact">
           {FACILITIES.map(([p, t, d]) => (
-            <div key={t}><div className="trio-photo ph" style={ph(p)} /><p className="trio-cap"><b>{t}</b>{d}</p></div>
+            <div key={t}><div className={`trio-photo ${p}`} /><p className="trio-cap"><b>{t}</b>{d}</p></div>
           ))}
         </div>
       </div>
@@ -98,7 +95,7 @@ function IntroPanel() {
             <p>또한, 과학적 근거에 기반한 미용 기술을 지속적으로 개발하여 <b>미용인들의 역량을 강화하고 있습니다.</b> 더불어, 미용 산업의 혁신을 목표로 권위 있는 학회 및 단체들과의 제휴와 교류를 통해 <b>대한민국 뷰티 산업에 새로운 패러다임을 제시합니다.</b></p>
             <p><b>IFBS</b>는 최신 미용 과학 기술과 트렌드를 연구하고, 이를 교육하며, 국내외 미용 전문가들과 협력하여 <b>한국 미용 산업의 글로벌 리더십을 확립하고자 합니다.</b></p>
           </div>
-          <div className="split-photo ph" style={ph("ifbs")} />
+          <div className="split-photo p3" />
         </div>
       </div>
 
@@ -110,7 +107,7 @@ function IntroPanel() {
             <p>IFBS는 지속적이고 과학적인 연구개발을 통해 미래 지속성장형 뷰티 연구소의 기반을 구축하고 있습니다. 세계적인 모발 과학 기술 역량을 강화하며, 선진 미용인을 위한 투자를 확대하여 미래 경쟁력을 선도하는 데 주력하고 있습니다.</p>
             <p>비주얼 뷰티 아카데미를 중심으로 국제미용과학협회 및 해외 파트너사 연구소와의 글로벌 네트워크를 확장하여, 세계적인 연구개발과 미용 산업 혁신을 이끌어 가고 있습니다. IFBS의 끊임없는 도전과 혁신은 글로벌 뷰티 산업의 미래를 이끌어 나갈 것입니다.</p>
           </div>
-          <div className="split-photo ph" style={ph("certificate")} />
+          <div className="split-photo p5" />
         </div>
       </div>
 
@@ -133,7 +130,7 @@ function IntroPanel() {
         </div>
       </div>
 
-      <div className="section quote-section ph" style={ph("texture")}>
+      <div className="section quote-section p6">
         <div className="qtext">
           <p>우리가 전하는 것은 단순한 기술이 아니라, 함께 걸어가는 여정입니다. 여러분이 걸어가는 길에 있어 <em>비주얼 뷰티</em>는 언제나 신뢰할 수 있는 동반자가 될 것을 약속드립니다. 여러분이 마주할 아름다움의 세계에서, <em>비주얼아카데미</em>는 변함없는 지원과 격려를 아끼지 않겠습니다.</p>
           <p>미용 인생의 매 순간, 우리는 여러분 곁에 있겠습니다.<br />여러분의 열정이 빛날 수 있도록, 함께 걸어가며 그 길을 더욱 아름답게 빚어내겠습니다.</p>
@@ -176,7 +173,11 @@ export default async function AboutPage({ searchParams }: PageProps<"/about">) {
               <div className="instructor-grid">
                 {instructors.map((i) => (
                   <div key={i.id} className="inst-card">
-                    <div className="inst-avatar">{i.initial}</div>
+                    {i.img ? (
+                      <div className="inst-avatar ph" style={{ backgroundImage: `url(${i.img})` }} role="img" aria-label={i.name} />
+                    ) : (
+                      <div className="inst-avatar">{i.initial}</div>
+                    )}
                     <div>
                       <p className="inst-name">{i.name}</p>
                       <p className="inst-role">{i.role}</p>
@@ -193,7 +194,7 @@ export default async function AboutPage({ searchParams }: PageProps<"/about">) {
               <h2>아카데미 공간 &amp; 수업 현장</h2>
               <div className="gallery-grid">
                 {GALLERY.map(([g, t]) => (
-                  <div key={t} className="gallery-tile ph" style={ph(g)}><span>{t}</span></div>
+                  <div key={t} className={`gallery-tile ${g}`}><span>{t}</span></div>
                 ))}
               </div>
             </div>
