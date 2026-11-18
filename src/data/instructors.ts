@@ -6,7 +6,7 @@ export const instructors: Instructor[] = [
     initial: "이",
     name: "이유경",
     role: "대표원장",
-    desc: "8개 지점을 직접 운영하며 쌓은 경영 노하우로 미용실 경영 마스터 클래스, 월 2000플랜 등 경영 과정을 이끌어요.",
+    desc: "8개 지점을 직접 운영하며 쌓은 경영 노하우로 미용 경영의 신, 월 2000플랜 등 경영 과정을 이끌어요.",
     img: "/images/instructors/lee-yukyung.jpg",
   },
   {

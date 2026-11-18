@@ -186,7 +186,7 @@ export const classes: AcademyClass[] = [
     },
   },
   {
-    id: 12, slug: "auto-owner", name: "미용실 경영 마스터 클래스", cat: "온라인", field: "경영·마케팅", target: "원장·창업",
+    id: 12, slug: "auto-owner", name: "미용 경영의 신", cat: "온라인", field: "경영·마케팅", target: "원장·창업",
     day: "상시", time: "-", place: "온라인", date: null, capacity: null, applied: 8,
     price: 890000, type: "online", cert: false, noob: false, step: 4, taxType: "taxable", months: 9,
     summary: "시술에서 벗어나 매장이 스스로 돌아가게 만드는 자동화 운영 시스템",
