@@ -46,7 +46,7 @@ export const DEF_MAIN = {
   online: { title: "시간이 안 맞아도, 온라인으로", desc: "월 2000플랜 · 오토사장 — 수강 기간 9개월, 원하는 시간에 들으세요.", btn: "온라인 강의 보기" },
   instructors: {
     title: "강사 소개", desc: "아카데미는 결국 가르치는 사람이 상품입니다.",
-    list: [{ name: "이유경", role: "대표원장", img: "" }, { name: "순돌", role: "이사 · 원장", img: "" }, { name: "강사명", role: "직함", img: "" }, { name: "강사명", role: "직함", img: "" }],
+    list: [{ name: "이유경", role: "대표원장", img: "/images/instructors/lee-yukyung.jpg" }, { name: "순돌", role: "이사 · 원장", img: "/images/instructors/sundol.jpg" }, { name: "준모", role: "디자이너", img: "/images/instructors/junmo.jpg" }, { name: "리현", role: "실장", img: "/images/instructors/rihyun.jpg" }, { name: "호승", role: "원장", img: "/images/instructors/hoseung.jpg" }, { name: "창민", role: "원장", img: "/images/instructors/changmin.jpg" }, { name: "지성", role: "원장", img: "/images/instructors/jiseong.jpg" }, { name: "성실", role: "원장", img: "/images/instructors/seongsil.jpg" }],
   },
   reviews: {
     title: "수강생 후기", desc: "실제 수강생들의 이야기입니다.",

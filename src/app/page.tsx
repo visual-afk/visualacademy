@@ -173,7 +173,7 @@ export default async function HomePage() {
           <div className="instr-grid">
             {C.instructors.list.map((ins, i) => (
               <div key={i} className={`instr-card${ins.img ? "" : " ph"}`}>
-                <div className="instr-photo" style={ins.img ? { backgroundImage: `url(${ins.img})`, backgroundSize: "cover", border: "none" } : undefined}>
+                <div className="instr-photo" style={ins.img ? { backgroundImage: `url(${ins.img})`, backgroundSize: "cover", backgroundPosition: "center 20%", border: "none" } : undefined}>
                   {ins.img ? "" : "사진"}
                 </div>
                 <p className="in">{ins.name}</p>
