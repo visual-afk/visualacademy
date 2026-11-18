@@ -257,6 +257,9 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={detailImage} alt={`${c.name} 상세 페이지`} />
                 </div>
+              ) : d.detailHtml ? (
+                // 아임웹 상세 본문 — 가져올 때 허용한 태그·속성만 남겨 저장해 둔 HTML
+                <div className="imweb-detail" dangerouslySetInnerHTML={{ __html: d.detailHtml }} />
               ) : (
                 <div className="hero-photo hero-photo-ph">
                   <span>상세 안내를 준비하고 있어요</span>
