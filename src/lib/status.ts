@@ -21,6 +21,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
  */
 export function computeStatus(c: AcademyClass): ClassStatus {
   if (c.manualEnd) return "종료";
+  if (c.saleStatus === "soldout") return "마감";
   if (c.type === "upcoming") return "개설예정";
   if (c.type === "online") return "온라인상시";
   if (c.type === "waitlist") return "개설대기";

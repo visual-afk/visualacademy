@@ -219,7 +219,12 @@ export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
                 <span className="cat">{c.cat}</span>
                 <span className={`status s-${c.status}`}>{c.status}</span>
               </div>
-              <p className="ctitle">{c.draft && <span className="badge badge-line" style={{ marginRight: 6 }}>임시저장 · 비공개</span>}{c.name}</p>
+              <p className="ctitle">
+                {c.draft && <span className="sale-tag">임시저장 · 비공개</span>}
+                {c.saleStatus === "hidden" && <span className="sale-tag">숨김</span>}
+                {c.saleStatus === "soldout" && <span className="sale-tag red">품절</span>}
+                {c.name}
+              </p>
               <p className="cmeta">
                 <span>{dayLabel(c.day)}</span><span className="sep">·</span><span>{c.time ?? "-"}</span><span className="sep">·</span><span>{c.place ?? "장소 미정"}</span>
                 {dated && (
