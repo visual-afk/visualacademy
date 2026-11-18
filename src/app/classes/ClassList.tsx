@@ -350,7 +350,7 @@ export default function ClassList({ classes }: { classes: AcademyClass[] }) {
                   <h2>디자이너의 정석 — 레벨 1부터 4까지</h2>
                   <p>레벨 순서대로 이어지는 정규 커리큘럼이에요. 지금 열려 있는 레벨부터 신청할 수 있어요.</p>
                 </div>
-                <Link href={ROUTES.classDetail("designer-level-1")}>전체 커리큘럼 소개 보기 ›</Link>
+                <Link href={ROUTES.classDetail("level-1")}>전체 커리큘럼 소개 보기 ›</Link>
               </div>
               <div className="order-track">
                 <div className="order-line" />
