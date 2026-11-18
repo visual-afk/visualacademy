@@ -197,9 +197,15 @@ export default function MyPageView({ tab, me = mockMe, data = MOCK }: { tab: MyT
                     </div>
                   </div>
                   <div className="course-right">
-                    <button type="button" className={`btn ${c.done ? "btn-ghost" : "btn-mint"} btn-sm`} onClick={() => showToast("강의 플레이어는 백엔드 연동 후 열려요")}>
-                      {c.done ? "다시보기" : "이어보기"}
-                    </button>
+                    {c.classId ? (
+                      <Link className={`btn ${c.done ? "btn-ghost" : "btn-mint"} btn-sm`} href={`/mypage/courses/${c.classId}`}>
+                        {c.done ? "다시보기" : "이어보기"}
+                      </Link>
+                    ) : (
+                      <button type="button" className={`btn ${c.done ? "btn-ghost" : "btn-mint"} btn-sm`} onClick={() => showToast("강의 플레이어는 백엔드 연동 후 열려요")}>
+                        {c.done ? "다시보기" : "이어보기"}
+                      </button>
+                    )}
                     <span className="course-expiry">수강기한 {c.expiry}까지</span>
                   </div>
                 </div>

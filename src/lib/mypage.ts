@@ -64,10 +64,11 @@ export async function getMyPageData(profileId: string): Promise<{ applications: 
 
   const { data: ens } = await db
     .from("enrollments")
-    .select("progress, expires_at, classes(name, months)")
+    .select("class_id, progress, expires_at, classes(name, months)")
     .eq("profile_id", profileId)
     .order("created_at", { ascending: false });
-  const courses: MyCourse[] = ((ens ?? []) as unknown as { progress: number; expires_at: string | null; classes: { name: string; months: number | null } }[]).map((e) => ({
+  const courses: MyCourse[] = ((ens ?? []) as unknown as { class_id: number; progress: number; expires_at: string | null; classes: { name: string; months: number | null } }[]).map((e) => ({
+    classId: e.class_id,
     title: e.classes.name,
     meta: `${e.classes.months ?? ""}개월 수강권`,
     pct: e.progress,
