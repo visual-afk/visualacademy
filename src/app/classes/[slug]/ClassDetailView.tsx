@@ -8,7 +8,8 @@ import Accordion from "@/components/site/Accordion";
 import { tileClass } from "@/components/site/ClassThumb";
 import { ROUTES } from "@/data/site";
 import { getClassDetail, refundPolicy } from "@/lib/classes";
-import { fullDate, ddayLabel, priceLabel } from "@/lib/format";
+import { fullDate, ddayLabel, priceLabel, won } from "@/lib/format";
+import { discountPct, earlyActive, optionCompare, optionPrice } from "@/lib/pricing";
 import { badgeClass, CATEGORY_LABELS, computeStatus, ctaLabel } from "@/lib/status";
 import type { AcademyClass, ClassStatus, Instructor } from "@/lib/types";
 
@@ -40,7 +41,7 @@ function buyboxRows(c: AcademyClass): [string, string][] {
       ["형태", "VOD + 실습 자료 다운로드"],
     ];
   }
-  if (c.type === "upcoming") return [["일정", "개설 예정"], ["과정", `총 ${c.weeks}주`]];
+  if (c.type === "upcoming") return [["일정", "개설 예정"], ...(c.weeks ? [["과정", `총 ${c.weeks}주`] as [string, string]] : [])];
   if (c.type === "waitlist") {
     return [
       ["일정", "미정"],
@@ -336,6 +337,27 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
               <span className="bb-price">{priceLabel(c)}</span>
               <span className="bb-unit">{unit}</span>
             </div>
+            {c.options && c.options.length > 0 && (
+              <ul className="bb-options">
+                {c.options.map((o) => {
+                  const now = optionPrice(o);
+                  const before = optionCompare(o);
+                  return (
+                    <li key={o.label}>
+                      <span>
+                        {o.label}
+                        {earlyActive(o) && <em className="bb-early">얼리버드 ~{o.earlyUntil!.slice(5).replace("-", "/")}</em>}
+                      </span>
+                      <span className="bb-opt-price">
+                        {before && <s>{won(before)}</s>}
+                        {before && <em className="bb-off">{discountPct(before, now)}%</em>}
+                        <b>{won(now)}</b>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
             <span className={`bb-dday ${chip.cls}`}>{chip.text}</span>
             <dl className="bb-dl">
               {buyboxRows(c).map(([k, v]) => (
