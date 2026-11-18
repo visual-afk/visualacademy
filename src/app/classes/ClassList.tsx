@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import ClassThumb from "@/components/site/ClassThumb";
 import GrowthRoadmap, { type RoadmapColumn } from "@/components/site/GrowthRoadmap";
 import { ROUTES } from "@/data/site";
-import { dayLabel, ddayLabel, priceLabel } from "@/lib/format";
+import { dayLabel, ddayLabel } from "@/lib/format";
 import { badgeClass, computeStatus, ctaLabel, STEP_NAMES } from "@/lib/status";
 import type { AcademyClass, ClassStatus } from "@/lib/types";
 
@@ -107,7 +107,6 @@ function OrderCard({ c, flash }: { c: Row; flash: boolean }) {
           <p className="ometa">
             {c.date} ({ddayLabel(c.date!)})<span className="sep">·</span>{c.place}
           </p>
-          <p className="oprice">{priceLabel(c)}</p>
         </>
       )}
       <ClassButton c={c} />
@@ -131,7 +130,6 @@ function LinkedCard({ c }: { c: Row }) {
         <span className="sep">·</span>
         {c.place}
       </p>
-      <p className="lc-price">{priceLabel(c)}</p>
       <ClassButton c={c} />
     </div>
   );
@@ -161,7 +159,6 @@ function RowCard({ c }: { c: Row }) {
         {c.cert && <span className="tagchip">수료증 발급</span>}
         {c.noob && <span className="tagchip">비전공자 가능</span>}
       </div>
-      <p className="price">{priceLabel(c)}</p>
       <ClassButton c={c} />
     </div>
   );

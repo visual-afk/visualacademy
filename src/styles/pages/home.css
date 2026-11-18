@@ -83,6 +83,7 @@
   .class-card .meta{font-size:13.5px;color:var(--ink-2);margin:2px 0;font-variant-numeric:tabular-nums}
   .class-card .price{font-size:21px;font-weight:800;margin:16px 0 18px;font-variant-numeric:tabular-nums;letter-spacing:-.015em}
   .class-card .btn{width:100%;margin-top:auto}
+  .class-card .meta:last-of-type{margin-bottom:18px}
   .class-card .btn-ghost{color:var(--ink);border-width:1px}
 
   .prog3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}

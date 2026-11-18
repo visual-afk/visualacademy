@@ -6,7 +6,7 @@ import SiteHeader from "@/components/site/SiteHeader";
 import { ROUTES } from "@/data/site";
 import { getMainContent, type MainContent } from "@/data/siteContent";
 import { getClasses } from "@/lib/api";
-import { dday, priceLabel, shortDate } from "@/lib/format";
+import { dday, shortDate } from "@/lib/format";
 import { badgeClass, computeStatus } from "@/lib/status";
 import type { AcademyClass, ClassStatus } from "@/lib/types";
 import HeroSearch from "./HeroSearch";
@@ -73,7 +73,7 @@ function RecruitCard({ c }: { c: AcademyClass & { status: ClassStatus } }) {
       ) : (
         <><p className="meta">{shortDate(c.date!)} 개강{c.weeks ? ` · 총 ${c.weeks}주` : ""}</p><p className="meta">{c.place} · {c.day}요일{c.weeks ? "반" : ""}</p></>
       )}
-      <p className="price">{priceLabel(c)}</p>
+      {/* 가격은 목록에서 빼고 상세·신청 화면에서만 보여준다 */}
       {wait ? (
         <Link className="btn btn-ghost" href={ROUTES.classDetail(c.slug)}>개설 알림 신청</Link>
       ) : (

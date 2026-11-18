@@ -91,7 +91,7 @@
   .linked-card .lc-meta{font-size:11.5px;color:var(--ink-2);margin:0 0 10px;display:flex;flex-wrap:wrap;gap:4px}
   .linked-card .lc-meta .sep{color:var(--line-strong)}
   .linked-card .lc-price{font-size:13px;font-weight:800;margin:0 0 10px}
-  .linked-card .btn{width:100%;padding:8px 12px;font-size:12.5px}
+  .linked-card .btn{width:100%;padding:8px 12px;font-size:12.5px;margin-top:4px}
 
   .order-node{width:28px;height:28px;border-radius:50%;background:var(--surface-2);border:2px solid var(--bg);
     box-shadow:0 0 0 2px var(--line-strong);display:flex;align-items:center;justify-content:center;
@@ -109,7 +109,7 @@
   .order-card .ometa{font-size:12px;color:var(--ink-2);margin:0 0 12px;display:flex;flex-wrap:wrap;gap:4px;font-variant-numeric:tabular-nums}
   .order-card .ometa .sep{color:var(--line-strong)}
   .order-card .oprice{font-size:17px;font-weight:800;margin:0 0 14px;font-variant-numeric:tabular-nums;letter-spacing:-.014em}
-  .order-card .btn{width:100%;padding:10px 16px;font-size:13.5px}
+  .order-card .btn{width:100%;padding:10px 16px;font-size:13.5px;margin-top:14px}
   .order-card .badge{margin-bottom:10px}
 
   .thumb{aspect-ratio:1/1;width:56px;flex:0 0 56px;border-radius:12px;background:var(--surface);border:1px solid var(--line);
@@ -148,6 +148,7 @@
   .row-card .tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0}
   .row-card .price{font-size:19px;font-weight:800;margin:14px 0 14px;font-variant-numeric:tabular-nums;letter-spacing:-.015em}
   .row-card .btn{width:100%;padding:10px 16px;font-size:13.5px;margin-top:auto}
+  .row-card .tags{margin-bottom:14px}
 
   .viewtoggle{display:flex;gap:8px;margin:36px 0 4px}
   .vtab{padding:10px 20px;border-radius:24px;border:1.5px solid var(--line-strong);background:var(--bg);
