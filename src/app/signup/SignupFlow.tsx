@@ -6,7 +6,7 @@ import SiteHeader from "@/components/site/SiteHeader";
 import { ROUTES } from "@/data/site";
 import { getLoginContent } from "@/data/siteContent";
 import { login } from "@/lib/loginState";
-import { getBrowserSupabase } from "@/lib/supabase/client";
+import { getBrowserSupabase, KAKAO_EXTRA_SCOPES } from "@/lib/supabase/client";
 import { saveSignup, type SignupState } from "./actions";
 
 /*
@@ -71,7 +71,7 @@ export default function SignupFlow({
     const back = next ? ROUTES.signup(next) : ROUTES.signup();
     const { error } = await getBrowserSupabase().auth.signInWithOAuth({
       provider: "kakao",
-      options: { redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(back)}` },
+      options: { scopes: KAKAO_EXTRA_SCOPES, redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(back)}` },
     });
     if (error) {
       setBusy(false);

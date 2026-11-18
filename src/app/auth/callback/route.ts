@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_COOKIE, adminCookieOptions, signAdminSession } from "@/lib/adminSession";
-import { ensureProfile, findKakaoAdmin } from "@/lib/auth";
+import { ensureProfile, fetchKakaoAccount, findKakaoAdmin } from "@/lib/auth";
 import { safeNext } from "@/lib/safeNext";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -36,9 +36,9 @@ export async function GET(request: NextRequest) {
     return res;
   }
 
-  // 고객 — 회원 행 준비, 휴대폰이 없으면(카카오 전화번호 동의 전) 한 번 입력받는다
-  const profile = await ensureProfile(user);
-  if (!profile.phone || !profile.name) {
+  // 고객 — 회원 행 준비(카카오 이름·전화번호로 미리 채움). 약관 동의 전이면 가입 화면에서 확인받는다
+  const profile = await ensureProfile(user, await fetchKakaoAccount(data.session?.provider_token));
+  if (!profile.agreed_at || !profile.phone || !profile.name) {
     return NextResponse.redirect(`${origin}/signup?next=${encodeURIComponent(next)}`);
   }
   return NextResponse.redirect(`${origin}${next}`);

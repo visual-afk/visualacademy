@@ -7,7 +7,7 @@ import SiteHeader from "@/components/site/SiteHeader";
 import { ROUTES } from "@/data/site";
 import { getLoginContent } from "@/data/siteContent";
 import { login } from "@/lib/loginState";
-import { getBrowserSupabase } from "@/lib/supabase/client";
+import { getBrowserSupabase, KAKAO_EXTRA_SCOPES } from "@/lib/supabase/client";
 
 /*
  * 카카오 로그인 · 가입 (일반 회원가입 없음)
@@ -66,7 +66,7 @@ export default function LoginFlow({ next, real = false, error = "" }: { next: st
       show({ kind: "loading" });
       const { error } = await getBrowserSupabase().auth.signInWithOAuth({
         provider: "kakao",
-        options: { redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next ?? "/mypage")}` },
+        options: { scopes: KAKAO_EXTRA_SCOPES, redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next ?? "/mypage")}` },
       });
       if (error) {
         show({ kind: "start" });

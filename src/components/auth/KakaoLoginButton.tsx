@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getBrowserSupabase } from "@/lib/supabase/client";
+import { getBrowserSupabase, KAKAO_EXTRA_SCOPES } from "@/lib/supabase/client";
 
 /** 카카오 로그인 시작 — 카카오 → Supabase → /auth/callback?next= 순서로 돌아온다 */
 export default function KakaoLoginButton({ next, label = "카카오로 시작하기" }: { next: string; label?: string }) {
@@ -13,7 +13,7 @@ export default function KakaoLoginButton({ next, label = "카카오로 시작하
     setError("");
     const { error } = await getBrowserSupabase().auth.signInWithOAuth({
       provider: "kakao",
-      options: { redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+      options: { scopes: KAKAO_EXTRA_SCOPES, redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     });
     if (error) {
       setBusy(false);
