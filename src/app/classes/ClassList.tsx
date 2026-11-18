@@ -62,13 +62,19 @@ function matchesDay(c: Row, f: Filters) {
   return f.day === "all" || c.day === f.day;
 }
 
+/** 회차 옵션이 있으면 "4회차 · 10회차 중 선택" */
+function optionLine(c: AcademyClass) {
+  return c.options && c.options.length > 1 ? `${c.options.map((o) => o.label.replace(/회$/, "회차")).join(" · ")} 중 선택` : null;
+}
+
 function metaLine(c: Row, withPlace: boolean) {
   const place = withPlace ? ` · ${c.place}` : "";
   if (c.status === "종료") return `${c.date} 종료됨${place}`;
   if (c.status === "품절") return "지금은 신청을 받지 않아요";
   if (c.type === "online") return withPlace ? `상시 · 수강 기간 ${c.months}개월` : "상시";
   if (c.type === "waitlist") return `일정 미정${place}`;
-  return `${c.date} (${ddayLabel(c.date!)})${place}`;
+  if (!c.date) return `${optionLine(c) ?? "일정 미정"}${place}`;
+  return `${c.date} (${ddayLabel(c.date)})${place}`;
 }
 
 function ClassButton({ c, small }: { c: Row; small?: boolean }) {
@@ -112,7 +118,13 @@ function OrderCard({ c, flash }: { c: Row; flash: boolean }) {
         <>
           <span className={`badge ${badgeClass(c.status)}`}>{c.status}</span>
           <p className="ometa">
-            {c.date} ({ddayLabel(c.date!)})<span className="sep">·</span>{c.place}
+            {c.date ? (
+              <>
+                {c.date} ({ddayLabel(c.date)})<span className="sep">·</span>{c.place}
+              </>
+            ) : (
+              optionLine(c) ?? c.place
+            )}
           </p>
         </>
       )}
