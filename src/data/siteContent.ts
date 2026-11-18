@@ -173,26 +173,26 @@ export const DEF_ABOUT = {
       { p: "비주얼 아카데미는 일회성 교육으로 끝나는 곳이 아닙니다. 우리는 여러분의 평생 동반자가 되어, 미용 인생의 모든 순간을 함께하며 성장하고자 합니다. 처음 미용을 시작하는 날부터, 그리고 나아가 위기와 도전 속에서 여러분이 도움과 힘을 필요로 할 때마다 든든한 존재가 되어드리고 싶습니다." },
     ],
   },
-  introPhoto: { caption: "비주얼아카데미 강남 본원", img: "" },
+  introPhoto: { caption: "비주얼아카데미 강남 본원", img: "/images/about/desk.jpg" },
   diff: {
     q: "비주얼아카데미는 무엇이 다른가요?",
     list: [
-      { img: "", b: "현장에서 검증된 커리큘럼과 함께", d: "감이 아닌 데이터로 설명하는 시술 기준을 가르쳐요" },
-      { img: "", b: "원장님들과 함께 고민해", d: "매출로 이어지는 실전 경영 노하우를 담아내는 설계" },
-      { img: "", b: "각 분야의 숙련된 강사진과", d: "다양한 케이스를 직접 실습하며 완성도를 확인" },
+      { img: "/images/about/studio-a.jpg", b: "현장에서 검증된 커리큘럼과 함께", d: "감이 아닌 데이터로 설명하는 시술 기준을 가르쳐요" },
+      { img: "/images/about/ceo.jpg", b: "원장님들과 함께 고민해", d: "매출로 이어지는 실전 경영 노하우를 담아내는 설계" },
+      { img: "/images/about/studio-b.jpg", b: "각 분야의 숙련된 강사진과", d: "다양한 케이스를 직접 실습하며 완성도를 확인" },
     ],
   },
-  price: { q: "Q. 합리적인 수강료, 어떻게 가능한가요?", title: "비주얼살롱 7개 지점을 직접\n운영하기에 가능합니다.", text: "현장에서 검증하지 않은 커리큘럼은 만들지 않아요. 매장을 직접 운영하며 얻은 데이터와 노하우로 군더더기 없는 교육을 설계해, 합리적인 수강료를 유지할 수 있습니다.", img: "" },
+  price: { q: "Q. 합리적인 수강료, 어떻게 가능한가요?", title: "비주얼살롱 7개 지점을 직접\n운영하기에 가능합니다.", text: "현장에서 검증하지 않은 커리큘럼은 만들지 않아요. 매장을 직접 운영하며 얻은 데이터와 노하우로 군더더기 없는 교육을 설계해, 합리적인 수강료를 유지할 수 있습니다.", img: "/images/about/lounge.jpg" },
   facility: {
     title: "시설 안내",
     list: [
-      { img: "", b: "프로페셔널 스튜디오 A", d: "최대 40명, 정규 과정 강의실" }, { img: "", b: "프로페셔널 스튜디오 B", d: "최대 20명, 그룹 수업 공간" },
-      { img: "", b: "라운지 / 셀프바", d: "안락한 휴게 공간" }, { img: "", b: "프라이빗 락커", d: "36개의 개인 보관함" },
-      { img: "", b: "미팅룸 / CEO룸", d: "상담·회의 전용 공간" }, { img: "", b: "데스크", d: "수강 안내 · 방문 접수" },
+      { img: "/images/about/studio-a.jpg", b: "프로페셔널 스튜디오 A", d: "최대 40명, 정규 과정 강의실" }, { img: "/images/about/studio-b.jpg", b: "프로페셔널 스튜디오 B", d: "최대 20명, 그룹 수업 공간" },
+      { img: "/images/about/lounge.jpg", b: "라운지 / 셀프바", d: "안락한 휴게 공간" }, { img: "/images/about/locker.jpg", b: "프라이빗 락커", d: "36개의 개인 보관함" },
+      { img: "/images/about/meeting.jpg", b: "미팅룸 / CEO룸", d: "상담·회의 전용 공간" }, { img: "/images/about/desk.jpg", b: "데스크", d: "수강 안내 · 방문 접수" },
     ],
   },
   ifbs: {
-    tag: "국제미용과학협회", title: "International Society of\nBeauty Sciences", img: "",
+    tag: "국제미용과학협회", title: "International Society of\nBeauty Sciences", img: "/images/about/ifbs.jpg",
     paras: [
       { p: "IFBS 국제미용과학협회는 미용과학을 연구하고, 선진 미용문화를 선도하는 **국내 최고 수준의 종합 뷰티 과학 협회**입니다. 저희 협회는 최신 미용 과학 기술을 연구하며, 이를 바탕으로 미용 산업의 발전에 기여하고 있습니다." },
       { p: "또한, 과학적 근거에 기반한 미용 기술을 지속적으로 개발하여 **미용인들의 역량을 강화하고 있습니다.** 더불어, 미용 산업의 혁신을 목표로 권위 있는 학회 및 단체들과의 제휴와 교류를 통해 **대한민국 뷰티 산업에 새로운 패러다임을 제시합니다.**" },
@@ -200,7 +200,7 @@ export const DEF_ABOUT = {
     ],
   },
   welcome: {
-    tag: "글로벌 뷰티 산업의 미래", title: "Welcome to IFBS", img: "",
+    tag: "글로벌 뷰티 산업의 미래", title: "Welcome to IFBS", img: "/images/about/certificate.jpg",
     paras: [
       { p: "IFBS는 지속적이고 과학적인 연구개발을 통해 미래 지속성장형 뷰티 연구소의 기반을 구축하고 있습니다. 세계적인 모발 과학 기술 역량을 강화하며, 선진 미용인을 위한 투자를 확대하여 미래 경쟁력을 선도하는 데 주력하고 있습니다." },
       { p: "비주얼 뷰티 아카데미를 중심으로 국제미용과학협회 및 해외 파트너사 연구소와의 글로벌 네트워크를 확장하여, 세계적인 연구개발과 미용 산업 혁신을 이끌어 가고 있습니다. IFBS의 끊임없는 도전과 혁신은 글로벌 뷰티 산업의 미래를 이끌어 나갈 것입니다." },
@@ -222,7 +222,7 @@ export const DEF_ABOUT = {
   inst: { title: "비주얼아카데미 강사진" },
   gallery: {
     title: "아카데미 공간 & 수업 현장",
-    list: [{ img: "", c: "프로페셔널 스튜디오 A" }, { img: "", c: "프로페셔널 스튜디오 B" }, { img: "", c: "라운지 & 셀프바" }, { img: "", c: "프라이빗 락커" }, { img: "", c: "미팅룸 / CEO룸" }, { img: "", c: "IFBS 협회 인증 현장" }],
+    list: [{ img: "/images/about/studio-a.jpg", c: "프로페셔널 스튜디오 A" }, { img: "/images/about/studio-b.jpg", c: "프로페셔널 스튜디오 B" }, { img: "/images/about/lounge.jpg", c: "라운지 & 셀프바" }, { img: "/images/about/locker.jpg", c: "프라이빗 락커" }, { img: "/images/about/ceo.jpg", c: "미팅룸 / CEO룸" }, { img: "/images/about/certificate.jpg", c: "IFBS 협회 인증 현장" }],
   },
   way: { title: "비주얼아카데미 강남 본원", mapImg: "", mapNote: "지도 영역 (약도 이미지가 준비되면 이 자리에 들어가요)", addr: "**서울 강남구 언주로 622** (논현동, 구암빌딩) 1층", tel: "010-2755-7452", hours: "평일 10:00 ~ 19:00 (주말·공휴일 휴무)" },
   partner: {

@@ -25,6 +25,7 @@ Node.js 20 이상 필요 (개발 환경: Node 24, Next.js 16, React 19, TypeScri
 | `VISUAL_AUTO_SUPABASE_URL` / `VISUAL_AUTO_SUPABASE_ANON_KEY` | 관리자 로그인 — visual-auto 본사(hq_admin) 계정 확인 |
 | `ADMIN_SESSION_SECRET` | 관리자 쿠키 서명. 설정하면 `/admin`이 로그인으로 잠긴다 |
 | 알림톡 · 본사 채팅 · Cron | [docs/alimtalk-templates.md](docs/alimtalk-templates.md) 참고 (`SOLAPI_*`, `KAKAO_SENDER_KEY`, `KAKAO_TMPL_*`, `ACADEMY_CHAT_WEBHOOK_URL`, `CRON_SECRET`) — 없으면 알림만 건너뛴다 |
+| 세금계산서 (팝빌) | `POPBILL_LINK_ID`, `POPBILL_SECRET_KEY`, `POPBILL_CORP_NUM`(아카데미 사업자번호, 숫자만), `POPBILL_TEST`(`false` 일 때만 실제 국세청 발행) — 없으면 발행 버튼이 안내 메시지만 띄운다. 발행하려면 팝빌에 공동인증서 등록 + 포인트 충전이 필요하다 |
 | `NEXT_PUBLIC_TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` | 토스페이먼츠 **결제위젯 연동 키** (`gck_` / `gsk_`). API 개별 연동 키(`ck_`/`sk_`)와 섞어 쓰면 승인이 실패한다 |
 
 1. Supabase SQL Editor에서 `supabase/migrations/0001_init.sql` 실행

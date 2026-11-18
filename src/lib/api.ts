@@ -108,7 +108,7 @@ export async function getClassById(id: number): Promise<AcademyClass | undefined
 
 export async function getInstructors(): Promise<Instructor[]> {
   if (!serviceRoleConfigured()) return mockInstructors;
-  const { data, error } = await getAdminSupabase().from("instructors").select("id, initial, name, role, desc").order("sort_order");
+  const { data, error } = await getAdminSupabase().from("instructors").select("*").order("sort_order");
   if (error) throw new Error(`강사 조회 실패: ${error.message}`);
   return data as Instructor[];
 }
