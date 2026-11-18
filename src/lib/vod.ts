@@ -18,7 +18,7 @@ export function parseVimeo(input: string): { id: string; hash: string | null } |
   if (/^\d{5,12}$/.test(s)) return { id: s, hash: null };
   let u: URL;
   try {
-    u = new URL(s);
+    u = new URL(/^https?:\/\//.test(s) ? s : `https://${s}`);
   } catch {
     return null;
   }
