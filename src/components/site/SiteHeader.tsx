@@ -6,6 +6,7 @@ import { ROUTES } from "@/data/site";
 import { getMainContent } from "@/data/siteContent";
 import { useLoginName } from "@/lib/loginState";
 
+/* "guide"(수강 안내)는 11.12부터 메뉴에서 빠졌다 — 페이지(/guide)는 보관, 그 페이지에서 넘기는 active 값만 남겨 둔다 */
 type NavKey = "classes" | "online" | "academy" | "guide";
 
 /* 메뉴 이름·로고·상담 버튼 문구는 디자인 모드(메인 페이지 › 상단 메뉴)에서 편집 — 연결 주소는 순서대로 고정 */
@@ -14,7 +15,6 @@ const NAV: { key: NavKey; label: string; href: string }[] = [
   { key: "classes", href: ROUTES.classes },
   { key: "online", href: ROUTES.classList("온라인") },
   { key: "academy", href: ROUTES.about() },
-  { key: "guide", href: ROUTES.guide() },
 ].map((n, i) => ({ ...n, key: n.key as NavKey, label: NAV_CONTENT.links[i]?.label ?? "" }));
 
 export function SearchIcon({ size = 17, stroke = 2 }: { size?: number; stroke?: number }) {

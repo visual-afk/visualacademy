@@ -3,10 +3,11 @@ import { ROUTES } from "@/data/site";
 import { getMainContent } from "@/data/siteContent";
 import { RefundLink } from "./RefundPopup";
 
-/* 링크 이름은 디자인 모드(메인 페이지 › 푸터)에서 바꾸고, 연결 주소는 순서대로 고정. "refund"는 환불 규정 팝업 */
+/* 링크 이름은 디자인 모드(메인 페이지 › 푸터)에서 바꾸고, 연결 주소는 순서대로 고정. "refund"는 환불 규정 팝업
+ * (11.12) 모든 페이지 푸터 통일 — 아카데미(소개·대표 인사·강사·오시는 길) / 이용 안내(환불 규정) / 관련 사이트 */
 const FOOTER_HREFS = [
-  [ROUTES.about(), ROUTES.about("inst"), ROUTES.about("way")],
-  [ROUTES.guide(), ROUTES.guide("faq"), "refund"],
+  [ROUTES.about(), ROUTES.greeting, ROUTES.about("inst"), ROUTES.about("way")],
+  ["refund"],
   ["#", "#"], // 비주얼살롱·트리필드 — 실제 URL 확정 전
 ];
 
@@ -41,9 +42,12 @@ export default function SiteFooter() {
             <Link href={ROUTES.terms}>이용약관</Link>
             <Link href={ROUTES.privacy}><b>개인정보처리방침</b></Link>
           </div>
-          {footer.biz1}
-          <br />
-          {footer.biz2}
+          <ul className="foot-biz">
+            {footer.biz.filter((b) => b.v.trim()).map((b) => (
+              <li key={b.k}><b>{b.k}</b>{b.v}</li>
+            ))}
+          </ul>
+          <p className="foot-copy">{footer.copy}</p>
         </div>
       </div>
     </footer>

@@ -37,7 +37,21 @@
   .site-link{font-size:12.5px;color:var(--ink-3);border-left:1px solid var(--line);padding-left:14px}
   .site-link:hover{color:var(--ink)}
   .logout-btn{background:none;border-top:0;border-right:0;border-bottom:0;cursor:pointer;font:inherit;font-size:12.5px}
-
+  .who-name,.site-link{white-space:nowrap}
+  /* 좁은 화면: 이름·'사이트 보기'는 숨기고 아바타·로그아웃만 (글자가 한 자씩 세로로 접히던 문제) */
+  @media(max-width:700px){
+    .topbar-inner{gap:12px}
+    .who{margin-left:auto}
+    .who-name,.view-site{display:none}
+    .logout-btn{border-left:0;padding-left:0}
+  }
+  @media(max-width:440px){
+    .topbar-inner{gap:8px}
+    .logo{font-size:14.5px;gap:6px}
+    .dm-btn{padding:7px 11px;font-size:12px}
+    .who{gap:6px}
+    .avatar{width:26px;height:26px}
+  }
   .page-head{display:flex;justify-content:space-between;align-items:flex-end;padding:38px 0 24px;flex-wrap:wrap;gap:16px}
   .page-head h1{font-size:24px;line-height:1.35;margin:0 0 8px;font-weight:700;letter-spacing:-.016em}
   .page-head p{margin:0;color:var(--ink-2);font-size:14px}

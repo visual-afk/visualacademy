@@ -123,7 +123,7 @@ export const classes: AcademyClass[] = [
   },
   {
     id: 8, slug: "damaged-hair-softening", name: "손상모 연화 노하우", cat: "특강", field: "모발과학", target: "디자이너",
-    day: "미정", time: "13:00~18:00", place: "강남 본원", date: null, capacity: null, applied: 24,
+    day: "미정", time: "13:00~18:00", place: "강남 본원", date: null, capacity: null, applied: 24, goal: 30,
     price: 350000, type: "waitlist", cert: false, noob: false, step: 3, taxType: "taxable",
     summary: "손상모 시술의 핵심, 연화 단계를 집중적으로 다루는 특강",
   },

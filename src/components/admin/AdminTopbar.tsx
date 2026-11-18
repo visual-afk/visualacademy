@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ROUTES } from "@/data/site";
 import { getAdmin } from "@/lib/auth";
 
-/** 관리자 상단바 — 신청자 목록·배치 상담·개설 알림은 아직 화면이 없어 비활성 표시 */
-export default async function AdminTopbar({ active }: { active?: "dashboard" | "payments" }) {
+/** 관리자 상단바 — 신청자 목록·배치 상담·개설 알림은 아직 화면이 없어 비활성 표시 (메뉴 순서는 프로토타입 그대로, 문의함이 마지막) */
+export default async function AdminTopbar({ active }: { active?: "dashboard" | "payments" | "inquiries" }) {
   const admin = await getAdmin();
   const name = admin?.name ?? "관리자";
   return (
@@ -16,6 +16,7 @@ export default async function AdminTopbar({ active }: { active?: "dashboard" | "
           <span className="soon" title="준비 중">신청자 목록</span>
           <span className="soon" title="준비 중">배치 상담</span>
           <span className="soon" title="준비 중">개설 알림</span>
+          <Link href={ROUTES.adminInquiries} className={active === "inquiries" ? "on" : undefined}>문의함</Link>
         </nav>
         <Link className="dm-btn" href={ROUTES.adminDesign}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -26,8 +27,8 @@ export default async function AdminTopbar({ active }: { active?: "dashboard" | "
           디자인 모드
         </Link>
         <div className="who">
-          <div className="avatar">{name.slice(0, 2)}</div>{name}님
-          <Link className="site-link" href={ROUTES.home}>사이트 보기 ↗</Link>
+          <div className="avatar">{name.slice(0, 2)}</div><span className="who-name">{name}님</span>
+          <Link className="site-link view-site" href={ROUTES.home}>사이트 보기 ↗</Link>
           <form action="/auth/logout?next=/admin/login" method="post">
             <button type="submit" className="site-link logout-btn">로그아웃</button>
           </form>
