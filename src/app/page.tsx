@@ -7,6 +7,7 @@ import { ROUTES } from "@/data/site";
 import { getMainContent, type MainContent } from "@/data/siteContent";
 import { getClasses } from "@/lib/api";
 import { dday, ddayLabel, shortDate } from "@/lib/format";
+import { optionLine } from "@/lib/pricing";
 import { badgeClass, CATEGORY_LABELS, computeStatus } from "@/lib/status";
 import type { AcademyClass, ClassStatus } from "@/lib/types";
 import HeroSearch from "./HeroSearch";
@@ -76,8 +77,11 @@ function RecruitCard({ c, hot }: { c: AcademyClass & { status: ClassStatus }; ho
     ? [["구성", `영상 강의 · 수강 기간 ${c.months}개월`], ["시작", "결제 후 바로 시작 가능"]]
     : wait
       ? [["일정", "인원이 차면 일정 안내"], ["구성", `${CATEGORY_LABELS[c.cat] ?? c.cat} · ${c.weeks ? `${c.weeks}주 과정` : "1일 과정"}`]]
-      : [["일정", `${shortDate(c.date!)} 개강${c.weeks ? ` · 총 ${c.weeks}주` : ""}`], ["장소", `${c.place} · ${c.day}요일${c.weeks ? "반" : ""}`]];
-  const seat = online
+      : [
+          ["일정", c.date ? `${shortDate(c.date)} 개강${c.weeks ? ` · 총 ${c.weeks}주` : ""}` : (optionLine(c) ?? "신청 후 안내")],
+          ["장소", c.day ? `${c.place} · ${c.day}요일${c.weeks ? "반" : ""}` : (c.place ?? "장소 미정")],
+        ];
+  const seat = online || (!wait && c.capacity == null)
     ? { label: "모집 현황", value: <>인원 제한 없음</>, pct: 100, dim: true }
     : wait
       ? { label: "개설 기준", value: <><b>{applied}명</b> / 개설 기준 {c.goal ?? applied}명</>, pct: c.goal ? Math.min(100, (applied / c.goal) * 100) : 0, dim: false }
@@ -91,7 +95,7 @@ function RecruitCard({ c, hot }: { c: AcademyClass & { status: ClassStatus }; ho
         ) : wait ? (
           <span className="dday mute">{applied}명 대기 중</span>
         ) : (
-          <span className="dday">개강 {ddayLabel(c.date!)}</span>
+          <span className="dday">{c.date ? `개강 ${ddayLabel(c.date)}` : "모집중"}</span>
         )}
       </div>
       <h3><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>

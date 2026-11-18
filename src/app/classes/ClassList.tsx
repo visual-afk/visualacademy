@@ -7,6 +7,7 @@ import ClassThumb from "@/components/site/ClassThumb";
 import GrowthRoadmap, { type RoadmapColumn } from "@/components/site/GrowthRoadmap";
 import { ROUTES } from "@/data/site";
 import { dayLabel, ddayLabel } from "@/lib/format";
+import { optionLine } from "@/lib/pricing";
 import { badgeClass, computeStatus, ctaLabel, STEP_NAMES } from "@/lib/status";
 import type { AcademyClass, ClassStatus } from "@/lib/types";
 
@@ -60,11 +61,6 @@ function matchesStatus(c: Row, f: Filters) {
 }
 function matchesDay(c: Row, f: Filters) {
   return f.day === "all" || c.day === f.day;
-}
-
-/** 회차 옵션이 있으면 "4회차 · 10회차 중 선택" */
-function optionLine(c: AcademyClass) {
-  return c.options && c.options.length > 1 ? `${c.options.map((o) => o.label.replace(/회$/, "회차")).join(" · ")} 중 선택` : null;
 }
 
 function metaLine(c: Row, withPlace: boolean) {

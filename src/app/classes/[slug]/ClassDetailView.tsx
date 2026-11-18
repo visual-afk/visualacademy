@@ -9,7 +9,7 @@ import { tileClass } from "@/components/site/ClassThumb";
 import { ROUTES } from "@/data/site";
 import { getClassDetail, refundPolicy } from "@/lib/classes";
 import { fullDate, ddayLabel, priceLabel, won } from "@/lib/format";
-import { discountPct, earlyActive, optionCompare, optionPrice } from "@/lib/pricing";
+import { discountPct, earlyActive, optionCompare, optionLine, optionPrice } from "@/lib/pricing";
 import { badgeClass, CATEGORY_LABELS, computeStatus, ctaLabel } from "@/lib/status";
 import type { AcademyClass, ClassStatus, Instructor } from "@/lib/types";
 
@@ -24,7 +24,8 @@ function ddayChip(c: AcademyClass, status: ClassStatus): { text: string; cls: st
   if (status === "품절") return { text: "지금은 신청을 받지 않아요", cls: "line" };
   const remain = (c.capacity ?? 0) - (c.applied ?? 0);
   if (status === "마감임박") return { text: `마감임박 · 정원 ${remain}석 남음`, cls: "amber" };
-  return { text: `모집중 · 개강까지 ${ddayLabel(c.date!)}`, cls: "mint" };
+  if (!c.date) return { text: `모집중 · ${optionLine(c) ?? "일정은 신청 후 안내"}`, cls: "mint" };
+  return { text: `모집중 · 개강까지 ${ddayLabel(c.date)}`, cls: "mint" };
 }
 
 function topLines(c: AcademyClass): [string, string] {
@@ -51,10 +52,10 @@ function buyboxRows(c: AcademyClass): [string, string][] {
     ];
   }
   return [
-    ["일정", `${fullDate(c.date!)} ${c.time}`],
+    ["일정", c.date ? `${fullDate(c.date)} ${c.time ?? ""}`.trim() : (optionLine(c) ?? "신청 후 안내")],
     ["장소", c.place ?? "-"],
     ["대상", c.noob ? `${c.target} (비전공자 가능)` : c.target],
-    ["정원", `${c.capacity}명 중 ${c.applied}명 신청`],
+    ...(c.capacity != null ? [["정원", `${c.capacity}명 중 ${c.applied ?? 0}명 신청`] as [string, string]] : []),
   ];
 }
 

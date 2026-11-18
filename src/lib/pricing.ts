@@ -1,5 +1,5 @@
 /* 가격 옵션 계산 (서버·브라우저 공용) — 얼리버드는 마감일(KST, 그날 포함)까지만 적용 */
-import type { PriceOption } from "./types";
+import type { AcademyClass, PriceOption } from "./types";
 
 export const todayKst = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 
@@ -20,3 +20,8 @@ export function optionCompare(o: PriceOption, today = todayKst()): number | null
 }
 
 export const discountPct = (before: number, now: number) => Math.round((1 - now / before) * 100);
+
+/** 개강일 없이 회차를 골라 신청하는 클래스의 일정 문구 — "4회차 · 10회차 중 선택" (옵션이 하나 이하면 null) */
+export function optionLine(c: Pick<AcademyClass, "options">): string | null {
+  return c.options && c.options.length > 1 ? `${c.options.map((o) => o.label.replace(/회$/, "회차")).join(" · ")} 중 선택` : null;
+}
