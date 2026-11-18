@@ -18,7 +18,7 @@ export default async function SignupPage({ searchParams }: PageProps<"/signup">)
   const user = real ? await getUser() : null;
   const profile = user ? await getProfile(user.id) : null;
   /* 이미 가입을 마친 회원 */
-  if (profile?.name && profile.phone) redirect(next ?? "/mypage");
+  if (profile?.agreed_at && profile.name && profile.phone) redirect(next ?? "/mypage");
 
   const meta = user?.user_metadata ?? {};
   return (
