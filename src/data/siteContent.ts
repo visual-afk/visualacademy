@@ -31,7 +31,7 @@ export const DEF_MAIN = {
       { name: "초보- 비기너 단계의 디자이너", desc: "아직 손이 서툴고 기본기부터\n제대로 다지고 싶은 분", img: ROADMAP_IMAGES[0], cls: "디자이너의 정석 레벨 1", meta: "월요일반 · 10주 · 강남 본원", chips: "마인드셋 특강" },
       { name: "중급 디자이너", desc: "기본은 되지만 어려운 모발과\n시술 앞에서 자신이 없는 분", img: ROADMAP_IMAGES[1], cls: "디자이너의 정석 레벨 2", meta: "화요일반 · 10주 · 레벨1 수료 필요", chips: "" },
       { name: "고급 디자이너", desc: "어떤 손님이 와도 흔들림 없는 실력으로\n지명 고객을 늘리고 싶은 분", img: ROADMAP_IMAGES[2], cls: "디자이너의 정석 레벨 3", meta: "수요일반 · 10주 · 레벨2 수료 필요", chips: "이천플랜, 어프로치 연화" },
-      { name: "미용 경영의 신", desc: "내 매장을 열었거나, 시술에서 벗어나\n운영으로 성장하고 싶은 분", img: ROADMAP_IMAGES[3], cls: "디자이너의 정석 레벨 4", meta: "목요일반 · 10주 · 레벨3 수료 필요", chips: "미용실 경영 마스터 클래스 (온라인)" },
+      { name: "미용 경영의 신", desc: "내 매장을 열었거나, 시술에서 벗어나\n운영으로 성장하고 싶은 분", img: ROADMAP_IMAGES[3], cls: "디자이너의 정석 레벨 4", meta: "목요일반 · 10주 · 레벨3 수료 필요", chips: "미용 경영의 신 (온라인)" },
     ],
   },
   recruit: { title: "이번 기수 모집중", desc: "클릭 전에 판단이 끝나도록 일정과 수강료를 먼저 보여드립니다.", count: "3", rule: "imminent" },
@@ -44,7 +44,7 @@ export const DEF_MAIN = {
     ],
   },
   online: {
-    tag: "ONLINE", title: "시간이 안 맞아도, 온라인으로", desc: "월 2000플랜 · 미용실 경영 마스터 클래스 — 수강 기간 9개월, 원하는 시간에 들으세요.",
+    tag: "ONLINE", title: "시간이 안 맞아도, 온라인으로", desc: "월 2000플랜 · 미용 경영의 신 — 수강 기간 9개월, 원하는 시간에 들으세요.",
     feats: "수강 기간 9개월, 언제든 시작, 반복 시청", btn: "온라인 강의 보기", priceName: "월 2000플랜", price: "550,000원",
   },
   /*
@@ -56,7 +56,7 @@ export const DEF_MAIN = {
     cats: "레벨교육, 어프로치·연화, 모발과학, 온라인 클래스",
     levelOrder: "리현, 준모, 창민, 성실, 호승",
     list: [
-      { name: "이유경", role: "대표원장", img: "/images/instructors/lee-yukyung.jpg", insta: "", cats: "온라인 클래스", tags: "미용실 경영 마스터 클래스, 월 2000플랜", career: "", career2Title: "", career2: "", intro: "", link: "/about/greeting" },
+      { name: "이유경", role: "대표원장", img: "/images/instructors/lee-yukyung.jpg", insta: "", cats: "온라인 클래스", tags: "미용 경영의 신, 월 2000플랜", career: "", career2Title: "", career2: "", intro: "", link: "/about/greeting" },
       { name: "순돌", role: "이사 · 원장", img: "/images/instructors/soondol.jpg", insta: "visual_soondol", cats: "모발과학", tags: "",
         career: "현) 복구매직 전문 살롱 10년 운영\n현) 비주얼 아카데미 교육이사\n현) 비주얼랩 교육이사\n현) 트리필드 이사\n현) 비주얼뷰티 부사장",
         career2Title: "그 외 이력",
@@ -135,7 +135,7 @@ export const DEF_LIST = {
       { label: "초보", name: "레벨 1", chips: "", card: "STEP 1 · 초보 — 디자이너의 정석 레벨 1", meta: "월요일반 · 10주 · 강남 본원" },
       { label: "중급", name: "레벨 2", chips: "", card: "STEP 2 · 중급 — 디자이너의 정석 레벨 2", meta: "화요일반 · 10주 · 레벨1 수료 필요" },
       { label: "고급", name: "레벨 3", chips: "손상모 연화 노하우", card: "STEP 3 · 고급 — 디자이너의 정석 레벨 3", meta: "수요일반 · 10주 · 레벨2 수료 필요" },
-      { label: "미용 경영의 신", name: "레벨 4", chips: "창업·경영 컨설팅, 미용실 경영 마스터 클래스 (온라인), 월 2000플랜 (온라인)", card: "STEP 4 · 미용 경영의 신 — 디자이너의 정석 레벨 4", meta: "목요일반 · 10주 · 레벨3 수료 필요" },
+      { label: "미용 경영의 신", name: "레벨 4", chips: "창업·경영 컨설팅, 미용 경영의 신 (온라인), 월 2000플랜 (온라인)", card: "STEP 4 · 미용 경영의 신 — 디자이너의 정석 레벨 4", meta: "목요일반 · 10주 · 레벨3 수료 필요" },
     ],
   },
   filters: {

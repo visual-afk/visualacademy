@@ -19,5 +19,5 @@ export const payments: Payment[] = [
   { id: "VA-20260913-0113", className: "창업·경영 컨설팅", cat: "경영", applicant: "장서연", method: "신용카드", amount: 450000, taxType: "taxable", paidAt: "2026-09-13 17:50", status: "결제완료" },
   { id: "VA-20261002-0151", className: "퍼스널 컬러 진단 교육", cat: "특강", applicant: "오세린", method: "신용카드", amount: 500000, taxType: "taxable", paidAt: "2026-10-02 11:20", status: "결제완료" },
   { id: "VA-20261006-0158", className: "디자이너의 정석 레벨 1", cat: "정석", applicant: "권나래", method: "간편결제", amount: 1200000, taxType: "taxable", paidAt: "2026-10-06 15:47", status: "결제완료" },
-  { id: "VA-20261009-0163", className: "미용실 경영 마스터 클래스", cat: "온라인", applicant: "류지환", method: "가상계좌", amount: 890000, taxType: "taxable", paidAt: "2026-10-09 09:31", status: "입금대기" },
+  { id: "VA-20261009-0163", className: "미용 경영의 신", cat: "온라인", applicant: "류지환", method: "가상계좌", amount: 890000, taxType: "taxable", paidAt: "2026-10-09 09:31", status: "입금대기" },
 ];
