@@ -47,6 +47,8 @@ export interface ClassDetail {
   faqs: Faq[];
   /** 상세페이지 본문 이미지 (세로로 긴 이미지). 없으면 자리표시 */
   detailImage?: string;
+  /** 아임웹에서 옮겨 온 상세페이지 본문 (scripts/import-imweb-details.ts 가 정리·저장). 상세 이미지가 없을 때 보여준다 */
+  detailHtml?: string;
   /** 온라인 강의 1강 무료 미리보기 */
   preview?: { title: string; desc: string; duration: string };
   buyboxQuote: string;

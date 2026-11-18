@@ -158,4 +158,12 @@
   }
 
   .site-footer{padding:64px 0 46px}
+
+  /* 아임웹에서 옮겨 온 상세 본문 */
+  .imweb-detail{max-width:860px;margin:0 auto 40px;text-align:center;font-size:15px;line-height:1.75;color:var(--ink);word-break:keep-all;overflow-wrap:anywhere}
+  .imweb-detail img{display:block;max-width:100%;height:auto;margin:0 auto}
+  .imweb-detail p{margin:0}
+  .imweb-detail iframe{display:block;width:100%;max-width:860px;aspect-ratio:16/9;height:auto;margin:16px auto;border:0}
+  .imweb-detail table{margin:16px auto;border-collapse:collapse;max-width:100%}
+  .imweb-detail td,.imweb-detail th{border:1px solid var(--line);padding:8px 12px}
 }
