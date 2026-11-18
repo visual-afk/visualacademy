@@ -68,7 +68,7 @@ export const classes: AcademyClass[] = [
     id: 4, slug: "designer-level-4", name: "디자이너의 정석 레벨 4", cat: "정석", field: "모발과학", target: "원장·창업",
     day: null, time: null, place: null, date: null, capacity: null, applied: null,
     price: null, type: "upcoming", cert: true, noob: false, step: 4, level: 4, taxType: "taxable", weeks: 10,
-    summary: "시술에서 벗어나 운영으로 성장하는 오토사장 단계",
+    summary: "시술에서 벗어나 운영으로 성장하는 미용 경영의 신 단계",
   },
 
   /* ── 단독 특강 ── */
@@ -158,7 +158,7 @@ export const classes: AcademyClass[] = [
       ],
       curriculumTitle: "강의 구성 (총 6강)",
       lessons: [
-        { t: "1강 · 오토사장 시스템 개요", d: "매장이 스스로 돌아가는 구조 만들기" },
+        { t: "1강 · 경영 시스템 개요", d: "매장이 스스로 돌아가는 구조 만들기" },
         { t: "2강 · 예약·매출 자동화", d: "예약 시스템과 정산 흐름 세팅" },
         { t: "3강 · 재구매 설계", d: "고객 리텐션을 위한 운영 루틴" },
         { t: "4강 · 팀 위임", d: "디자이너 채용과 업무 매뉴얼" },
@@ -176,7 +176,7 @@ export const classes: AcademyClass[] = [
         { q: "수강 기간이 끝나면 어떻게 되나요?", a: "만료 30일 전 알림톡으로 안내드리고, 연장 신청도 가능해요." },
         { q: "수료증이 발급되나요?", a: "전 강의 시청 완료 시 수료증이 발급돼요." },
       ],
-      preview: { title: "1강 · 오토사장 시스템 개요", desc: "매장이 스스로 돌아가는 구조 만들기", duration: "12:34" },
+      preview: { title: "1강 · 경영 시스템 개요", desc: "매장이 스스로 돌아가는 구조 만들기", duration: "12:34" },
       buyboxQuote: "\"원할 때 이어볼 수 있어서 훨씬 편했습니다.\"",
       doneNotes: [
         "지금 바로 강의를 수강할 수 있어요",
@@ -186,7 +186,7 @@ export const classes: AcademyClass[] = [
     },
   },
   {
-    id: 12, slug: "auto-owner", name: "오토사장", cat: "온라인", field: "경영·마케팅", target: "원장·창업",
+    id: 12, slug: "auto-owner", name: "미용실 경영 마스터 클래스", cat: "온라인", field: "경영·마케팅", target: "원장·창업",
     day: "상시", time: "-", place: "온라인", date: null, capacity: null, applied: 8,
     price: 890000, type: "online", cert: false, noob: false, step: 4, taxType: "taxable", months: 9,
     summary: "시술에서 벗어나 매장이 스스로 돌아가게 만드는 자동화 운영 시스템",

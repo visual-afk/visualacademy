@@ -1,7 +1,7 @@
 import { dday } from "./format";
 import type { AcademyClass, ClassStatus, RoadmapStep } from "./types";
 
-export const STEP_NAMES = ["초보", "중급", "고급", "오토사장"] as const;
+export const STEP_NAMES = ["초보", "중급", "고급", "미용 경영의 신"] as const;
 
 export function stepLabel(step: RoadmapStep): string {
   return `STEP ${step} · ${STEP_NAMES[step - 1]}`;
