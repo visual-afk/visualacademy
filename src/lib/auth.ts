@@ -58,11 +58,14 @@ export async function ensureProfile(user: User, kakao: KakaoAccount = { name: nu
   const db = getAdminSupabase();
   const existing = await getProfile(user.id);
   if (existing) {
-    // 예전에 휴대폰 없이 만들어진 회원 — 카카오 값으로 빈 칸만 채운다
-    if ((!existing.phone && kakao.phone) || (!existing.name && kakao.name)) {
+    // 가입 전(약관 동의 전)이면 카카오 실명·휴대폰으로 덮어쓰고(닉네임이 이름으로 들어간 경우), 가입 후에는 빈 칸만 채운다
+    const fresh = !existing.agreed_at;
+    const name = (fresh ? kakao.name : null) ?? existing.name ?? kakao.name;
+    const phone = (fresh ? kakao.phone : null) ?? existing.phone ?? kakao.phone;
+    if (name !== existing.name || phone !== existing.phone) {
       const { data } = await db
         .from("profiles")
-        .update({ phone: existing.phone ?? kakao.phone, name: existing.name ?? kakao.name, updated_at: new Date().toISOString() })
+        .update({ phone, name, updated_at: new Date().toISOString() })
         .eq("id", existing.id)
         .select(cols)
         .single();
