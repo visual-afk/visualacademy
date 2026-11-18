@@ -20,7 +20,7 @@ export type OrderRow = {
   amount: number; status: string; created_at: string;
 };
 
-const PURCHASABLE_BLOCK = ["종료", "마감", "개설대기", "개설예정"];
+const PURCHASABLE_BLOCK = ["종료", "마감", "품절", "개설대기", "개설예정"];
 
 /** 신청 가능 여부 — 0원(무료 세미나)도 신청은 받는다 */
 export function canPurchase(c: AcademyClass): boolean {

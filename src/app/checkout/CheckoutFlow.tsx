@@ -126,7 +126,7 @@ export default function CheckoutFlow({
 
   /* 신청할 수 없는 클래스 */
   const status = c ? computeStatus(c) : null;
-  const purchasable = c && c.price !== null && !["종료", "마감", "개설대기", "개설예정"].includes(status!);
+  const purchasable = c && c.price !== null && !["종료", "마감", "품절", "개설대기", "개설예정"].includes(status!);
   if (!c || !purchasable) {
     return (
       <>

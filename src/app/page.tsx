@@ -58,7 +58,7 @@ function roadmapColumns(c: MainContent["roadmap"]): RoadmapColumn[] {
 function pickRecruit(all: AcademyClass[], rule: string, count: number) {
   const rows = all
     .map((c) => ({ ...c, status: computeStatus(c) }))
-    .filter((c) => !["종료", "마감", "개설예정"].includes(c.status));
+    .filter((c) => !["종료", "마감", "품절", "개설예정"].includes(c.status));
   const urgency = (c: AcademyClass & { status: ClassStatus }) =>
     c.status === "마감임박" ? 0 : c.date ? 1 : c.type === "online" ? 2 : 3;
   if (rule === "imminent") rows.sort((a, b) => urgency(a) - urgency(b) || (a.date && b.date ? dday(a.date) - dday(b.date) : 0));

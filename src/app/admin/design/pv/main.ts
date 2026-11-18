@@ -27,7 +27,7 @@ type Row = AcademyClass & { status: ClassStatus };
 
 /** page.tsx pickRecruit 와 같은 규칙 */
 function pickRecruit(rule: string, count: number): Row[] {
-  const rows = classes.map((c) => ({ ...c, status: computeStatus(c) })).filter((c) => !["종료", "마감", "개설예정"].includes(c.status));
+  const rows = classes.map((c) => ({ ...c, status: computeStatus(c) })).filter((c) => !["종료", "마감", "품절", "개설예정"].includes(c.status));
   const urgency = (c: Row) => (c.status === "마감임박" ? 0 : c.date ? 1 : c.type === "online" ? 2 : 3);
   if (rule === "imminent") rows.sort((a, b) => urgency(a) - urgency(b) || (a.date && b.date ? dday(a.date) - dday(b.date) : 0));
   if (rule === "start") rows.sort((a, b) => (a.date ? dday(a.date) : 9999) - (b.date ? dday(b.date) : 9999));

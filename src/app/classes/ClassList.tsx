@@ -15,6 +15,7 @@ const STATUS_TABS: { value: string; label: string }[] = [
   { value: "모집중", label: "이번 기수 모집중" },
   { value: "온라인상시", label: "상시 수강" },
   { value: "개설대기", label: "개설 대기" },
+  { value: "품절", label: "품절" },
   { value: "종료", label: "종료된 클래스" },
 ];
 const ROW_CATS = [
@@ -48,9 +49,14 @@ function matchesCommon(c: Row, f: Filters) {
     (!f.q || c.name.toLowerCase().includes(f.q.toLowerCase()))
   );
 }
-/** 상태 탭 "전체"는 종료된 클래스를 숨긴다 */
+/** 필터·검색을 하나라도 쓰고 있는지 (상태 탭 제외) */
+function filtering(f: Filters) {
+  return f.cat !== "all" || f.field !== "all" || f.target !== "all" || f.day !== "all" || f.cert !== "all" || f.noob !== "all" || !!f.q;
+}
+/** 상태 탭 "전체"는 종료된 클래스를 숨기고, 품절은 필터·검색을 쓸 때만 보여준다 */
 function matchesStatus(c: Row, f: Filters) {
-  return f.status === "all" ? c.status !== "종료" : c.status === f.status;
+  if (f.status !== "all") return c.status === f.status;
+  return c.status !== "종료" && (c.status !== "품절" || filtering(f));
 }
 function matchesDay(c: Row, f: Filters) {
   return f.day === "all" || c.day === f.day;
@@ -59,6 +65,7 @@ function matchesDay(c: Row, f: Filters) {
 function metaLine(c: Row, withPlace: boolean) {
   const place = withPlace ? ` · ${c.place}` : "";
   if (c.status === "종료") return `${c.date} 종료됨${place}`;
+  if (c.status === "품절") return "지금은 신청을 받지 않아요";
   if (c.type === "online") return withPlace ? `상시 · 수강 기간 ${c.months}개월` : "상시";
   if (c.type === "waitlist") return `일정 미정${place}`;
   return `${c.date} (${ddayLabel(c.date!)})${place}`;
@@ -66,7 +73,7 @@ function metaLine(c: Row, withPlace: boolean) {
 
 function ClassButton({ c, small }: { c: Row; small?: boolean }) {
   const label = ctaLabel(c, c.status);
-  const disabled = c.status === "종료" || c.status === "마감";
+  const disabled = c.status === "종료" || c.status === "마감" || c.status === "품절";
   const ghost = disabled || c.type === "waitlist" || c.type === "upcoming";
   const cls = `btn ${ghost ? "btn-ghost" : "btn-mint"}${small ? " btn-sm" : ""}`;
   if (disabled) {
@@ -137,7 +144,7 @@ function LinkedCard({ c }: { c: Row }) {
 
 function RowCard({ c }: { c: Row }) {
   return (
-    <div className={`row-card${c.status === "종료" ? " past" : ""}`}>
+    <div className={`row-card${c.status === "종료" || c.status === "품절" ? " past" : ""}`}>
       <div className="rctop">
         <span className="badge badge-line">{c.cat}</span>
         <span className={`badge ${badgeClass(c.status)}`}>{c.status}</span>
@@ -148,11 +155,13 @@ function RowCard({ c }: { c: Row }) {
           <h3><Link className="card-link" href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
         </div>
       </div>
-      <p className="meta">
-        {dayLabel(c.day)}
-        <span className="sep">·</span>
-        {c.time}
-      </p>
+      {c.status !== "품절" && (
+        <p className="meta">
+          {dayLabel(c.day)}
+          <span className="sep">·</span>
+          {c.time}
+        </p>
+      )}
       <p className="meta" style={{ marginTop: 2 }}>{metaLine(c, true)}</p>
       <div className="tags">
         {c.step && <span className={`step-chip s${c.step}`}>STEP {c.step} · {STEP_NAMES[c.step - 1]}</span>}
@@ -271,7 +280,11 @@ export default function ClassList({ classes }: { classes: AcademyClass[] }) {
           <div className="frow">
             <span className="flabel">상태</span>
             {STATUS_TABS.map((t) => (
-              <button key={t.value} type="button" className={`tab${f.status === t.value ? " on" : ""}`} onClick={() => set("status")(t.value)}>
+              <button key={t.value} type="button" className={`tab${f.status === t.value ? " on" : ""}`} onClick={() => {
+                set("status")(t.value);
+                // 품절 수업은 레벨에 묶이지 않아 수업별 보기에서만 보인다
+                if (t.value === "품절") setView("class");
+              }}>
                 {t.label}
               </button>
             ))}

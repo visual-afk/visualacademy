@@ -21,6 +21,7 @@ function ddayChip(c: AcademyClass, status: ClassStatus): { text: string; cls: st
   if (status === "개설예정") return { text: "개설 예정 · 일정이 정해지면 알려드려요", cls: "line" };
   if (status === "종료") return { text: "모집이 종료된 클래스예요", cls: "line" };
   if (status === "마감") return { text: "정원 마감", cls: "red" };
+  if (status === "품절") return { text: "지금은 신청을 받지 않아요", cls: "line" };
   const remain = (c.capacity ?? 0) - (c.applied ?? 0);
   if (status === "마감임박") return { text: `마감임박 · 정원 ${remain}석 남음`, cls: "amber" };
   return { text: `모집중 · 개강까지 ${ddayLabel(c.date!)}`, cls: "mint" };
@@ -176,7 +177,7 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
 
   const cta = ctaLabel(c, status);
   const isNotify = c.type === "waitlist" || c.type === "upcoming";
-  const closed = status === "종료" || status === "마감";
+  const closed = status === "종료" || status === "마감" || status === "품절";
   const ctaButton = (cls = "btn btn-mint") =>
     closed ? (
       <button type="button" className={cls} disabled>{cta}</button>
