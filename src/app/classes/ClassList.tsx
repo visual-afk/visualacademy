@@ -224,9 +224,14 @@ export default function ClassList({ classes }: { classes: AcademyClass[] }) {
     const statusCls = oc.status === "모집중" ? "st-mint" : oc.status === "마감임박" ? "st-amber" : "st-line";
     const statusText = oc.status === "개설예정" ? "개설 예정" : oc.status;
     const linked = rowClasses.filter((r) => r.step === oc.level);
-    const meta = oc.type === "upcoming"
-      ? `${["월", "화", "수", "목"][i]}요일반 · ${oc.weeks}주 · 레벨${i} 수료 필요`
-      : `${oc.day}요일반 · ${oc.weeks}주 · ${i === 0 ? oc.place : `레벨${i} 수료 필요`}`;
+    // 정해지지 않은 요일·주차는 빼고 보여준다
+    const meta = [
+      oc.day && oc.type !== "upcoming" ? `${oc.day}요일반` : null,
+      oc.weeks ? `${oc.weeks}주` : null,
+      i === 0 ? (oc.type === "upcoming" ? "개설 예정" : oc.place) : `레벨${i} 수료 필요`,
+    ]
+      .filter(Boolean)
+      .join(" · ");
     return {
       labelPos: i < 2 ? "top" : "bottom",
       title: STEP_NAMES[i],

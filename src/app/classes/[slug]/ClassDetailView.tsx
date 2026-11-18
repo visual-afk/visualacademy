@@ -40,7 +40,7 @@ function buyboxRows(c: AcademyClass): [string, string][] {
       ["형태", "VOD + 실습 자료 다운로드"],
     ];
   }
-  if (c.type === "upcoming") return [["일정", "개설 예정"], ["과정", `총 ${c.weeks}주`]];
+  if (c.type === "upcoming") return [["일정", "개설 예정"], ...(c.weeks ? [["과정", `총 ${c.weeks}주`] as [string, string]] : [])];
   if (c.type === "waitlist") {
     return [
       ["일정", "미정"],
