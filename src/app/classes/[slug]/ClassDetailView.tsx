@@ -7,7 +7,7 @@ import { useToast } from "@/components/common/useToast";
 import Accordion from "@/components/site/Accordion";
 import { ROUTES } from "@/data/site";
 import { getClassDetail, refundPolicy } from "@/lib/classes";
-import { fullDate, ddayLabel, priceLabel } from "@/lib/format";
+import { fullDate, ddayLabel, priceLabel, won } from "@/lib/format";
 import { badgeClass, CATEGORY_LABELS, computeStatus, ctaLabel } from "@/lib/status";
 import type { AcademyClass, ClassStatus, Instructor } from "@/lib/types";
 
@@ -320,6 +320,13 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
               <span className="bb-price">{priceLabel(c)}</span>
               <span className="bb-unit">{unit}</span>
             </div>
+            {c.options && c.options.length > 1 && (
+              <ul className="bb-options">
+                {c.options.map((o) => (
+                  <li key={o.label}><span>{o.label}</span><b>{won(o.price)}</b></li>
+                ))}
+              </ul>
+            )}
             <span className={`bb-dday ${chip.cls}`}>{chip.text}</span>
             <dl className="bb-dl">
               {buyboxRows(c).map(([k, v]) => (

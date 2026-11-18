@@ -43,7 +43,8 @@ export function won(n: number): string {
   return n.toLocaleString("ko-KR") + "원";
 }
 
-export function priceLabel(c: Pick<AcademyClass, "price">): string {
+export function priceLabel(c: Pick<AcademyClass, "price" | "options">): string {
+  if (c.options && c.options.length > 1) return `${won(Math.min(...c.options.map((o) => o.price)))}~`;
   if (c.price === null) return "미정";
   if (c.price === 0) return "무료";
   return won(c.price);

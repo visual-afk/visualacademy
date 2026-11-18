@@ -27,21 +27,25 @@ export function canPurchase(c: AcademyClass): boolean {
 }
 
 /** 주문 생성 — 금액은 항상 DB 의 클래스 가격으로 정한다 (브라우저가 보낸 금액은 믿지 않음) */
-export async function createOrder(profile: Profile, slug: string, applicant: Applicant, agreements: Record<string, boolean>) {
+export async function createOrder(profile: Profile, slug: string, applicant: Applicant, agreements: Record<string, boolean>, optionIndex?: number) {
   const c = await getClass(slug);
   if (!c) return { error: "클래스를 찾을 수 없어요" } as const;
   if (!canPurchase(c)) return { error: "지금은 신청할 수 없는 클래스예요" } as const;
+  // 가격 옵션이 있는 클래스는 고른 옵션의 가격으로 (브라우저는 몇 번째 옵션인지만 보낸다)
+  const option = c.options?.length ? c.options[optionIndex ?? -1] : undefined;
+  if (c.options?.length && !option) return { error: "수강 옵션을 골라주세요" } as const;
+  const amount = option ? option.price : c.price!;
 
   const db = getAdminSupabase();
   const { data: no, error: noErr } = await db.rpc("next_order_no");
   if (noErr) throw new Error(noErr.message);
   const { data, error } = await db
     .from("orders")
-    .insert({ order_no: no as string, profile_id: profile.id, class_id: c.id, applicant, agreements, amount: c.price!, status: "결제대기" })
+    .insert({ order_no: no as string, profile_id: profile.id, class_id: c.id, applicant, agreements, amount, status: "결제대기", ...(option ? { option_label: option.label } : {}) })
     .select("order_no, amount")
     .single();
   if (error) throw new Error(error.message);
-  return { orderNo: data.order_no as string, amount: data.amount as number, orderName: c.name, cls: c } as const;
+  return { orderNo: data.order_no as string, amount: data.amount as number, orderName: option ? `${c.name} · ${option.label}` : c.name, cls: c } as const;
 }
 
 async function getOrderByNo(orderNo: string): Promise<OrderRow | null> {

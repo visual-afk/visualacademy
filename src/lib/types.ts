@@ -74,6 +74,8 @@ export interface AcademyClass {
   applied: number | null;
   /** 원 단위, 0 = 무료, null = 미정 */
   price: number | null;
+  /** 가격 옵션이 있으면 고객이 하나를 골라 결제한다 (price 는 가장 싼 옵션) */
+  options?: PriceOption[];
   type: ClassType;
   cert: boolean;
   noob: boolean;
@@ -99,6 +101,12 @@ export interface Instructor {
   name: string;
   role: string;
   desc: string;
+}
+
+/** 가격 옵션 — 예) { label: "4회", price: 350000 } */
+export interface PriceOption {
+  label: string;
+  price: number;
 }
 
 export type PaymentStatus = "결제완료" | "부분환불" | "환불완료" | "입금대기";

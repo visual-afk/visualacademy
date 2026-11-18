@@ -102,6 +102,12 @@ function imgStyle(img: Img): React.CSSProperties {
  * 클래스 등록·편집 폼. 프로토타입(10.14)에서 기본 정보와 콘텐츠 관리가 별도 화면으로 분리돼
  * mode 로 두 화면을 나눠 렌더한다 — basic: /admin/classes/new, /admin/classes/[id]/edit · content: /admin/classes/[id]/content
  */
+/** 숫자만 남겨 1,234,000 형태로 */
+const fmtWon = (v: string) => {
+  const raw = v.replace(/[^0-9]/g, "");
+  return raw ? parseInt(raw, 10).toLocaleString("ko-KR") : "";
+};
+
 export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass }) {
   const router = useRouter();
   const classId = src?.id;
@@ -123,6 +129,10 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
   const [seminarPlace, setSeminarPlace] = useState(src?.type === "seminar" ? src.place ?? "" : "코엑스 컨퍼런스룸 B");
   const [months, setMonths] = useState(src?.months ?? 9);
   const [price, setPrice] = useState(src?.price != null ? src.price.toLocaleString("ko-KR") : "");
+  /* 가격 옵션 (예: 4회 / 10회) — 있으면 단일 가격 대신 고객이 하나를 골라 결제한다 */
+  const [options, setOptions] = useState<{ label: string; price: string }[]>(
+    () => src?.options?.map((o) => ({ label: o.label, price: o.price.toLocaleString("ko-KR") })) ?? [],
+  );
   const [taxType, setTaxType] = useState<TaxType>(src?.taxType ?? "taxable");
   const [summary, setSummary] = useState(src?.summary ?? "");
   const [forWhom, setForWhom] = useState(src?.detail?.checklist.join("\n") ?? "");
@@ -176,7 +186,9 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
 
   const isSeminar = cat === "세미나";
   const isOnline = type === "online";
-  const priceNum = parseInt(price.replace(/[^0-9]/g, "") || "0", 10);
+  const num = (v: string) => parseInt(v.replace(/[^0-9]/g, "") || "0", 10);
+  const optionList = options.map((o) => ({ label: o.label.trim(), price: num(o.price) }));
+  const priceNum = optionList.length ? Math.min(...optionList.map((o) => o.price)) : num(price);
   const tax = taxBreakdown(priceNum, taxType);
 
   const changeCat = (c: ClassCategory) => {
@@ -213,7 +225,10 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
     if (!name.trim()) return "클래스명을 입력해주세요";
     if (type === "offline" && !date) return "개강일을 입력해주세요";
     if (isSeminar && !seminarPlace.trim()) return "세미나 장소를 입력해주세요";
-    if (!priceNum && !isSeminar) return "가격을 입력해주세요";
+    if (optionList.length) {
+      if (optionList.some((o) => !o.label)) return "가격 옵션 이름을 입력해주세요 (예: 4회)";
+      if (optionList.some((o) => !o.price && !isSeminar)) return "가격 옵션 금액을 입력해주세요";
+    } else if (!priceNum && !isSeminar) return "가격을 입력해주세요";
     return null;
   };
   const input = (draft: boolean): ClassInput => ({
@@ -225,16 +240,17 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
     place: isSeminar ? seminarPlace.trim() : place,
     months: type === "online" ? months : null,
     price: priceNum || (isSeminar ? 0 : null),
+    options: optionList,
     taxType, summary,
     checklist: forWhom.split("\n"),
     prep, draft,
   });
 
   /* 공개 중인 클래스의 임시저장은 사이트에 반영되면 안 돼서 이 브라우저에만 보관한다 */
-  const FORM_FIELDS = { name, cat, type, step, date, day, timeFrom, timeTo, capacity, place, seminarPlace, months, price, taxType, summary, forWhom, prep };
+  const FORM_FIELDS = { name, cat, type, step, date, day, timeFrom, timeTo, capacity, place, seminarPlace, months, price, options, taxType, summary, forWhom, prep };
   const restoreSetters: Record<string, (v: never) => void> = {
     name: setName, cat: setCat, type: setType, step: setStep, date: setDate, day: setDay, timeFrom: setTimeFrom, timeTo: setTimeTo,
-    capacity: setCapacity, place: setPlace, seminarPlace: setSeminarPlace, months: setMonths, price: setPrice, taxType: setTaxType,
+    capacity: setCapacity, place: setPlace, seminarPlace: setSeminarPlace, months: setMonths, price: setPrice, options: setOptions, taxType: setTaxType,
     summary: setSummary, forWhom: setForWhom, prep: setPrep,
   };
   /* localStorage 는 하이드레이션 뒤에만 읽을 수 있어 effect 안에서 복원한다 */
@@ -526,18 +542,49 @@ export default function ClassForm({ mode, src }: { mode: Tab; src?: AcademyClass
               <h2>가격 · 소개</h2>
               <div className="field">
                 <label htmlFor="cf-price">가격 <span className="req">*</span></label>
-                <input
-                  id="cf-price"
-                  type="text"
-                  inputMode="numeric"
-                  value={price}
-                  placeholder="예) 1,200,000"
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9]/g, "");
-                    setPrice(raw ? parseInt(raw, 10).toLocaleString("ko-KR") : "");
-                  }}
-                />
-                <p className="hint">숫자만 입력하면 자동으로 &ldquo;원&rdquo;이 붙어요. 입력한 가격은 소비자가 결제하는 최종 금액(과세 시 부가세 포함가) 기준이에요.</p>
+                {options.length === 0 ? (
+                  <input
+                    id="cf-price"
+                    type="text"
+                    inputMode="numeric"
+                    value={price}
+                    placeholder="예) 1,200,000"
+                    onChange={(e) => setPrice(fmtWon(e.target.value))}
+                  />
+                ) : (
+                  options.map((o, i) => (
+                    <div key={i} className="option-row">
+                      <input
+                        type="text"
+                        aria-label={`옵션 ${i + 1} 이름`}
+                        placeholder="예) 4회"
+                        value={o.label}
+                        onChange={(e) => setOptions(options.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))}
+                      />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        aria-label={`옵션 ${i + 1} 가격`}
+                        placeholder="예) 350,000"
+                        value={o.price}
+                        onChange={(e) => setOptions(options.map((x, j) => (j === i ? { ...x, price: fmtWon(e.target.value) } : x)))}
+                      />
+                      <button type="button" className="option-del" aria-label="옵션 삭제" onClick={() => setOptions(options.filter((_, j) => j !== i))}>삭제</button>
+                    </div>
+                  ))
+                )}
+                <button
+                  type="button"
+                  className="option-add"
+                  onClick={() => setOptions(options.length ? [...options, { label: "", price: "" }] : [{ label: "", price: price }, { label: "", price: "" }])}
+                >
+                  + 가격 옵션 {options.length ? "추가" : "나누기 (예: 4회 / 10회)"}
+                </button>
+                <p className="hint">
+                  {options.length
+                    ? "고객이 신청할 때 옵션 하나를 골라 결제해요. 상세 페이지에는 옵션별 가격이, 목록에는 가장 싼 가격부터 보여요."
+                    : "숫자만 입력하면 자동으로 “원”이 붙어요. 입력한 가격은 소비자가 결제하는 최종 금액(과세 시 부가세 포함가) 기준이에요."}
+                </p>
               </div>
               <div className="field">
                 <span className="lbl">과세 구분 <span className="req">*</span></span>

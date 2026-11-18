@@ -43,6 +43,7 @@ type ClassRow = {
   id: number; slug: string; name: string; cat: AcademyClass["cat"]; field: AcademyClass["field"]; target: AcademyClass["target"];
   type: AcademyClass["type"]; day: string | null; time: string | null; place: string | null; date: string | null;
   capacity: number | null; applied: number | null; price: number | null; tax_type: AcademyClass["taxType"];
+  price_options?: AcademyClass["options"] | null;
   cert: boolean; noob: boolean; step: AcademyClass["step"]; level: AcademyClass["level"] | null; summary: string;
   weeks: number | null; months: number | null; manual_end: boolean; draft: boolean;
   detail: Partial<ClassDetail> | null; thumbnail_url: string | null; banner_url: string | null; detail_image_url: string | null;
@@ -54,7 +55,7 @@ function rowToClass(r: ClassRow): AcademyClass {
     day: r.day, time: r.time, place: r.place, date: r.date, capacity: r.capacity,
     // 개설 예정(upcoming)은 신청 인원 개념이 없어 목업처럼 null 로 둔다
     applied: r.type === "upcoming" && !r.applied ? null : r.applied,
-    price: r.price, type: r.type, cert: r.cert, noob: r.noob, step: r.step,
+    price: r.price, ...(r.price_options?.length ? { options: r.price_options } : {}), type: r.type, cert: r.cert, noob: r.noob, step: r.step,
     ...(r.level ? { level: r.level } : {}),
     taxType: r.tax_type, summary: r.summary,
     ...(r.weeks ? { weeks: r.weeks } : {}),

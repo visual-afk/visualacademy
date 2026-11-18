@@ -97,6 +97,11 @@
 
   .buybox{position:sticky;top:104px;background:var(--bg);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:28px}
   .bb-price-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+  .bb-options{list-style:none;margin:10px 0 4px;padding:0;font-size:13px}
+  .bb-options li{display:flex;justify-content:space-between;padding:7px 0;border-top:1px dashed var(--line)}
+  .bb-options li:first-child{border-top:none}
+  .bb-options span{color:var(--ink-2)}
+  .bb-options b{font-variant-numeric:tabular-nums}
   .bb-price{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.014em}
   .bb-unit{font-size:13px;color:var(--ink-2)}
   .bb-dday{display:inline-flex;font-size:12px;font-weight:700;padding:4px 10px;border-radius:100px;margin:10px 0 18px;letter-spacing:.01em}
