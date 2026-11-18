@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import Accordion from "@/components/site/Accordion";
+import { tileClass } from "@/components/site/ClassThumb";
 import { ROUTES } from "@/data/site";
 import { getClassDetail, refundPolicy } from "@/lib/classes";
 import { fullDate, ddayLabel, priceLabel } from "@/lib/format";
@@ -166,6 +167,8 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
   const { toast, showToast } = useToast();
 
   const chip = ddayChip(c, status);
+  const thumb = c.images?.thumb;
+  const detailImage = d.detailImage ?? c.images?.detail;
   const [line1, line2] = topLines(c);
   const unit = c.type === "online" ? `${c.months}개월 수강` : c.cat === "정석" ? "/ 전체 과정" : "1인 기준";
   const catLabel = c.cat === "온라인" ? "온라인 강의" : CATEGORY_LABELS[c.cat];
@@ -202,18 +205,25 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
       <div className="wrap detail-grid">
         <div>
           <div className="top-block">
-            <div
-              className="hero-img"
-              style={c.images?.thumb ? { backgroundImage: `url(${c.images.thumb})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
-            >
-              {!c.images?.thumb && <span>{c.name}</span>}
-            </div>
+            {/* 정사각형 썸네일 — 관리자에서 올린 썸네일이 있으면 그 이미지, 없으면 분류·레벨 색 그라데이션 타일 */}
+            {thumb ? (
+              <div className="hero-img has-photo">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={thumb} alt={c.name} />
+              </div>
+            ) : (
+              <div className={`hero-img tg ${tileClass(c)}`} aria-hidden="true">
+                <em className="hi-tag">VISUAL ACADEMY</em>
+                <span>{c.name}</span>
+              </div>
+            )}
             <div className="top-info">
               <div className="tags">
                 <span className="badge badge-line">{catLabel}</span>
                 <span className={`badge ${badgeClass(status)}`}>{status === "개설예정" ? "개설 예정" : status}</span>
               </div>
               <h1 className="dtitle">{c.name}</h1>
+              {c.summary && <p className="top-lead">{c.summary}</p>}
               <p className="top-sum">{line1}</p>
               <p className="top-sum">{line2}</p>
             </div>
@@ -239,13 +249,17 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
 
           {tab === "info" && (
             <div>
-              {d.detailImage ? (
+              {/* 세로로 긴 상세 이미지 — 관리자 > 콘텐츠 관리에서 올린 이미지를 잘리지 않게 그대로 */}
+              {detailImage ? (
                 <div className="hero-photo">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={d.detailImage} alt={`${c.name} 상세 페이지`} />
+                  <img src={detailImage} alt={`${c.name} 상세 페이지`} />
                 </div>
               ) : (
-                <div className="hero-photo hero-photo-ph"><span>{c.name} · 상세페이지 이미지 영역</span></div>
+                <div className="hero-photo hero-photo-ph">
+                  <span>상세 안내를 준비하고 있어요</span>
+                  <small>곧 자세한 커리큘럼과 사례가 올라올 예정이에요. 궁금한 점은 카카오채널로 문의해 주세요.</small>
+                </div>
               )}
 
               <div className="section">
@@ -264,10 +278,12 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
                 <h2>강사 소개</h2>
                 <div className="instructor">
                   <div className="iavatar">{inst.initial}</div>
-                  <div>
+                  <div className="itxt">
+                    <span className="itag">INSTRUCTOR</span>
                     <p className="iname">{inst.name}</p>
                     <p className="irole">{inst.role}</p>
                   </div>
+                  <Link className="ilink" href={ROUTES.about("inst")}>강사 소개 →</Link>
                 </div>
                 <div className="prep-note"><b>준비물 안내</b>{d.prep}</div>
               </div>

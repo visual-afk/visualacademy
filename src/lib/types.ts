@@ -72,6 +72,8 @@ export interface AcademyClass {
   capacity: number | null;
   /** 신청 인원 (개설 대기는 알림 신청 인원) */
   applied: number | null;
+  /** 개설 대기: 이 인원이 모이면 개설 (메인 모집 카드의 '개설 기준') */
+  goal?: number;
   /** 원 단위, 0 = 무료, null = 미정 */
   price: number | null;
   type: ClassType;
@@ -139,4 +141,25 @@ export interface InvoiceRecord {
   /** 전액 환불로 발행취소·계약해제된 상태 */
   canceled?: boolean;
   history?: { at: string; kind: "발행" | "발행취소" | "수정발행"; mgtKey: string; amount: number; ntsConfirmNum?: string; modifyCode?: number }[];
+}
+
+/** 제휴·가맹 문의 처리 상태 — new 신규 · prog 확인중 · done 완료 */
+export type InquiryStatus = "new" | "prog" | "done";
+
+export type InquiryType = "가맹 개설 문의" | "교육 제휴 문의" | "기업 단체 교육 문의" | "기타";
+
+/** 관리자 문의함 한 건 (inquiries 테이블 + payload jsonb) */
+export interface Inquiry {
+  id: string;
+  /** KST "YYYY-MM-DD HH:mm" */
+  date: string;
+  name: string;
+  /** 매장·소속 (없으면 "-") */
+  shop: string;
+  phone: string;
+  type: InquiryType;
+  status: InquiryStatus;
+  body: string;
+  /** 담당자 메모 (고객 비공개) */
+  memo: string;
 }
