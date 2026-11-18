@@ -10,11 +10,20 @@ export async function GET(request: NextRequest) {
   const next = safeNext(searchParams.get("next"));
   const code = searchParams.get("code");
   const fail = (msg: string) => NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(msg)}&next=${encodeURIComponent(next)}`);
+  // 카카오 동의 실패·Supabase 설정 문제는 code 대신 error_description 으로 돌아온다 — 원인을 화면에 그대로 보여준다
+  const reason = searchParams.get("error_description") ?? searchParams.get("error");
+  if (reason) {
+    console.error("[auth/callback]", searchParams.get("error"), searchParams.get("error_code"), reason);
+    return fail(reason === "access_denied" ? "카카오 동의를 취소했어요" : `카카오 로그인 실패: ${reason}`);
+  }
   if (!code) return fail("로그인이 취소됐어요");
 
   const supabase = await getServerSupabase();
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error || !data.user) return fail("로그인에 실패했어요. 다시 시도해 주세요.");
+  if (error || !data.user) {
+    console.error("[auth/callback] exchange", error?.message);
+    return fail(`로그인에 실패했어요 (${error?.message ?? "세션 없음"})`);
+  }
   const user = data.user;
 
   // 관리자 화면에서 시작한 카카오 로그인 → 허용 목록 확인 후 관리자 쿠키 발급
