@@ -90,8 +90,16 @@
   @media(max-width:600px){.order-row{grid-template-columns:1fr}}
 
   .order-col{display:flex;flex-direction:column;gap:12px}
+  /* 레벨 카드 4장은 내용 길이와 상관없이 같은 높이 — 첫 줄(레벨 카드)을 subgrid 로 맞추고, 연결 수업은 둘째 줄 */
+  @supports (grid-template-rows:subgrid){
+    .order-row{row-gap:12px}
+    .order-col{display:grid;grid-row:span 2;grid-template-rows:subgrid;gap:12px}
+    .order-col>.linked-wrap{grid-row:2}
+  }
   .order-card{background:var(--bg);border:1px solid var(--line);border-radius:22px;padding:22px 20px;
-    transition:box-shadow .18s ease,transform .18s ease;position:relative}
+    transition:box-shadow .18s ease,transform .18s ease;position:relative;display:flex;flex-direction:column}
+  .order-card .headrow{align-items:flex-start;min-height:86px}
+  .order-card .badge{align-self:flex-start}
   .order-card.active:hover{box-shadow:0 16px 32px -18px rgba(20,22,26,.18);transform:translateY(-2px)}
   /* 준비 중(개설 예정) 레벨 — 점선 대신 옅은 그라데이션 카드 + COMING SOON */
   .order-card.muted{background:linear-gradient(180deg,#fbfcfb,#f3f6f5);border-color:var(--line)}
@@ -136,7 +144,7 @@
   .order-card .ometa{font-size:12px;color:var(--ink-2);margin:0 0 12px;display:flex;flex-wrap:wrap;gap:4px;font-variant-numeric:tabular-nums}
   .order-card .ometa .sep{color:var(--line-strong)}
   .order-card .oprice{font-size:17px;font-weight:800;margin:0 0 14px;font-variant-numeric:tabular-nums;letter-spacing:-.014em}
-  .order-card .btn{width:100%;padding:10px 16px;font-size:13.5px;margin-top:14px}
+  .order-card .btn{width:100%;padding:10px 16px;font-size:13.5px;margin-top:auto}  /* 버튼은 카드 맨 아래 */
   .order-card .badge{margin-bottom:10px}
 
   .thumb{aspect-ratio:1/1;width:56px;flex:0 0 56px;border-radius:12px;background:var(--surface);border:1px solid var(--line);
