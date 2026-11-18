@@ -4,12 +4,13 @@
  * 브라우저 컴포넌트는 이 파일을 import 하지 말고, 서버 page 에서 조회해 props 로 받는다.
  */
 import { CLASS_ALIASES, classes as seedClasses } from "@/data/classes";
+import { inquiries as mockInquiries } from "@/data/inquiries";
 import { instructors as mockInstructors } from "@/data/instructors";
 import { payments as mockPayments } from "@/data/payments";
 import { getAdminSupabase } from "./supabase/admin";
 import { parseDate, today } from "./format";
 import { serviceRoleConfigured } from "./supabase/env";
-import type { AcademyClass, ClassDetail, Instructor, Payment } from "./types";
+import type { AcademyClass, ClassDetail, Inquiry, InquiryType, Instructor, Payment } from "./types";
 
 import { getClassDetail } from "./classes";
 
@@ -43,8 +44,9 @@ type ClassRow = {
   id: number; slug: string; name: string; cat: AcademyClass["cat"]; field: AcademyClass["field"]; target: AcademyClass["target"];
   type: AcademyClass["type"]; day: string | null; time: string | null; place: string | null; date: string | null;
   capacity: number | null; applied: number | null; price: number | null; tax_type: AcademyClass["taxType"];
+  price_options?: AcademyClass["options"] | null;
   cert: boolean; noob: boolean; step: AcademyClass["step"]; level: AcademyClass["level"] | null; summary: string;
-  weeks: number | null; months: number | null; manual_end: boolean; draft: boolean;
+  weeks: number | null; months: number | null; manual_end: boolean; draft: boolean; sale_status?: "on" | "soldout" | "hidden";
   detail: Partial<ClassDetail> | null; thumbnail_url: string | null; banner_url: string | null; detail_image_url: string | null;
 };
 
@@ -54,13 +56,14 @@ function rowToClass(r: ClassRow): AcademyClass {
     day: r.day, time: r.time, place: r.place, date: r.date, capacity: r.capacity,
     // 개설 예정(upcoming)은 신청 인원 개념이 없어 목업처럼 null 로 둔다
     applied: r.type === "upcoming" && !r.applied ? null : r.applied,
-    price: r.price, type: r.type, cert: r.cert, noob: r.noob, step: r.step,
+    price: r.price, ...(r.price_options?.length ? { options: r.price_options } : {}), type: r.type, cert: r.cert, noob: r.noob, step: r.step,
     ...(r.level ? { level: r.level } : {}),
     taxType: r.tax_type, summary: r.summary,
     ...(r.weeks ? { weeks: r.weeks } : {}),
     ...(r.months ? { months: r.months } : {}),
     ...(r.manual_end ? { manualEnd: true } : {}),
     ...(r.draft ? { draft: true } : {}),
+    ...(r.sale_status && r.sale_status !== "on" ? { saleStatus: r.sale_status } : {}),
   };
   const images = {
     ...(r.thumbnail_url ? { thumb: r.thumbnail_url } : {}),
@@ -83,7 +86,8 @@ export async function getClasses(opts: { includeDraft?: boolean } = {}): Promise
   if (!opts.includeDraft) q = q.eq("draft", false);
   const { data, error } = await q;
   if (error) throw new Error(`클래스 조회 실패: ${error.message}`);
-  return (data as ClassRow[]).map(rowToClass);
+  // 숨김 클래스도 고객 화면에서는 뺀다 (관리자 목록에는 보임)
+  return (data as ClassRow[]).filter((r) => opts.includeDraft || r.sale_status !== "hidden").map(rowToClass);
 }
 
 /** GET /api/classes/:slug (프로토타입 ?cls=offline|online 별칭 호환) */
@@ -93,7 +97,7 @@ export async function getClass(slugOrAlias: string | null | undefined): Promise<
   if (!serviceRoleConfigured()) return mockClasses().find((c) => c.slug === slug);
   const { data, error } = await getAdminSupabase().from("class_with_counts").select("*").eq("slug", slug).eq("draft", false).maybeSingle();
   if (error) throw new Error(`클래스 조회 실패: ${error.message}`);
-  return data ? rowToClass(data as ClassRow) : undefined;
+  return data && (data as ClassRow).sale_status !== "hidden" ? rowToClass(data as ClassRow) : undefined;
 }
 
 /** GET /api/admin/classes/:id */
@@ -147,4 +151,35 @@ export async function getPayments(): Promise<Payment[]> {
     ...(r.refund ? { refund: { ...r.refund, refundedAt: kstStamp(r.refund.refundedAt) } } : {}),
     ...(r.invoice ? { invoice: r.invoice } : {}),
   }));
+}
+
+type InquiryRow = {
+  id: string; handled: boolean; created_at: string;
+  payload: { name?: string; shop?: string; phone?: string; type?: string; body?: string; status?: Inquiry["status"]; memo?: string } | null;
+};
+const INQUIRY_TYPES: InquiryType[] = ["가맹 개설 문의", "교육 제휴 문의", "기업 단체 교육 문의", "기타"];
+
+/** GET /api/admin/inquiries — 제휴·가맹 문의함, 최근 순 */
+export async function getInquiries(): Promise<Inquiry[]> {
+  if (!serviceRoleConfigured()) return mockInquiries;
+  const { data, error } = await getAdminSupabase()
+    .from("inquiries")
+    .select("id, handled, created_at, payload")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`문의 조회 실패: ${error.message}`);
+  return ((data ?? []) as InquiryRow[]).map((r) => {
+    const p = r.payload ?? {};
+    // TODO(backend): 처리 상태(신규/확인중/완료)·메모 컬럼이 아직 없다 — 지금은 handled=완료, 나머지=신규 (docs/backend-todo.md)
+    return {
+      id: r.id,
+      date: kstStamp(r.created_at),
+      name: p.name || "-",
+      shop: p.shop || "-",
+      phone: p.phone || "-",
+      type: INQUIRY_TYPES.find((t) => t === p.type) ?? "기타",
+      status: p.status ?? (r.handled ? "done" : "new"),
+      body: p.body ?? "",
+      memo: p.memo ?? "",
+    };
+  });
 }
