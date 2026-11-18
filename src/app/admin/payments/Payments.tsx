@@ -84,6 +84,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
       }
     }
     setRefunding(true);
+    let invoiceNote = "";
     try {
       const res = await fetch(`/api/admin/payments/${encodeURIComponent(p.id)}/refund`, {
         method: "POST",
@@ -99,16 +100,19 @@ export default function Payments({ initial }: { initial: Payment[] }) {
         status: data.status,
         cancelRequested: false,
         refund: { type: data.status === "환불완료" ? "full" : "partial", amount: data.refunded, reason: refund.reason, refundedAt: nowStamp() },
+        ...(data.invoice ? { invoice: data.invoice } : {}),
       });
+      invoiceNote = data.invoiceNote ?? "";
     } finally {
       setRefunding(false);
     }
     setRefund(null);
-    showToast(refund.type === "full" ? "전액 환불 처리했어요" : `${fmt(amount)}원 부분 환불 처리했어요`);
+    showToast(`${refund.type === "full" ? "전액 환불 처리했어요" : `${fmt(amount)}원 부분 환불 처리했어요`}${invoiceNote ? ` · ${invoiceNote}` : ""}`);
   };
 
-  const confirmInvoice = () => {
-    if (!invoice) return;
+  const [issuing, setIssuing] = useState(false);
+  const confirmInvoice = async () => {
+    if (!invoice || issuing) return;
     if (invoice.bizNo.replace(/[^0-9]/g, "").length !== 10) {
       setInvoice({ ...invoice, error: "사업자등록번호 10자리를 확인해주세요" });
       return;
@@ -117,10 +121,24 @@ export default function Payments({ initial }: { initial: Payment[] }) {
       setInvoice({ ...invoice, error: "상호·대표자명·이메일을 모두 입력해주세요" });
       return;
     }
-    // 백엔드: POST /api/admin/payments/:id/invoice → 전자세금계산서 발행 API
-    patch(invoice.id, { invoice: { bizNo: invoice.bizNo, bizName: invoice.bizName, ceo: invoice.ceo, email: invoice.email, issuedAt: nowStamp() } });
+    setIssuing(true);
+    try {
+      const res = await fetch(`/api/admin/payments/${encodeURIComponent(invoice.id)}/invoice`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bizNo: invoice.bizNo, bizName: invoice.bizName, ceo: invoice.ceo, email: invoice.email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setInvoice({ ...invoice, error: data.error ?? "발행하지 못했어요" });
+        return;
+      }
+      patch(invoice.id, { invoice: data.invoice });
+    } finally {
+      setIssuing(false);
+    }
     setInvoice(null);
-    showToast(`세금계산서를 발행했어요 · ${invoice.email}로 발송돼요`);
+    showToast(`발행했어요 · ${invoice.email}로 발송돼요`);
   };
 
   const formatBizNo = (v: string) => {
@@ -195,7 +213,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
                     </td>
                     <td className="cell-date">{p.paidAt}</td>
                     <td><span className={`pill p-${p.status}`}>{p.status}</span></td>
-                    <td><span className={`pill ${p.invoice ? "p-발행완료" : "p-미발행"}`}>{p.invoice ? "발행완료" : "미발행"}</span></td>
+                    <td><span className={`pill ${p.invoice && !p.invoice.canceled ? "p-발행완료" : "p-미발행"}`}>{p.invoice ? (p.invoice.canceled ? "발행취소" : "발행완료") : "미발행"}</span></td>
                     <td>
                       <div className="row-actions">
                         {p.status === "환불완료" ? (
@@ -210,7 +228,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
                             ) : null}
                           </>
                         )}
-                        {p.status !== "입금대기" && (
+                        {(p.status === "결제완료" || p.status === "부분환불") && (
                           <button
                             type="button"
                             className="ca-btn"
@@ -218,7 +236,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
                               setInvoice({ id: p.id, bizNo: p.invoice?.bizNo ?? "", bizName: p.invoice?.bizName ?? "", ceo: p.invoice?.ceo ?? "", email: p.invoice?.email ?? "", error: "" })
                             }
                           >
-                            {p.invoice ? "재발행" : "계산서 발행"}
+                            {p.invoice && !p.invoice.canceled ? "재발행" : "계산서 발행"}
                           </button>
                         )}
                       </div>
@@ -239,6 +257,16 @@ export default function Payments({ initial }: { initial: Payment[] }) {
                               <div><b>세금계산서 · 사업자번호</b><p>{p.invoice.bizNo}</p></div>
                               <div><b>상호 · 대표자</b><p>{p.invoice.bizName} · {p.invoice.ceo}</p></div>
                               <div><b>수신 이메일 · 발행일시</b><p>{p.invoice.email}<br /><span className="sub">{p.invoice.issuedAt}</span></p></div>
+                              {p.invoice.ntsConfirmNum && (
+                                <div>
+                                  <b>국세청 승인번호</b>
+                                  <p>
+                                    {p.invoice.ntsConfirmNum}
+                                    <br />
+                                    <a className="sub" href={`/api/admin/payments/${encodeURIComponent(p.id)}/invoice/view`} target="_blank" rel="noreferrer">팝빌에서 보기 ↗</a>
+                                  </p>
+                                </div>
+                              )}
                             </>
                           )}
                           {p.refund && (
@@ -307,11 +335,12 @@ export default function Payments({ initial }: { initial: Payment[] }) {
       {invoice && invoiceTarget && (
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setInvoice(null)}>
           <div className="modal" role="dialog" aria-modal="true">
-            <h3>{invoiceTarget.invoice ? "세금계산서 재발행" : "세금계산서 발행"}</h3>
+            <h3>{invoiceTarget.taxType === "exempt" ? "계산서" : "세금계산서"} {invoiceTarget.invoice && !invoiceTarget.invoice.canceled ? "재발행" : "발행"}</h3>
             <p className="m-sub">{invoiceTarget.className} · {invoiceTarget.applicant} · {invoiceTarget.id}</p>
             <div className="m-amt-row">
               <span className="lbl">{invoiceTarget.taxType === "exempt" ? "면세 공급가액" : "공급가액 · 부가세"}</span>
-              <span className="amt sm">{invoiceTarget.taxType === "exempt" ? `${fmt(invoiceTarget.amount)}원` : taxNote(invoiceTarget)}</span>
+              {/* 부분 환불된 건은 남은 금액으로 발행된다 */}
+              <span className="amt sm">{invoiceTarget.taxType === "exempt" ? `${fmt(netAmount(invoiceTarget))}원` : taxNote({ ...invoiceTarget, amount: netAmount(invoiceTarget) })}</span>
             </div>
             <div className="field"><label htmlFor="im-bizno">사업자등록번호</label><input id="im-bizno" type="text" placeholder="123-45-67890" value={invoice.bizNo} onChange={(e) => setInvoice({ ...invoice, bizNo: formatBizNo(e.target.value), error: "" })} /></div>
             <div className="field"><label htmlFor="im-bizname">상호</label><input id="im-bizname" type="text" placeholder="예) 주식회사 비주얼" value={invoice.bizName} onChange={(e) => setInvoice({ ...invoice, bizName: e.target.value, error: "" })} /></div>
@@ -320,7 +349,9 @@ export default function Payments({ initial }: { initial: Payment[] }) {
             {invoice.error && <p className="err">{invoice.error}</p>}
             <div className="modal-actions">
               <button type="button" className="btn btn-ghost" onClick={() => setInvoice(null)}>취소</button>
-              <button type="button" className="btn btn-mint" onClick={confirmInvoice}>{invoiceTarget.invoice ? "재발행하기" : "발행하기"}</button>
+              <button type="button" className="btn btn-mint" onClick={confirmInvoice} disabled={issuing}>
+                {issuing ? "발행 중…" : invoiceTarget.invoice && !invoiceTarget.invoice.canceled ? "재발행하기" : "발행하기"}
+              </button>
             </div>
           </div>
         </div>

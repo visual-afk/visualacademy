@@ -118,5 +118,23 @@ export interface Payment {
   /** 고객이 마이페이지에서 취소를 요청한 건 */
   cancelRequested?: boolean;
   refund?: { type: "full" | "partial"; amount: number; reason: string; refundedAt: string };
-  invoice?: { bizNo: string; bizName: string; ceo: string; email: string; issuedAt: string };
+  invoice?: InvoiceRecord;
+}
+
+/** 세금계산서(과세)·계산서(면세) — payments.invoice. 실제 발행분만 mgtKey 이하가 채워진다 */
+export interface InvoiceRecord {
+  bizNo: string;
+  bizName: string;
+  ceo: string;
+  email: string;
+  issuedAt: string;
+  /** 팝빌 문서번호 · 국세청 승인번호 · 작성일자(yyyyMMdd) · 지금 신고된 금액 */
+  mgtKey?: string;
+  ntsConfirmNum?: string;
+  writeDate?: string;
+  amount?: number;
+  seq?: number;
+  /** 전액 환불로 발행취소·계약해제된 상태 */
+  canceled?: boolean;
+  history?: { at: string; kind: "발행" | "발행취소" | "수정발행"; mgtKey: string; amount: number; ntsConfirmNum?: string; modifyCode?: number }[];
 }
