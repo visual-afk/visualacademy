@@ -45,7 +45,7 @@ type ClassRow = {
   capacity: number | null; applied: number | null; price: number | null; tax_type: AcademyClass["taxType"];
   price_options?: AcademyClass["options"] | null;
   cert: boolean; noob: boolean; step: AcademyClass["step"]; level: AcademyClass["level"] | null; summary: string;
-  weeks: number | null; months: number | null; manual_end: boolean; draft: boolean;
+  weeks: number | null; months: number | null; manual_end: boolean; draft: boolean; sale_status?: "on" | "soldout" | "hidden";
   detail: Partial<ClassDetail> | null; thumbnail_url: string | null; banner_url: string | null; detail_image_url: string | null;
 };
 
@@ -62,6 +62,7 @@ function rowToClass(r: ClassRow): AcademyClass {
     ...(r.months ? { months: r.months } : {}),
     ...(r.manual_end ? { manualEnd: true } : {}),
     ...(r.draft ? { draft: true } : {}),
+    ...(r.sale_status && r.sale_status !== "on" ? { saleStatus: r.sale_status } : {}),
   };
   const images = {
     ...(r.thumbnail_url ? { thumb: r.thumbnail_url } : {}),
@@ -84,7 +85,8 @@ export async function getClasses(opts: { includeDraft?: boolean } = {}): Promise
   if (!opts.includeDraft) q = q.eq("draft", false);
   const { data, error } = await q;
   if (error) throw new Error(`클래스 조회 실패: ${error.message}`);
-  return (data as ClassRow[]).map(rowToClass);
+  // 숨김 클래스도 고객 화면에서는 뺀다 (관리자 목록에는 보임)
+  return (data as ClassRow[]).filter((r) => opts.includeDraft || r.sale_status !== "hidden").map(rowToClass);
 }
 
 /** GET /api/classes/:slug (프로토타입 ?cls=offline|online 별칭 호환) */
@@ -94,7 +96,7 @@ export async function getClass(slugOrAlias: string | null | undefined): Promise<
   if (!serviceRoleConfigured()) return mockClasses().find((c) => c.slug === slug);
   const { data, error } = await getAdminSupabase().from("class_with_counts").select("*").eq("slug", slug).eq("draft", false).maybeSingle();
   if (error) throw new Error(`클래스 조회 실패: ${error.message}`);
-  return data ? rowToClass(data as ClassRow) : undefined;
+  return data && (data as ClassRow).sale_status !== "hidden" ? rowToClass(data as ClassRow) : undefined;
 }
 
 /** GET /api/admin/classes/:id */

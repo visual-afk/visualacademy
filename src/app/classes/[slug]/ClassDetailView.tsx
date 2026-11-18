@@ -8,6 +8,7 @@ import Accordion from "@/components/site/Accordion";
 import { ROUTES } from "@/data/site";
 import { getClassDetail, refundPolicy } from "@/lib/classes";
 import { fullDate, ddayLabel, priceLabel, won } from "@/lib/format";
+import { discountPct, earlyActive, optionCompare, optionPrice } from "@/lib/pricing";
 import { badgeClass, CATEGORY_LABELS, computeStatus, ctaLabel } from "@/lib/status";
 import type { AcademyClass, ClassStatus, Instructor } from "@/lib/types";
 
@@ -320,11 +321,25 @@ export default function ClassDetailView({ c, inst, waitlisted = false }: { c: Ac
               <span className="bb-price">{priceLabel(c)}</span>
               <span className="bb-unit">{unit}</span>
             </div>
-            {c.options && c.options.length > 1 && (
+            {c.options && c.options.length > 0 && (
               <ul className="bb-options">
-                {c.options.map((o) => (
-                  <li key={o.label}><span>{o.label}</span><b>{won(o.price)}</b></li>
-                ))}
+                {c.options.map((o) => {
+                  const now = optionPrice(o);
+                  const before = optionCompare(o);
+                  return (
+                    <li key={o.label}>
+                      <span>
+                        {o.label}
+                        {earlyActive(o) && <em className="bb-early">얼리버드 ~{o.earlyUntil!.slice(5).replace("-", "/")}</em>}
+                      </span>
+                      <span className="bb-opt-price">
+                        {before && <s>{won(before)}</s>}
+                        {before && <em className="bb-off">{discountPct(before, now)}%</em>}
+                        <b>{won(now)}</b>
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             )}
             <span className={`bb-dday ${chip.cls}`}>{chip.text}</span>

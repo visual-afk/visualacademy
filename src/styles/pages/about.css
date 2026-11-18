@@ -50,6 +50,7 @@
   .big-photo span{position:relative;z-index:1;color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.02em}
 
   /* 듀오톤 사진 자리표시 */
+  .ph{background-color:#2d3a34;background-size:cover;background-position:center;background-repeat:no-repeat}
   .p1,.g1{background:linear-gradient(150deg,#7c8c83,#2d3a34)}
   .p2,.g2{background:linear-gradient(150deg,#a9b8ae,#5c6b62)}
   .p3,.g3{background:linear-gradient(150deg,#8d9a91,#414f47)}

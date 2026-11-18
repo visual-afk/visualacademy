@@ -7,6 +7,7 @@ import { RefundLink } from "@/components/site/RefundPopup";
 import { ROUTES } from "@/data/site";
 import { getClassDetail } from "@/lib/classes";
 import { fullDate, taxNote, won } from "@/lib/format";
+import { earlyActive, optionCompare, optionPrice } from "@/lib/pricing";
 import { useLoginName } from "@/lib/loginState";
 import { CATEGORY_LABELS, computeStatus } from "@/lib/status";
 import type { AcademyClass } from "@/lib/types";
@@ -146,7 +147,7 @@ export default function CheckoutFlow({
 
   const d = getClassDetail(c);
   const option = c.options?.[optionIdx];
-  const price = option ? option.price : c.price!;
+  const price = option ? optionPrice(option) : c.price!;
   const requiredChecks = [
     ...(d.needPrereq ? [{ k: "prereq", label: "선수 과정 이수 여부를 확인했어요", link: null }] : []),
     { k: "refund", label: "환불 규정을 확인했어요", link: "refund" },
@@ -243,8 +244,12 @@ export default function CheckoutFlow({
                 {c.options.map((o, i) => (
                   <label key={o.label} className={`sb-option${i === optionIdx ? " on" : ""}`}>
                     <input type="radio" name="price-option" checked={i === optionIdx} onChange={() => setOptionIdx(i)} />
-                    <span className="so-label">{o.label}</span>
-                    <span className="so-price">{won(o.price)}</span>
+                    <span className="so-label">
+                      {o.label}
+                      {earlyActive(o) && <em className="so-early">얼리버드 ~{o.earlyUntil!.slice(5).replace("-", "/")}</em>}
+                    </span>
+                    {optionCompare(o) && <s className="so-before">{won(optionCompare(o)!)}</s>}
+                    <span className="so-price">{won(optionPrice(o))}</span>
                   </label>
                 ))}
               </div>

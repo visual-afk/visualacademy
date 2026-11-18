@@ -7,6 +7,7 @@ import { getClass } from "./api";
 import type { Profile } from "./auth";
 import { fullDate, won } from "./format";
 import { notifyHq, notifyOnce } from "./notify";
+import { optionPrice } from "./pricing";
 import { computeStatus } from "./status";
 import { getAdminSupabase } from "./supabase/admin";
 import { bankName, cancelPayment, confirmPayment, getPaymentByOrderId, methodLabel, TossError, type TossPayment } from "./toss";
@@ -34,7 +35,8 @@ export async function createOrder(profile: Profile, slug: string, applicant: App
   // 가격 옵션이 있는 클래스는 고른 옵션의 가격으로 (브라우저는 몇 번째 옵션인지만 보낸다)
   const option = c.options?.length ? c.options[optionIndex ?? -1] : undefined;
   if (c.options?.length && !option) return { error: "수강 옵션을 골라주세요" } as const;
-  const amount = option ? option.price : c.price!;
+  // 얼리버드는 서버 시각(KST) 기준으로 적용
+  const amount = option ? optionPrice(option) : c.price!;
 
   const db = getAdminSupabase();
   const { data: no, error: noErr } = await db.rpc("next_order_no");
