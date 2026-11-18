@@ -1,3 +1,4 @@
+import { optionPrice } from "./pricing";
 import type { AcademyClass, TaxType } from "./types";
 
 const DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
@@ -43,7 +44,9 @@ export function won(n: number): string {
   return n.toLocaleString("ko-KR") + "원";
 }
 
-export function priceLabel(c: Pick<AcademyClass, "price">): string {
+export function priceLabel(c: Pick<AcademyClass, "price" | "options">): string {
+  if (c.options && c.options.length > 1) return `${won(Math.min(...c.options.map((o) => optionPrice(o))))}~`;
+  if (c.options?.length === 1) return won(optionPrice(c.options[0]));
   if (c.price === null) return "미정";
   if (c.price === 0) return "무료";
   return won(c.price);

@@ -1,4 +1,4 @@
-/* 디자인 모드 — 영역별 입력 폼 스키마 (프로토타입 SEC_* 그대로) */
+/* 디자인 모드 — 영역별 입력 폼 스키마 (프로토타입 11.12 SEC_* 기준, 키는 src/data/siteContent.ts DEF_* 와 1:1) */
 import { ROUTES } from "@/data/site";
 import type { ContentPageKey } from "@/data/siteContent";
 
@@ -20,7 +20,7 @@ const PH = "**굵게**처럼 별표 두 개로 감싸면 굵은 글씨가 돼요
 const DASH = ROUTES.admin;
 
 const SEC_MAIN: Record<string, SectionSchema> = {
-  nav: { name: "상단 메뉴", sub: "로고 · 메뉴 4개 · 상담 버튼", fields: [
+  nav: { name: "상단 메뉴", sub: "로고 · 메뉴 3개 · 상담 버튼 (모든 페이지 공통)", fields: [
     { k: "logo", l: "로고 텍스트", t: "text" },
     { k: "links", l: "메뉴", t: "list", item: "메뉴", fixed: true, f: [{ k: "label", l: "메뉴 이름", t: "text" }] },
     { k: "cta", l: "상담 버튼 문구", t: "text" }] },
@@ -47,21 +47,39 @@ const SEC_MAIN: Record<string, SectionSchema> = {
   programs: { name: "프로그램 3갈래", sub: "카드 3개 · 클래스 목록 연결", fields: [
     { k: "title", l: "섹션 제목", t: "text" }, { k: "desc", l: "섹션 설명", t: "text" },
     { k: "cards", l: "카드", t: "list", item: "카드", fixed: true, f: [{ k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "textarea" },
-      { k: "link", l: "\"전체 보기\"가 열 분류", t: "select", o: [["정석", "디자이너의 정석"], ["특강", "단독 특강"], ["경영", "경영 · 컨설팅"], ["", "전체 클래스"]] }] }] },
-  online: { name: "온라인 강의 배너", sub: "문구 · 버튼", fields: [
-    { k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "text" }, { k: "btn", l: "버튼 문구", t: "text" }] },
-  instructors: { name: "강사 소개", sub: "사진 · 이름 · 직함", fields: [
+      { k: "chips", l: "작은 태그", t: "text", hint: "쉼표로 구분 (예: 레벨 1~4, 10주 과정)" },
+      { k: "link", l: "\"전체 보기\"가 열 분류", t: "select", o: [["정석", "디자이너의 정석"], ["특강", "단독 특강"], ["경영", "경영 · 컨설팅"], ["", "전체 클래스"]] }] },
+    { note: "카드 번호(01·02·03)와 아이콘은 순서대로 자동으로 붙어요." }] },
+  online: { name: "온라인 강의 배너", sub: "태그 · 문구 · 특징 · 버튼 · 가격", fields: [
+    { k: "tag", l: "작은 태그", t: "text", hint: "비우면 숨김" }, { k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "text" },
+    { k: "feats", l: "특징 (체크 표시)", t: "text", hint: "쉼표로 구분" }, { k: "btn", l: "버튼 문구", t: "text" },
+    { k: "priceName", l: "버튼 아래 상품 이름", t: "text" }, { k: "price", l: "버튼 아래 가격", t: "text", hint: "비우면 가격 줄을 숨김" }] },
+  instructors: { name: "강사 소개", sub: "분류 탭 · 강사 카드 (사진 · 이력 · 소개)", fields: [
     { k: "title", l: "섹션 제목", t: "text" }, { k: "desc", l: "섹션 설명", t: "text" },
-    { k: "list", l: "강사", t: "list", item: "강사", max: 8, f: [{ k: "img", l: "사진", t: "image", rec: [600, 800, "3:4 세로"] }, { k: "name", l: "이름", t: "text" }, { k: "role", l: "직함", t: "text" }] }] },
-  reviews: { name: "수강생 후기", sub: "후기 문구 · 작성자", fields: [
+    { k: "cats", l: "분류 탭", t: "text", hint: "쉼표로 구분 — '전체' 탭은 자동으로 맨 앞에 붙어요" },
+    { k: "levelOrder", l: "'레벨교육' 탭 안 순서", t: "text", hint: "강사 이름을 쉼표로 — 나머지 탭은 아래 목록 순서" },
+    { k: "list", l: "강사 (목록 순서 = '전체' 탭 순서)", t: "list", item: "강사", max: 16, f: [
+      { k: "img", l: "사진", t: "image", rec: [480, 600, "4:5 세로"] }, { k: "name", l: "이름", t: "text" }, { k: "role", l: "직함", t: "text" },
+      { k: "insta", l: "인스타그램 아이디 (선택)", t: "text" },
+      { k: "cats", l: "분류", t: "text", hint: "위 분류 탭 이름을 쉼표로 (여러 개 가능)" },
+      { k: "tags", l: "전문 분야 태그", t: "text", hint: "쉼표로 구분" },
+      { k: "career", l: "이력", t: "textarea", hint: "한 줄에 하나씩 · **글자**는 굵게" },
+      { k: "career2Title", l: "추가 이력 제목 (선택)", t: "text" }, { k: "career2", l: "추가 이력", t: "textarea", hint: "한 줄에 하나씩" },
+      { k: "intro", l: "소개 / 인사말", t: "textarea", hint: "**글자**는 형광펜 강조" },
+      { k: "link", l: "프로필 페이지 주소 (선택)", t: "text", hint: "입력하면 카드 전체가 링크가 돼요" }] },
+    { note: "'레벨교육' 분류는 카드에 '레벨 전문 강사'로 표시돼요. 이력과 소개가 모두 비어 있으면 '준비하고 있어요' 안내가 나와요." }] },
+  reviews: { name: "수강생 후기", sub: "후기 문구 · 과정 · 작성자", fields: [
     { k: "title", l: "섹션 제목", t: "text" }, { k: "desc", l: "섹션 설명", t: "text" },
-    { k: "list", l: "후기", t: "list", item: "후기", max: 6, f: [{ k: "q", l: "후기 내용", t: "textarea" }, { k: "a", l: "작성자", t: "text" }] }] },
-  salon: { name: "비주얼살롱 배너", sub: "문구 · 버튼", fields: [
-    { k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "text" }, { k: "btn", l: "버튼 문구", t: "text" }] },
+    { k: "list", l: "후기", t: "list", item: "후기", max: 6, f: [{ k: "q", l: "후기 내용", t: "textarea" }, { k: "course", l: "과정 표시", t: "text" },
+      { k: "a", l: "작성자", t: "text", hint: "첫 글자가 동그라미 안에 들어가요" }, { k: "sub", l: "작성자 아래 설명", t: "text" }] }] },
+  salon: { name: "비주얼살롱 배너", sub: "태그 · 문구 · 지역 · 버튼", fields: [
+    { k: "tag", l: "작은 태그", t: "text", hint: "비우면 숨김" }, { k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "text" },
+    { k: "regions", l: "지역 표시", t: "text", hint: "쉼표로 구분" }, { k: "btn", l: "버튼 문구", t: "text" }] },
   footer: { name: "푸터", sub: "소개 · 링크 모음 · 사업자 정보 · 환불 규정 창", fields: [
     { k: "desc", l: "한 줄 소개", t: "text" },
     { k: "cols", l: "링크 모음", t: "list", item: "묶음", fixed: true, f: [{ k: "h", l: "묶음 제목", t: "text" }, { k: "links", l: "링크 이름들", t: "text", hint: "쉼표로 구분" }] },
-    { k: "biz1", l: "사업자 정보 (1줄)", t: "textarea" }, { k: "biz2", l: "주소 · 연락처 · 저작권 (2줄)", t: "textarea" },
+    { k: "biz", l: "사업자 정보", t: "list", item: "항목", max: 10, f: [{ k: "k", l: "항목 이름", t: "text" }, { k: "v", l: "내용", t: "text", hint: "비우면 이 항목은 숨겨져요" }] },
+    { k: "copy", l: "저작권 문구", t: "text" },
     { sub: "아래는 푸터의 \"환불 규정\"을 눌렀을 때 뜨는 안내 창이에요. 모든 페이지에 똑같이 적용돼요." },
     { k: "rfTitle", l: "환불 규정 창 제목", t: "text" },
     { k: "rfTh", l: "표 머리글", t: "list", item: "칸", fixed: true, f: [{ k: "t", l: "머리글", t: "text" }] },
@@ -150,39 +168,40 @@ const SEC_ABOUT: Record<string, SectionSchema> = {
   stats: { name: "숫자로 보는 아카데미", sub: "[아카데미 소개 탭] 수치 4개 · 지점 이름", fields: [
     { k: "title", l: "제목", t: "text" },
     { k: "list", l: "수치", t: "list", item: "수치", fixed: true, f: [{ k: "n", l: "숫자", t: "text" }, { k: "l", l: "이름", t: "text" }] },
-    { k: "salon", l: "지점 소개 제목", t: "text" }, { k: "branches", l: "지점 이름들", t: "text", hint: "쉼표로 구분" }] },
+    { k: "salon", l: "지점 소개 제목", t: "text" }, { k: "region", l: "지역 표시", t: "text", hint: "예: 서울·부산" },
+    { k: "branches", l: "지점 이름들", t: "text", hint: "쉼표로 구분" }] },
   quote: { name: "맺음말", sub: "[아카데미 소개 탭] 배경 사진 위 인용 문구", fields: [
     { k: "paras", l: "문구", t: "list", item: "문단", max: 4, f: [{ k: "p", l: "내용", t: "textarea", hint: PH }] }] },
-  history: { name: "연혁", sub: "[아카데미 소개 탭] 연도별 이력", fields: [
+  inst: { name: "강사 소개 탭", sub: "제목 · 강사 카드는 메인 페이지와 같은 데이터", fields: [
     { k: "title", l: "섹션 제목", t: "text" },
-    { k: "list", l: "연혁", t: "list", item: "연혁", max: 20, f: [{ k: "y", l: "연도", t: "text" }, { k: "d", l: "내용", t: "text" }] }] },
-  inst: { name: "강사 소개 탭", sub: "제목 · 강사 카드", fields: [
-    { k: "title", l: "섹션 제목", t: "text" },
-    { k: "list", l: "강사", t: "list", item: "강사", max: 12, f: [{ k: "name", l: "이름", t: "text" }, { k: "role", l: "직함·경력", t: "text" }, { k: "desc", l: "소개", t: "textarea" }] },
-    { note: "강사 카드의 동그란 이니셜은 이름의 첫 글자로 자동으로 만들어져요." }] },
+    { note: `필터 탭과 강사 카드(사진·이력·소개)는 <a href="#" data-goto="main:instructors">메인 페이지 → 강사 소개</a>와 같은 데이터를 써요. 거기서 고치면 여기도 똑같이 바뀌어요.` }] },
   gallery: { name: "갤러리 탭", sub: "사진 6장 · 캡션", fields: [
     { k: "title", l: "섹션 제목", t: "text" },
     { k: "list", l: "사진", t: "list", item: "사진", max: 12, f: [{ k: "img", l: "사진", t: "image", rec: [640, 800, "4:5 세로"] }, { k: "c", l: "사진 위 캡션", t: "text" }] }] },
   way: { name: "오시는 길 탭", sub: "장소 · 주소 · 전화 · 운영 시간", fields: [
-    { k: "title", l: "장소 이름", t: "text" }, { k: "addr", l: "주소", t: "text", hint: PH }, { k: "tel", l: "전화", t: "text" }, { k: "hours", l: "운영 시간", t: "text" },
-    { note: "지도는 실제 서비스에서 지도 API가 자동으로 표시돼요." }] },
+    { k: "title", l: "장소 이름", t: "text" },
+    { k: "mapImg", l: "약도 이미지 (선택)", t: "image", rec: [1200, 640, "15:8 가로"], hint: "비우면 안내 문구 자리표시" },
+    { k: "mapNote", l: "약도가 없을 때 안내 문구", t: "text" },
+    { k: "addr", l: "주소", t: "text", hint: PH }, { k: "tel", l: "전화", t: "text" }, { k: "hours", l: "운영 시간", t: "text" },
+    { note: "카카오톡 채널 줄은 사이트 공통 정보에서 자동으로 들어와요." }] },
   partner: { name: "제휴 문의 탭", sub: "제목 · 안내 · 문의 유형 · 버튼", fields: [
     { k: "title", l: "제목", t: "text" }, { k: "lead", l: "안내 문구", t: "textarea" },
     { k: "types", l: "문의 유형 선택지", t: "list", item: "유형", max: 8, f: [{ k: "t", l: "유형 이름", t: "text" }] }, { k: "btn", l: "버튼 문구", t: "text" }] },
 };
 
-const SEC_GUIDE: Record<string, SectionSchema> = {
-  pagehead: { name: "페이지 제목", sub: "제목 · 설명", fields: [{ k: "title", l: "페이지 제목", t: "text" }, { k: "desc", l: "설명", t: "textarea" }] },
-  tabs: { name: "탭 이름 (2개)", sub: "수강 절차 · 자주 묻는 질문", fields: [
-    { k: "list", l: "탭", t: "list", item: "탭", fixed: true, f: [{ k: "t", l: "탭 이름", t: "text" }] },
-    { note: "푸터의 \"수강 절차 · 자주 묻는 질문\" 링크가 이 탭들로 바로 연결돼요. 환불 규정은 탭이 아니라 푸터 링크를 눌렀을 때 뜨는 안내 창이에요(메인 페이지 → 푸터에서 수정)." }] },
-  proc: { name: "수강 절차 탭", sub: "제목 · 단계(번호는 자동)", fields: [
-    { k: "title", l: "제목", t: "text" },
-    { k: "steps", l: "단계", t: "list", item: "단계", max: 12, f: [{ k: "t", l: "단계 이름", t: "text" }, { k: "d", l: "설명", t: "textarea" },
-      { k: "notes", l: "부가 안내 (선택)", t: "textarea", hint: "한 줄에 하나 · 「라벨 | 내용」 형식" }] }] },
-  faq: { name: "자주 묻는 질문 탭", sub: "묶음 4개 · 질문과 답", fields: [
-    { k: "groups", l: "질문 묶음", t: "list", item: "묶음", max: 8, f: [{ k: "g", l: "묶음 제목", t: "text" },
-      { k: "items", l: "질문", t: "list", item: "질문", max: 12, f: [{ k: "q", l: "질문", t: "text" }, { k: "a", l: "답변", t: "textarea" }] }] }] },
+const SEC_GREETING: Record<string, SectionSchema> = {
+  head: { name: "제목 · 인사 · 사진", sub: "영문 제목 · 첫 인사 · 대표 사진", fields: [
+    { k: "title", l: "큰 제목", t: "text" }, { k: "hello", l: "첫 인사", t: "textarea", hint: "줄바꿈 가능" },
+    { k: "photo", l: "대표 사진", t: "image", rec: [680, 860, "4:5 세로"] }, { k: "photoAlt", l: "사진 설명 (대체 텍스트)", t: "text" },
+    { note: "대표 사진은 '제목 · 인사' 영역을 숨겨도 왼쪽에 계속 보여요." }] },
+  panel: { name: "직함·이력 박스", sub: "대표 직함과 이력", fields: [
+    { k: "list", l: "이력", t: "list", item: "줄", max: 12, f: [{ k: "t", l: "내용", t: "text" }] }] },
+  body: { name: "인사말 본문", sub: "소제목 · 문단", fields: [
+    { k: "quote", l: "소제목", t: "text" },
+    { k: "paras", l: "문단", t: "list", item: "문단", max: 10, f: [{ k: "p", l: "내용", t: "textarea", hint: "줄바꿈 가능" }] }] },
+  sign: { name: "서명", sub: "직함 · 서명 이미지", fields: [
+    { k: "label", l: "서명 위 직함", t: "text" }, { k: "img", l: "서명 이미지", t: "image", rec: [400, 160, "가로형 · 투명 배경(PNG) 권장"] },
+    { k: "alt", l: "서명 설명 (대체 텍스트)", t: "text" }] },
 };
 
 const SEC_MY: Record<string, SectionSchema> = {
@@ -254,6 +273,9 @@ const SEC_LOGIN: Record<string, SectionSchema> = {
     { k: "btn1", l: "첫 번째 버튼", t: "text" }, { k: "btn2", l: "두 번째 버튼", t: "text" }] },
 };
 
+/** 편집기에 보이는 페이지 — 수강 안내(guide)는 11.12부터 편집기에서 빠졌다 (데이터 DEF_GUIDE·페이지 /guide 는 보관) */
+export type EditorPageKey = Exclude<ContentPageKey, "guide">;
+
 export interface PageMeta {
   name: string;
   h1: string;
@@ -270,13 +292,18 @@ export interface PageMeta {
   tstyle?: boolean;
 }
 
-export const PAGES: Record<ContentPageKey, PageMeta> = {
-  main: { name: "메인 페이지", h1: "페이지 관리 — 메인 페이지", sub: "메인 페이지에 보이는 모든 영역을 여기서 고치고, 왼쪽 화면에서 바로 확인해요.", url: "visualacademy — 메인", pv: "메인 페이지 화면", sec: SEC_MAIN, first: "hero" },
-  list: { name: "클래스 목록", h1: "페이지 관리 — 클래스 목록", sub: "클래스 목록 페이지의 문구와 구성을 고쳐요. 카드 속 일정·정원·수강료는 클래스 관리에서 입력한 값이 자동으로 들어와요.", url: "visualacademy — 클래스", pv: "클래스 목록 화면", sec: SEC_LIST, first: "pagehead", common: true },
-  detail: { name: "클래스 상세", h1: "페이지 관리 — 클래스 상세", sub: "모든 클래스 상세 페이지에 공통으로 쓰는 문구예요. 클래스마다 다른 내용(일정·가격·소개·이미지)은 클래스 등록에서 입력해요.", url: "visualacademy — 클래스 상세 (예시: 퍼스널 컬러)", pv: "클래스 상세 화면 (예시)", sec: SEC_DET, first: "tabs", common: true, fixed: true },
+const HOW = "화면에서 고칠 곳을 클릭하면 오른쪽에 편집 창이 열려요.";
+
+/** 순서 = 편집기 상단 페이지 칩 순서 (프로토타입 11.12) */
+export const PAGES: Record<EditorPageKey, PageMeta> = {
+  main: { name: "메인 페이지", h1: "페이지 관리 — 메인 페이지", sub: `메인 페이지에 보이는 모든 영역을 여기서 고쳐요. ${HOW}`, url: "visualacademy — 메인", pv: "메인 페이지 화면", sec: SEC_MAIN, first: "hero" },
+  list: { name: "클래스 목록", h1: "페이지 관리 — 클래스 목록", sub: `클래스 목록 페이지의 문구와 구성을 고쳐요. 카드 속 일정·정원·수강료는 클래스 관리에서 입력한 값이 자동으로 들어와요. ${HOW}`, url: "visualacademy — 클래스", pv: "클래스 목록 화면", sec: SEC_LIST, first: "pagehead", common: true },
+  detail: { name: "클래스 상세", h1: "페이지 관리 — 클래스 상세", sub: `모든 클래스 상세 페이지에 공통으로 쓰는 문구예요. 클래스마다 다른 내용(일정·가격·소개·이미지)은 클래스 등록에서 입력해요. ${HOW}`, url: "visualacademy — 클래스 상세 (예시: 퍼스널 컬러)", pv: "클래스 상세 화면 (예시)", sec: SEC_DET, first: "tabs", common: true, fixed: true },
   about: { name: "아카데미 소개", h1: "페이지 관리 — 아카데미 소개", sub: "아카데미 소개 페이지의 모든 글과 사진을 고쳐요. 5개 탭(소개·강사·갤러리·오시는 길·제휴 문의)의 내용이 모두 들어 있어요. 글 입력칸 오른쪽 'Aa 글자 스타일'로 크기·자간·줄 간격·굵기·정렬도 바꿀 수 있어요.", url: "visualacademy — 아카데미 소개", pv: "아카데미 소개 화면", sec: SEC_ABOUT, first: "intro", common: true, fixed: true, tstyle: true },
-  guide: { name: "수강 안내", h1: "페이지 관리 — 수강 안내", sub: "수강 절차, 자주 묻는 질문 2개 탭의 내용을 고쳐요. 질문·단계는 자유롭게 추가하고 지울 수 있어요.", url: "visualacademy — 수강 안내", pv: "수강 안내 화면", sec: SEC_GUIDE, first: "proc", common: true, fixed: true },
+  greeting: { name: "대표 인사", h1: "페이지 관리 — 대표 인사", sub: "이유경 대표원장 프로필을 누르면 열리는 대표 인사 페이지예요. 사진·직함·인사말·서명을 고쳐요.", url: "visualacademy — 대표 인사", pv: "대표 인사 화면", sec: SEC_GREETING, first: "head", common: true, fixed: true },
   my: { name: "마이페이지", h1: "페이지 관리 — 마이페이지", sub: "회원이 로그인하면 보는 마이페이지의 문구를 고쳐요. 신청·결제·수강 내용 자체는 회원 데이터가 자동으로 들어와요.", url: "visualacademy — 마이페이지 (예시 회원)", pv: "마이페이지 화면 (예시)", sec: SEC_MY, first: "pagehead", common: true, fixed: true },
   pay: { name: "신청 · 결제", h1: "페이지 관리 — 신청 · 결제", sub: "클래스 신청부터 결제 완료까지 이어지는 화면들의 문구를 고쳐요. 클래스 정보·금액·주문번호는 자동으로 들어와요.", url: "visualacademy — 신청 · 결제 (예시)", pv: "신청 · 결제 화면 (예시)", sec: SEC_PAY, first: "form", fixed: true },
   login: { name: "로그인 · 가입", h1: "페이지 관리 — 로그인 · 가입", sub: "카카오톡으로 로그인하는 화면의 문구를 고쳐요. 일반 회원가입은 없고, 처음 오는 회원은 약관 동의만 하면 가입이 끝나요.", url: "visualacademy — 로그인 (카카오)", pv: "로그인 · 가입 화면 (예시)", sec: SEC_LOGIN, first: "start", common: true, fixed: true },
 };
+
+export const EDITOR_KEYS = Object.keys(PAGES) as EditorPageKey[];

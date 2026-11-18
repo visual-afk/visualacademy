@@ -7,6 +7,7 @@ import { RefundLink } from "@/components/site/RefundPopup";
 import { ROUTES } from "@/data/site";
 import { getClassDetail } from "@/lib/classes";
 import { fullDate, taxNote, won } from "@/lib/format";
+import { earlyActive, optionCompare, optionPrice } from "@/lib/pricing";
 import { useLoginName } from "@/lib/loginState";
 import { CATEGORY_LABELS, computeStatus } from "@/lib/status";
 import type { AcademyClass } from "@/lib/types";
@@ -72,8 +73,19 @@ function useHydrated() {
 export type Prefill = { name: string; phone: string; email: string; shop: string };
 
 /** loggedIn: 서버가 확인한 로그인 여부 (Supabase 키가 없는 목업 단계에선 undefined → 브라우저 표시를 따른다) */
-export default function CheckoutFlow({ c, prefill, loggedIn }: { c: AcademyClass | undefined; prefill?: Prefill; loggedIn?: boolean }) {
+export default function CheckoutFlow({
+  c,
+  prefill,
+  loggedIn,
+  initialOption = 0,
+}: {
+  c: AcademyClass | undefined;
+  prefill?: Prefill;
+  loggedIn?: boolean;
+  initialOption?: number;
+}) {
   const [step, setStep] = useState<Step>(2);
+  const [optionIdx, setOptionIdx] = useState(c?.options?.[initialOption] ? initialOption : 0);
   const [checks, setChecks] = useState<Record<string, boolean>>({});
   const [form, setForm] = useState(prefill ?? { name: "", phone: "", email: "", shop: "" });
   const [formError, setFormError] = useState("");
@@ -114,7 +126,7 @@ export default function CheckoutFlow({ c, prefill, loggedIn }: { c: AcademyClass
 
   /* 신청할 수 없는 클래스 */
   const status = c ? computeStatus(c) : null;
-  const purchasable = c && c.price !== null && !["종료", "마감", "개설대기", "개설예정"].includes(status!);
+  const purchasable = c && c.price !== null && !["종료", "마감", "품절", "개설대기", "개설예정"].includes(status!);
   if (!c || !purchasable) {
     return (
       <>
@@ -134,7 +146,8 @@ export default function CheckoutFlow({ c, prefill, loggedIn }: { c: AcademyClass
   }
 
   const d = getClassDetail(c);
-  const price = c.price!;
+  const option = c.options?.[optionIdx];
+  const price = option ? optionPrice(option) : c.price!;
   const requiredChecks = [
     ...(d.needPrereq ? [{ k: "prereq", label: "선수 과정 이수 여부를 확인했어요", link: null }] : []),
     { k: "refund", label: "환불 규정을 확인했어요", link: "refund" },
@@ -158,7 +171,7 @@ export default function CheckoutFlow({ c, prefill, loggedIn }: { c: AcademyClass
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: c.slug, applicant: form, agreements: checks }),
+        body: JSON.stringify({ slug: c.slug, applicant: form, agreements: checks, ...(option ? { option: optionIdx } : {}) }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -226,6 +239,21 @@ export default function CheckoutFlow({ c, prefill, loggedIn }: { c: AcademyClass
                 <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
               ))}
             </dl>
+            {c.options && c.options.length > 0 && (
+              <div className="sb-options" role="radiogroup" aria-label="수강 옵션">
+                {c.options.map((o, i) => (
+                  <label key={o.label} className={`sb-option${i === optionIdx ? " on" : ""}`}>
+                    <input type="radio" name="price-option" checked={i === optionIdx} onChange={() => setOptionIdx(i)} />
+                    <span className="so-label">
+                      {o.label}
+                      {earlyActive(o) && <em className="so-early">얼리버드 ~{o.earlyUntil!.slice(5).replace("-", "/")}</em>}
+                    </span>
+                    {optionCompare(o) && <s className="so-before">{won(optionCompare(o)!)}</s>}
+                    <span className="so-price">{won(optionPrice(o))}</span>
+                  </label>
+                ))}
+              </div>
+            )}
             <div className="sb-total"><span className="lbl">결제 예정 금액</span><span className="amt">{won(price)}</span></div>
             <p className="tax-note">{taxNote(price, c.taxType)}</p>
             <button type="button" className="btn btn-mint" disabled={!allChecked || busy} onClick={toPay}>{busy ? "신청서 저장 중…" : price === 0 ? "무료로 신청하기" : "결제 단계로"}</button>
