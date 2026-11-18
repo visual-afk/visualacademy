@@ -146,4 +146,17 @@
   .option-row.sub{grid-template-columns:1fr 1fr 1fr;margin-top:8px}
   .option-del{border:none;background:var(--surface);color:var(--ink-2);border-radius:100px;padding:0 14px;font:inherit;font-size:12px;cursor:pointer}
   .option-add{border:1.5px dashed var(--line-strong);background:none;color:var(--ink-2);border-radius:12px;padding:9px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;margin-top:4px}
+
+  /* 상세 본문(글·사진) 편집기 */
+  .detail-editor .de-toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .detail-editor .de-danger{color:var(--red)}
+  .detail-editor .de-help{margin:0 0 8px;font-size:12px}
+  .detail-editor .de-body{max-height:640px;overflow:auto;border:1.5px solid var(--line-strong);border-radius:12px;padding:16px;background:#fff;
+    text-align:center;font-size:14px;line-height:1.7;word-break:keep-all;outline:none}
+  .detail-editor .de-body:focus{border-color:var(--mint)}
+  .detail-editor .de-body:empty::before{content:'본문이 비어 있어요 — 글을 쓰거나 사진 넣기를 눌러주세요';color:var(--ink-3)}
+  .detail-editor .de-body img{display:block;max-width:100%;height:auto;margin:0 auto;cursor:pointer}
+  .detail-editor .de-body img.de-selected{outline:3px solid var(--mint);outline-offset:2px}
+  .detail-editor .de-body iframe{width:100%;aspect-ratio:16/9;height:auto;border:0}
+  .detail-editor .de-body p{margin:0}
 }
