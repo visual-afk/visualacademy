@@ -30,7 +30,7 @@ const HERO_WAVES = [
   { a: "M-40,380 C300,300 560,460 820,360 C1020,290 1180,380 1260,340", b: "M-40,350 C300,410 560,420 820,390 C1020,367 1180,320 1260,370", dur: "9s", opacity: 0.2 },
 ];
 
-const LEVEL_SLUGS = ["designer-level-1", "designer-level-2", "designer-level-3", "designer-level-4"];
+const LEVEL_SLUGS = ["level-1", "level-2", "level-3", "level-4"];
 
 const lines = (s: string) => s.split("\n").flatMap((l, i) => (i ? [<br key={i} />, l] : [l]));
 const split = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
