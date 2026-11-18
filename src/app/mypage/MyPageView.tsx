@@ -39,7 +39,8 @@ const PAY_BADGE: Record<MyPaymentStatus, string> = {
 };
 
 type Receipt = MyPayment;
-type Modal = { kind: "receipt"; p: Receipt } | { kind: "cancel"; a: MyApplication } | { kind: "withdraw" } | { kind: "withdrawn" } | { kind: "logout" } | null;
+type InvoiceForm = { p: Receipt; bizNo: string; bizName: string; ceo: string; email: string; error: string; sending: boolean };
+type Modal = { kind: "receipt"; p: Receipt } | { kind: "invoice"; f: InvoiceForm } | { kind: "cancel"; a: MyApplication } | { kind: "withdraw" } | { kind: "withdrawn" } | { kind: "logout" } | null;
 
 export type MyInfo = typeof mockMe;
 export type MyData = { applications: MyApplication[]; payments: MyPayment[]; courses: MyCourse[] };
@@ -69,6 +70,30 @@ export default function MyPageView({ tab, me = mockMe, data = MOCK }: { tab: MyT
   const [modal, setModal] = useState<Modal>(null);
   const [pwError, setPwError] = useState("");
   const { toast, showToast } = useToast();
+
+  const bizNoFormat = (v: string) => {
+    const d = v.replace(/\D/g, "").slice(0, 10);
+    return d.length > 5 ? `${d.slice(0, 3)}-${d.slice(3, 5)}-${d.slice(5)}` : d.length > 3 ? `${d.slice(0, 3)}-${d.slice(3)}` : d;
+  };
+  const setInvoice = (f: InvoiceForm) => setModal({ kind: "invoice", f });
+  const requestInvoice = async (f: InvoiceForm) => {
+    if (f.sending) return;
+    if (!f.p.orderId) {
+      setModal(null);
+      return showToast("세금계산서 신청이 접수됐어요");
+    }
+    setInvoice({ ...f, sending: true, error: "" });
+    const res = await fetch(`/api/me/orders/${f.p.orderId}/invoice`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bizNo: f.bizNo, bizName: f.bizName, ceo: f.ceo, email: f.email }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) return setInvoice({ ...f, sending: false, error: d.error ?? "신청하지 못했어요" });
+    setModal(null);
+    showToast("세금계산서 신청이 접수됐어요 · 익월 10일까지 이메일로 발행돼요");
+    router.refresh();
+  };
 
   const saveInfo = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -242,9 +267,42 @@ export default function MyPageView({ tab, me = mockMe, data = MOCK }: { tab: MyT
                   {(modal.p.status === "환불완료" || modal.p.status === "부분환불") && <div><dt>환불 상태</dt><dd>{modal.p.status}</dd></div>}
                 </dl>
                 <p className="receipt-tax">{taxNote(modal.p.amount, modal.p.taxType)}</p>
+                {(modal.p.status === "결제완료" || modal.p.status === "부분환불") && (
+                  <p className="receipt-invoice">
+                    {modal.p.invoice?.state === "발행"
+                      ? `세금계산서 발행 완료 · ${modal.p.invoice.email}`
+                      : modal.p.invoice?.state === "신청"
+                        ? `세금계산서 신청됨 · ${modal.p.invoice.email}로 발행돼요`
+                        : "사업자이신가요? 세금계산서를 신청할 수 있어요."}
+                  </p>
+                )}
                 <div className="modal-actions">
+                  {(modal.p.status === "결제완료" || modal.p.status === "부분환불") && modal.p.invoice?.state !== "발행" && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      onClick={() => setInvoice({ p: modal.p, bizNo: "", bizName: "", ceo: "", email: modal.p.invoice?.email ?? me.email ?? "", error: "", sending: false })}
+                    >
+                      {modal.p.invoice?.state === "신청" ? "신청 정보 수정" : "세금계산서 신청"}
+                    </button>
+                  )}
                   {modal.p.receiptUrl && <a className="btn btn-mint" href={modal.p.receiptUrl} target="_blank" rel="noreferrer">카드·현금 영수증 보기 ↗</a>}
                   <button type="button" className="btn btn-ghost" onClick={() => setModal(null)}>닫기</button>
+                </div>
+              </>
+            )}
+            {modal.kind === "invoice" && (
+              <>
+                <h3>세금계산서 신청</h3>
+                <p>{modal.f.p.item} · {won(modal.f.p.amount)}<br />본사 확인 후 익월 10일까지 이메일로 발행돼요.</p>
+                <div className="field"><label htmlFor="iv-bizno">사업자등록번호</label><input id="iv-bizno" type="text" inputMode="numeric" placeholder="123-45-67890" value={modal.f.bizNo} onChange={(e) => setInvoice({ ...modal.f, bizNo: bizNoFormat(e.target.value), error: "" })} /></div>
+                <div className="field"><label htmlFor="iv-name">상호</label><input id="iv-name" type="text" placeholder="예) 비주얼헤어" value={modal.f.bizName} onChange={(e) => setInvoice({ ...modal.f, bizName: e.target.value, error: "" })} /></div>
+                <div className="field"><label htmlFor="iv-ceo">대표자명</label><input id="iv-ceo" type="text" value={modal.f.ceo} onChange={(e) => setInvoice({ ...modal.f, ceo: e.target.value, error: "" })} /></div>
+                <div className="field"><label htmlFor="iv-email">받을 이메일</label><input id="iv-email" type="email" value={modal.f.email} onChange={(e) => setInvoice({ ...modal.f, email: e.target.value, error: "" })} /></div>
+                {modal.f.error && <p className="form-err">{modal.f.error}</p>}
+                <div className="modal-actions">
+                  <button type="button" className="btn btn-ghost" onClick={() => setModal({ kind: "receipt", p: modal.f.p })}>이전</button>
+                  <button type="button" className="btn btn-mint" disabled={modal.f.sending} onClick={() => requestInvoice(modal.f)}>{modal.f.sending ? "신청 중…" : "신청하기"}</button>
                 </div>
               </>
             )}

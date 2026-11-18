@@ -104,6 +104,7 @@
   .receipt-dl dd{margin:0;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
   .receipt-tax{font-size:12px!important;color:var(--ink-3)!important;text-align:right;margin:2px 0 0!important;font-variant-numeric:tabular-nums}
   .modal-box .btn-danger{background:var(--red);color:#fff}
+  .receipt-invoice{font-size:12.5px!important;color:var(--ink-2)!important;background:var(--surface);border-radius:12px;padding:10px 12px;margin:14px 0 0!important}
 
   .site-footer{padding:65px 0 46px}
 }

@@ -128,6 +128,8 @@ export interface InvoiceRecord {
   ceo: string;
   email: string;
   issuedAt: string;
+  /** 고객이 마이페이지에서 신청한 시각 — 발행 전에는 mgtKey 가 없다 */
+  requestedAt?: string;
   /** 팝빌 문서번호 · 국세청 승인번호 · 작성일자(yyyyMMdd) · 지금 신고된 금액 */
   mgtKey?: string;
   ntsConfirmNum?: string;

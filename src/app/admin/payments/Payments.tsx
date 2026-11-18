@@ -29,6 +29,14 @@ function taxNote(p: Payment) {
   const { supply, vat } = taxBreakdown(p.amount, p.taxType);
   return `공급 ${fmt(supply)} + 부가세 ${fmt(vat)}`;
 }
+/** 고객 신청만 들어온 건(문서번호 없음)은 '신청됨' — 목업 데이터는 문서번호 없이 발행완료로 들어 있다 */
+function invoicePill(p: Payment) {
+  const i = p.invoice;
+  if (!i) return { cls: "p-미발행", label: "미발행" };
+  if (i.canceled) return { cls: "p-미발행", label: "발행취소" };
+  if (i.requestedAt && !i.mgtKey) return { cls: "p-입금대기", label: "신청됨" };
+  return { cls: "p-발행완료", label: "발행완료" };
+}
 function netAmount(p: Payment) {
   if (p.status === "환불완료") return 0;
   if (p.status === "부분환불") return p.amount - (p.refund?.amount ?? 0);
@@ -38,6 +46,29 @@ function nowStamp() {
   const d = new Date();
   const z = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
+}
+
+/** 지금 필터에 걸린 목록을 엑셀에서 바로 열리는 CSV(UTF-8 BOM)로 내려받는다 */
+function downloadCsv(rows: Payment[]) {
+  const head = ["주문번호", "클래스", "분류", "신청자", "결제수단", "결제금액", "과세", "공급가액", "부가세", "환불금액", "실수령액", "결제일시", "상태", "세금계산서", "사업자번호", "상호", "국세청 승인번호"];
+  const cell = (v: string | number | undefined) => {
+    const t = String(v ?? "");
+    return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
+  };
+  const lines = rows.map((p) => {
+    const { supply, vat } = taxBreakdown(p.amount, p.taxType);
+    return [
+      p.id, p.className, p.cat, p.applicant, p.method, p.amount, p.taxType === "exempt" ? "면세" : "과세", supply, vat,
+      p.status === "환불완료" ? p.amount : p.refund?.amount ?? 0, netAmount(p), p.paidAt, p.status,
+      invoicePill(p).label, p.invoice?.bizNo, p.invoice?.bizName, p.invoice?.ntsConfirmNum,
+    ].map(cell).join(",");
+  });
+  const blob = new Blob(["\uFEFF" + [head.join(","), ...lines].join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `결제내역-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 type RefundDraft = { id: string; type: "full" | "partial"; amount: string; reason: string; memo: string; error: string };
@@ -159,7 +190,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
           <h1>결제 관리</h1>
           <p>모든 결제 내역을 확인하고, 환불을 처리해요.</p>
         </div>
-        <button type="button" className="btn btn-ghost" onClick={() => showToast("CSV 내보내기는 백엔드 연동 후 제공돼요")}>CSV 내보내기</button>
+        <button type="button" className="btn btn-ghost" onClick={() => downloadCsv(list)} disabled={list.length === 0}>CSV 내보내기</button>
       </div>
 
       <div className="summary">
@@ -213,7 +244,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
                     </td>
                     <td className="cell-date">{p.paidAt}</td>
                     <td><span className={`pill p-${p.status}`}>{p.status}</span></td>
-                    <td><span className={`pill ${p.invoice && !p.invoice.canceled ? "p-발행완료" : "p-미발행"}`}>{p.invoice ? (p.invoice.canceled ? "발행취소" : "발행완료") : "미발행"}</span></td>
+                    <td><span className={`pill ${invoicePill(p).cls}`}>{invoicePill(p).label}</span></td>
                     <td>
                       <div className="row-actions">
                         {p.status === "환불완료" ? (
@@ -236,7 +267,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
                               setInvoice({ id: p.id, bizNo: p.invoice?.bizNo ?? "", bizName: p.invoice?.bizName ?? "", ceo: p.invoice?.ceo ?? "", email: p.invoice?.email ?? "", error: "" })
                             }
                           >
-                            {p.invoice && !p.invoice.canceled ? "재발행" : "계산서 발행"}
+                            {invoicePill(p).label === "발행완료" ? "재발행" : "계산서 발행"}
                           </button>
                         )}
                       </div>
@@ -335,7 +366,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
       {invoice && invoiceTarget && (
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setInvoice(null)}>
           <div className="modal" role="dialog" aria-modal="true">
-            <h3>{invoiceTarget.taxType === "exempt" ? "계산서" : "세금계산서"} {invoiceTarget.invoice && !invoiceTarget.invoice.canceled ? "재발행" : "발행"}</h3>
+            <h3>{invoiceTarget.taxType === "exempt" ? "계산서" : "세금계산서"} {invoicePill(invoiceTarget).label === "발행완료" ? "재발행" : "발행"}</h3>
             <p className="m-sub">{invoiceTarget.className} · {invoiceTarget.applicant} · {invoiceTarget.id}</p>
             <div className="m-amt-row">
               <span className="lbl">{invoiceTarget.taxType === "exempt" ? "면세 공급가액" : "공급가액 · 부가세"}</span>
@@ -350,7 +381,7 @@ export default function Payments({ initial }: { initial: Payment[] }) {
             <div className="modal-actions">
               <button type="button" className="btn btn-ghost" onClick={() => setInvoice(null)}>취소</button>
               <button type="button" className="btn btn-mint" onClick={confirmInvoice} disabled={issuing}>
-                {issuing ? "발행 중…" : invoiceTarget.invoice && !invoiceTarget.invoice.canceled ? "재발행하기" : "발행하기"}
+                {issuing ? "발행 중…" : invoicePill(invoiceTarget).label === "발행완료" ? "재발행하기" : "발행하기"}
               </button>
             </div>
           </div>

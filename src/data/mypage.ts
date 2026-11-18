@@ -42,6 +42,9 @@ export type MyPayment = {
   taxType: TaxType;
   /** 토스 영수증 주소 (실제 결제만) */
   receiptUrl?: string;
+  /** 세금계산서 신청용 (실제 결제만) */
+  orderId?: string;
+  invoice?: { state: "신청" | "발행"; email: string; ntsConfirmNum?: string };
 };
 
 export const myPayments: MyPayment[] = [

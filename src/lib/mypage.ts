@@ -3,7 +3,7 @@ import type { ApplicationStatus, MyApplication, MyCourse, MyPayment, MyPaymentSt
 import { fullDate } from "./format";
 import { CATEGORY_LABELS } from "./status";
 import { getAdminSupabase } from "./supabase/admin";
-import type { TaxType } from "./types";
+import type { InvoiceRecord, TaxType } from "./types";
 
 const APP_STATUS: Record<string, ApplicationStatus> = {
   수강확정: "수강 확정", 입금대기: "입금 대기", 수강완료: "수강 완료", 취소신청: "취소 요청", 신청취소: "신청 취소",
@@ -15,14 +15,14 @@ const dot = (iso: string) => iso.slice(0, 10).replace(/-/g, ".");
 type Row = {
   id: string; status: string; amount: number; created_at: string;
   classes: { slug: string; name: string; cat: string; date: string | null; time: string | null; place: string | null; type: string; tax_type: TaxType; draft: boolean };
-  payments: { method: string | null; status: string; amount: number; paid_at: string | null; created_at: string; raw: { receipt?: { url?: string } } | null }[];
+  payments: { method: string | null; status: string; amount: number; paid_at: string | null; created_at: string; raw: { receipt?: { url?: string } } | null; invoice: InvoiceRecord | null }[];
 };
 
 export async function getMyPageData(profileId: string): Promise<{ applications: MyApplication[]; payments: MyPayment[]; courses: MyCourse[] }> {
   const db = getAdminSupabase();
   const { data: rows } = await db
     .from("orders")
-    .select("id, status, amount, created_at, classes(slug, name, cat, date, time, place, type, tax_type, draft), payments(method, status, amount, paid_at, created_at, raw)")
+    .select("id, status, amount, created_at, classes(slug, name, cat, date, time, place, type, tax_type, draft), payments(method, status, amount, paid_at, created_at, raw, invoice)")
     .eq("profile_id", profileId)
     .not("status", "in", "(결제대기,승인중)") // 결제를 끝내지 않은 주문은 보여주지 않는다
     .order("created_at", { ascending: false });
@@ -59,6 +59,10 @@ export async function getMyPageData(profileId: string): Promise<{ applications: 
         amount: p.amount,
         taxType: o.classes.tax_type,
         receiptUrl: p.raw?.receipt?.url,
+        orderId: o.id,
+        ...(p.invoice && !p.invoice.canceled
+          ? { invoice: { state: p.invoice.mgtKey ? ("발행" as const) : ("신청" as const), email: p.invoice.email, ntsConfirmNum: p.invoice.ntsConfirmNum } }
+          : {}),
       })),
   );
 
