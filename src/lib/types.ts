@@ -74,6 +74,10 @@ export interface AcademyClass {
   applied: number | null;
   /** 원 단위, 0 = 무료, null = 미정 */
   price: number | null;
+  /** 가격 옵션이 있으면 고객이 하나를 골라 결제한다 (price 는 가장 싼 옵션) */
+  options?: PriceOption[];
+  /** 품절(신청 불가) · 숨김(고객 화면에서 빠짐). 없으면 판매중 */
+  saleStatus?: Exclude<SaleStatus, "on">;
   type: ClassType;
   cert: boolean;
   noob: boolean;
@@ -102,6 +106,21 @@ export interface Instructor {
   /** 프로필 사진 경로 (public/images/instructors) — 없으면 이름 첫 글자 */
   img?: string | null;
 }
+
+/** 가격 옵션 — 예) { label: "4회", price: 350000 } */
+export interface PriceOption {
+  label: string;
+  /** 판매가 */
+  price: number;
+  /** 정가 — 판매가보다 크면 취소선 + 할인율로 보여준다 */
+  listPrice?: number;
+  /** 얼리버드: earlyUntil(YYYY-MM-DD, 그날 포함)까지 이 가격 */
+  earlyPrice?: number;
+  earlyUntil?: string;
+}
+
+/** 클래스 판매 상태 — 없으면 판매중 */
+export type SaleStatus = "on" | "soldout" | "hidden";
 
 export type PaymentStatus = "결제완료" | "부분환불" | "환불완료" | "입금대기";
 
