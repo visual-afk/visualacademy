@@ -9,6 +9,7 @@ import "@/styles/pages/class-detail.css";
 import "@/styles/pages/about.css";
 import "@/styles/pages/guide.css";
 import "@/styles/pages/mypage.css";
+import "@/styles/pages/course.css";
 import "@/styles/pages/checkout.css";
 import "@/styles/pages/admin-dashboard.css";
 import "@/styles/pages/admin-class-form.css";

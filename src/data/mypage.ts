@@ -51,7 +51,8 @@ export const myPayments: MyPayment[] = [
   { date: "2026.07.28", item: "두피 스케일링 심화반", method: "신용카드", status: "환불완료", amount: 350000, taxType: "taxable" },
 ];
 
-export type MyCourse = { title: string; meta: string; pct: number; expiry: string; thumb: string; done: boolean };
+/** classId 가 있으면 실제 수강권 — /mypage/courses/:classId 에서 재생 */
+export type MyCourse = { title: string; meta: string; pct: number; expiry: string; thumb: string; done: boolean; classId?: number };
 
 export const myCourses: MyCourse[] = [
   { title: "월 2000플랜 (온라인)", meta: "9개월 수강권 · 총 6강 중 3강 완료", pct: 50, expiry: "2027.06.20", thumb: "", done: false },

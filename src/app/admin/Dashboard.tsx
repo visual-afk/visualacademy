@@ -250,6 +250,8 @@ export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
               <div className="card-actions">
                 <Link className="ca-btn" href={ROUTES.adminEditClass(c.id)}>기본 정보</Link>
                 <Link className="ca-btn" href={ROUTES.adminClassContent(c.id)}>콘텐츠 관리</Link>
+                <Link className="ca-btn" href={`/admin/classes/${c.id}/applicants`}>신청자</Link>
+                {c.type === "online" && <Link className="ca-btn" href={`/admin/classes/${c.id}/videos`}>강의 영상</Link>}
                 <Link className="ca-btn primary" href={ROUTES.classDetail(c.slug)} target="_blank">미리보기</Link>
               </div>
               {!isPast && dated && (
