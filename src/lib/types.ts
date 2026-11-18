@@ -99,6 +99,8 @@ export interface Instructor {
   name: string;
   role: string;
   desc: string;
+  /** 프로필 사진 경로 (public/images/instructors) — 없으면 이름 첫 글자 */
+  img?: string | null;
 }
 
 export type PaymentStatus = "결제완료" | "부분환불" | "환불완료" | "입금대기";
