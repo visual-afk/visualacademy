@@ -195,6 +195,6 @@ export const classes: AcademyClass[] = [
 
 /** 프로토타입의 ?cls=offline / ?cls=online 링크 호환 */
 export const CLASS_ALIASES: Record<string, string> = {
-  offline: "designer-level-2",
-  online: "monthly-2000-plan",
+  offline: "level-2",
+  online: "2000-plan",
 };
