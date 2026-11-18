@@ -92,7 +92,7 @@
   .seat-bar i{display:block;height:100%;border-radius:6px;background:var(--mint-grad)}
   .class-card .price{font-size:22px;font-weight:800;margin:auto 0 16px;font-variant-numeric:tabular-nums;letter-spacing:-.015em;display:flex;align-items:baseline;gap:8px}
   .class-card .price small{font-size:12.5px;font-weight:500;color:var(--ink-3);letter-spacing:0}
-  .class-card .btn{width:100%}
+  .class-card .btn{width:100%;margin-top:auto}
   .class-card .btn-ghost{color:var(--ink);border-width:1px}
 
   /* 칩 (프로그램·강사 공용) */

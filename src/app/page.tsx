@@ -6,7 +6,7 @@ import SiteHeader from "@/components/site/SiteHeader";
 import { ROUTES } from "@/data/site";
 import { getMainContent, type MainContent } from "@/data/siteContent";
 import { getClasses } from "@/lib/api";
-import { dday, ddayLabel, priceLabel, shortDate } from "@/lib/format";
+import { dday, ddayLabel, shortDate } from "@/lib/format";
 import { badgeClass, CATEGORY_LABELS, computeStatus } from "@/lib/status";
 import type { AcademyClass, ClassStatus } from "@/lib/types";
 import HeroSearch from "./HeroSearch";
@@ -102,10 +102,7 @@ function RecruitCard({ c, hot }: { c: AcademyClass & { status: ClassStatus }; ho
         <div className="seat-top"><span>{seat.label}</span><span>{seat.value}</span></div>
         <div className="seat-bar"><i style={{ width: `${seat.pct}%`, opacity: seat.dim ? 0.35 : undefined }} /></div>
       </div>
-      <p className="price">
-        {priceLabel(c)}
-        {!!c.price && <small>{c.taxType === "exempt" ? "면세" : "VAT 포함"}</small>}
-      </p>
+      {/* 가격은 목록에서 빼고 상세·신청 화면에서만 보여준다 */}
       {wait ? (
         <Link className="btn btn-ghost" href={ROUTES.classDetail(c.slug)}>개설 알림 신청</Link>
       ) : (
