@@ -173,7 +173,11 @@ export default async function AboutPage({ searchParams }: PageProps<"/about">) {
               <div className="instructor-grid">
                 {instructors.map((i) => (
                   <div key={i.id} className="inst-card">
-                    <div className="inst-avatar">{i.initial}</div>
+                    {i.img ? (
+                      <div className="inst-avatar ph" style={{ backgroundImage: `url(${i.img})` }} role="img" aria-label={i.name} />
+                    ) : (
+                      <div className="inst-avatar">{i.initial}</div>
+                    )}
                     <div>
                       <p className="inst-name">{i.name}</p>
                       <p className="inst-role">{i.role}</p>

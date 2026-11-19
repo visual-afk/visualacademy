@@ -35,7 +35,7 @@ export function getClassDetail(c: AcademyClass): ClassDetail {
   };
 }
 
-/** 목록에 없는 강사 id 면 수석 강사(목록 3번째)로 대신한다 — 목업 getInstructor 와 같은 규칙 */
+/** 목록에 없는 강사 id 면 대표(목록 첫 번째)로 대신한다 — 목업 getInstructor 와 같은 규칙 */
 export function pickInstructor(list: Instructor[], id: string): Instructor | undefined {
-  return list.find((i) => i.id === id) ?? list[2] ?? list[0];
+  return list.find((i) => i.id === id) ?? list[0];
 }

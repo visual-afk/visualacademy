@@ -57,7 +57,7 @@ export const DEF_MAIN = {
     levelOrder: "리현, 준모, 창민, 성실, 호승",
     list: [
       { name: "이유경", role: "대표원장", img: "/images/instructors/lee-yukyung.jpg", insta: "", cats: "", tags: "", career: "", career2Title: "", career2: "", intro: "", link: "/about?tab=inst" },
-      { name: "순돌", role: "이사 · 원장", img: "/images/instructors/soondol.jpg", insta: "visual_soondol", cats: "모발과학", tags: "",
+      { name: "순돌", role: "이사 · 원장", img: "/images/instructors/sundol.jpg", insta: "visual_soondol", cats: "모발과학", tags: "",
         career: "현) 복구매직 전문 살롱 10년 운영\n현) 비주얼 아카데미 교육이사\n현) 비주얼랩 교육이사\n현) 트리필드 이사\n현) 비주얼뷰티 부사장",
         career2Title: "그 외 이력",
         career2: "2001년 미용 입문 25년차 경력 디자이너\n국/내외 모발 과학 교육 & 세미나 다수 이수\nm-nrt 대표 스터디 소수 그룹 10년 운영\n모발 과학 단일 교육 최대 인원 모집\n모발 과학 단일 교육 최장 기간 교육 매진\n최신 모발 과학 서적 출간\n트리필드 전제품 연구 개발 및 출시\ns3아카데미 (서울·천안·수원·창원)외 다수 아카데미 모발 과학 교육 및 입점교육\n레베 전국지사 모발 과학 세미나 & 펌 원리 교육 서울·부산 모발 과학 특강 20기 배출\n부산 보건 대학교 졸업생 출강 & 재직자 특강 다수 진행중",
