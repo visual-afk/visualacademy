@@ -17,6 +17,8 @@ export const ROUTES = {
   classDetail: (slug: string) => `/classes/${slug}`,
   checkout: (slug: string) => `/checkout?cls=${slug}`,
   about: (tab?: string) => (tab ? `/about?tab=${tab}` : "/about"),
+  /** 대표 인사 (11.12) — 아카데미 소개·푸터에서 연결 */
+  greeting: "/about/greeting",
   guide: (tab?: string) => (tab ? `/guide?tab=${tab}` : "/guide"),
   mypage: "/mypage",
   /** 카카오 로그인 · 가입. next = 로그인 후 돌아갈 주소 */
@@ -27,6 +29,8 @@ export const ROUTES = {
   terms: "/terms",
   admin: "/admin",
   adminPayments: "/admin/payments",
+  /** 문의함 (11.12) — 제휴·가맹·교육·기업 문의 */
+  adminInquiries: "/admin/inquiries",
   adminNewClass: "/admin/classes/new",
   adminEditClass: (id: number) => `/admin/classes/${id}/edit`,
   adminClassContent: (id: number) => `/admin/classes/${id}/content`,

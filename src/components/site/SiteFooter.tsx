@@ -3,10 +3,11 @@ import { ROUTES } from "@/data/site";
 import { getMainContent } from "@/data/siteContent";
 import { RefundLink } from "./RefundPopup";
 
-/* 링크 이름은 디자인 모드(메인 페이지 › 푸터)에서 바꾸고, 연결 주소는 순서대로 고정. "refund"는 환불 규정 팝업 */
+/* 링크 이름은 디자인 모드(메인 페이지 › 푸터)에서 바꾸고, 연결 주소는 순서대로 고정. "refund"는 환불 규정 팝업
+ * (11.12) 모든 페이지 푸터 통일 — 아카데미(소개·대표 인사·강사·오시는 길) / 이용 안내(환불 규정) / 관련 사이트 */
 const FOOTER_HREFS = [
-  [ROUTES.about(), ROUTES.about("inst"), ROUTES.about("way")],
-  [ROUTES.guide(), ROUTES.guide("faq"), "refund"],
+  [ROUTES.about(), ROUTES.greeting, ROUTES.about("inst"), ROUTES.about("way")],
+  ["refund"],
   ["#", "#"], // 비주얼살롱·트리필드 — 실제 URL 확정 전
 ];
 

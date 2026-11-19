@@ -142,3 +142,24 @@ export interface InvoiceRecord {
   canceled?: boolean;
   history?: { at: string; kind: "발행" | "발행취소" | "수정발행"; mgtKey: string; amount: number; ntsConfirmNum?: string; modifyCode?: number }[];
 }
+
+/** 제휴·가맹 문의 처리 상태 — new 신규 · prog 확인중 · done 완료 */
+export type InquiryStatus = "new" | "prog" | "done";
+
+export type InquiryType = "가맹 개설 문의" | "교육 제휴 문의" | "기업 단체 교육 문의" | "기타";
+
+/** 관리자 문의함 한 건 (inquiries 테이블 + payload jsonb) */
+export interface Inquiry {
+  id: string;
+  /** KST "YYYY-MM-DD HH:mm" */
+  date: string;
+  name: string;
+  /** 매장·소속 (없으면 "-") */
+  shop: string;
+  phone: string;
+  type: InquiryType;
+  status: InquiryStatus;
+  body: string;
+  /** 담당자 메모 (고객 비공개) */
+  memo: string;
+}
