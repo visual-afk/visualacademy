@@ -47,21 +47,39 @@ const SEC_MAIN: Record<string, SectionSchema> = {
   programs: { name: "프로그램 3갈래", sub: "카드 3개 · 클래스 목록 연결", fields: [
     { k: "title", l: "섹션 제목", t: "text" }, { k: "desc", l: "섹션 설명", t: "text" },
     { k: "cards", l: "카드", t: "list", item: "카드", fixed: true, f: [{ k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "textarea" },
-      { k: "link", l: "\"전체 보기\"가 열 분류", t: "select", o: [["정석", "디자이너의 정석"], ["특강", "단독 특강"], ["경영", "경영 · 컨설팅"], ["", "전체 클래스"]] }] }] },
-  online: { name: "온라인 강의 배너", sub: "문구 · 버튼", fields: [
-    { k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "text" }, { k: "btn", l: "버튼 문구", t: "text" }] },
-  instructors: { name: "강사 소개", sub: "사진 · 이름 · 직함", fields: [
+      { k: "chips", l: "작은 태그", t: "text", hint: "쉼표로 구분 (예: 레벨 1~4, 10주 과정)" },
+      { k: "link", l: "\"전체 보기\"가 열 분류", t: "select", o: [["정석", "디자이너의 정석"], ["특강", "단독 특강"], ["경영", "경영 · 컨설팅"], ["", "전체 클래스"]] }] },
+    { note: "카드 번호(01·02·03)와 아이콘은 순서대로 자동으로 붙어요." }] },
+  online: { name: "온라인 강의 배너", sub: "태그 · 문구 · 특징 · 버튼 · 가격", fields: [
+    { k: "tag", l: "작은 태그", t: "text", hint: "비우면 숨김" }, { k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "text" },
+    { k: "feats", l: "특징 (체크 표시)", t: "text", hint: "쉼표로 구분" }, { k: "btn", l: "버튼 문구", t: "text" },
+    { k: "priceName", l: "버튼 아래 상품 이름", t: "text" }, { k: "price", l: "버튼 아래 가격", t: "text", hint: "비우면 가격 줄을 숨김" }] },
+  instructors: { name: "강사 소개", sub: "분류 탭 · 강사 카드 (사진 · 이력 · 소개)", fields: [
     { k: "title", l: "섹션 제목", t: "text" }, { k: "desc", l: "섹션 설명", t: "text" },
-    { k: "list", l: "강사", t: "list", item: "강사", max: 8, f: [{ k: "img", l: "사진", t: "image", rec: [600, 800, "3:4 세로"] }, { k: "name", l: "이름", t: "text" }, { k: "role", l: "직함", t: "text" }] }] },
-  reviews: { name: "수강생 후기", sub: "후기 문구 · 작성자", fields: [
+    { k: "cats", l: "분류 탭", t: "text", hint: "쉼표로 구분 — '전체' 탭은 자동으로 맨 앞에 붙어요" },
+    { k: "levelOrder", l: "'레벨교육' 탭 안 순서", t: "text", hint: "강사 이름을 쉼표로 — 나머지 탭은 아래 목록 순서" },
+    { k: "list", l: "강사 (목록 순서 = '전체' 탭 순서)", t: "list", item: "강사", max: 16, f: [
+      { k: "img", l: "사진", t: "image", rec: [480, 600, "4:5 세로"] }, { k: "name", l: "이름", t: "text" }, { k: "role", l: "직함", t: "text" },
+      { k: "insta", l: "인스타그램 아이디 (선택)", t: "text" },
+      { k: "cats", l: "분류", t: "text", hint: "위 분류 탭 이름을 쉼표로 (여러 개 가능)" },
+      { k: "tags", l: "전문 분야 태그", t: "text", hint: "쉼표로 구분" },
+      { k: "career", l: "이력", t: "textarea", hint: "한 줄에 하나씩 · **글자**는 굵게" },
+      { k: "career2Title", l: "추가 이력 제목 (선택)", t: "text" }, { k: "career2", l: "추가 이력", t: "textarea", hint: "한 줄에 하나씩" },
+      { k: "intro", l: "소개 / 인사말", t: "textarea", hint: "**글자**는 형광펜 강조" },
+      { k: "link", l: "프로필 페이지 주소 (선택)", t: "text", hint: "입력하면 카드 전체가 링크가 돼요" }] },
+    { note: "'레벨교육' 분류는 카드에 '레벨 전문 강사'로 표시돼요. 이력과 소개가 모두 비어 있으면 '준비하고 있어요' 안내가 나와요." }] },
+  reviews: { name: "수강생 후기", sub: "후기 문구 · 과정 · 작성자", fields: [
     { k: "title", l: "섹션 제목", t: "text" }, { k: "desc", l: "섹션 설명", t: "text" },
-    { k: "list", l: "후기", t: "list", item: "후기", max: 6, f: [{ k: "q", l: "후기 내용", t: "textarea" }, { k: "a", l: "작성자", t: "text" }] }] },
-  salon: { name: "비주얼살롱 배너", sub: "문구 · 버튼", fields: [
-    { k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "text" }, { k: "btn", l: "버튼 문구", t: "text" }] },
+    { k: "list", l: "후기", t: "list", item: "후기", max: 6, f: [{ k: "q", l: "후기 내용", t: "textarea" }, { k: "course", l: "과정 표시", t: "text" },
+      { k: "a", l: "작성자", t: "text", hint: "첫 글자가 동그라미 안에 들어가요" }, { k: "sub", l: "작성자 아래 설명", t: "text" }] }] },
+  salon: { name: "비주얼살롱 배너", sub: "태그 · 문구 · 지역 · 버튼", fields: [
+    { k: "tag", l: "작은 태그", t: "text", hint: "비우면 숨김" }, { k: "title", l: "제목", t: "text" }, { k: "desc", l: "설명", t: "text" },
+    { k: "regions", l: "지역 표시", t: "text", hint: "쉼표로 구분" }, { k: "btn", l: "버튼 문구", t: "text" }] },
   footer: { name: "푸터", sub: "소개 · 링크 모음 · 사업자 정보 · 환불 규정 창", fields: [
     { k: "desc", l: "한 줄 소개", t: "text" },
     { k: "cols", l: "링크 모음", t: "list", item: "묶음", fixed: true, f: [{ k: "h", l: "묶음 제목", t: "text" }, { k: "links", l: "링크 이름들", t: "text", hint: "쉼표로 구분" }] },
-    { k: "biz1", l: "사업자 정보 (1줄)", t: "textarea" }, { k: "biz2", l: "주소 · 연락처 · 저작권 (2줄)", t: "textarea" },
+    { k: "biz", l: "사업자 정보", t: "list", item: "항목", max: 10, f: [{ k: "k", l: "항목 이름", t: "text" }, { k: "v", l: "내용", t: "text", hint: "비우면 이 항목은 숨겨져요" }] },
+    { k: "copy", l: "저작권 문구", t: "text" },
     { sub: "아래는 푸터의 \"환불 규정\"을 눌렀을 때 뜨는 안내 창이에요. 모든 페이지에 똑같이 적용돼요." },
     { k: "rfTitle", l: "환불 규정 창 제목", t: "text" },
     { k: "rfTh", l: "표 머리글", t: "list", item: "칸", fixed: true, f: [{ k: "t", l: "머리글", t: "text" }] },

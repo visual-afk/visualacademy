@@ -21,8 +21,8 @@ interface PageState { D: PageContent; saved: string; hist: Version[]; next: numb
 type Modal = { kind: "publish" } | { kind: "reset" } | { kind: "history" } | { kind: "restore"; id: number } | null;
 
 const KEYS = Object.keys(PAGES) as ContentPageKey[];
-/* 콘텐츠 구조가 바뀌면 v 숫자를 올린다 — 예전 구조로 저장된 초안은 읽지 않음 (v2: 환불 규정을 수강 안내 탭 → 푸터 팝업으로 이동) */
-const LS = (k: ContentPageKey) => `va-design:v2:${k}`;
+/* 콘텐츠 구조가 바뀌면 v 숫자를 올린다 — 예전 구조로 저장된 초안은 읽지 않음 (v2: 환불 규정 → 푸터 팝업, v3: 메인 강사 슬라이더·푸터 사업자 정보 목록) */
+const LS = (k: ContentPageKey) => `va-design:v3:${k}`;
 const TSK = ["fs", "ls", "lh", "fw", "al"] as const;
 
 const fmt = (d: Date) => d.toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" });
