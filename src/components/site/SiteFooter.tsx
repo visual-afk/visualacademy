@@ -21,7 +21,10 @@ export default function SiteFooter() {
       <div className="wrap">
         <div className="foot-top">
           <div>
-            <div className="logo" style={{ marginBottom: 12 }}>{nav.logo}</div>
+            <div className="logo" style={{ marginBottom: 12 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="logo-img" src="/images/brand/logo.png" alt={nav.logo} width={231} height={20} />
+            </div>
             <p style={{ fontSize: 13, color: "var(--ink-3)", maxWidth: 280, margin: 0 }}>{footer.desc}</p>
           </div>
           <div className="foot-links">

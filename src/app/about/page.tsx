@@ -95,8 +95,16 @@ function IntroPanel() {
         <div className="section qa-block">
           <div className="split-section light reverse">
             <div className="split-text">
-              <p className="qtag">{C.ifbs.tag}</p>
-              <h3><Rich text={C.ifbs.title} /></h3>
+              {C.ifbs.logo ? (
+                /* 협회 로고 (11.17) — 로고가 있으면 작은 제목·제목 대신 */
+                // eslint-disable-next-line @next/next/no-img-element
+                <img className="ifbs-logo" src={C.ifbs.logo} alt={`${C.ifbs.tag} ${C.ifbs.title.replace(/\n/g, " ")}`} width={300} height={63} />
+              ) : (
+                <>
+                  <p className="qtag">{C.ifbs.tag}</p>
+                  <h3><Rich text={C.ifbs.title} /></h3>
+                </>
+              )}
               {C.ifbs.paras.map((x, i) => <p key={i}><Rich text={x.p} /></p>)}
             </div>
             <div className={photoCls("split-photo", C.ifbs.img, "p3")} style={bg(C.ifbs.img)} />

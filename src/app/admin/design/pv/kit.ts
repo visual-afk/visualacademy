@@ -66,14 +66,14 @@ const NAV_KEYS: NavKey[] = ["classes", "online", "academy"];
 export function siteHeader(nav: any, opts: { active?: NavKey; hero?: boolean; right?: string } = {}) {
   const links = (nav?.links || []).map((l: any, i: number) => `<a class="${opts.active && NAV_KEYS[i] === opts.active ? "on" : ""}">${esc(l.label)}</a>`).join("");
   const util = opts.right ?? `<a class="icon-btn" aria-label="검색">${ICON_SEARCH()}</a><a class="btn btn-ghost nav-login">로그인</a><a class="btn btn-mint">${esc(nav?.cta)}</a>`;
-  return `<header class="site-header${opts.hero ? " is-hero" : ""}"><div class="wrap nav"><a class="logo">${esc(nav?.logo)}</a><nav class="navlinks">${links}</nav><div class="navutil">${util}</div></div></header>`;
+  return `<header class="site-header${opts.hero ? " is-hero" : ""}"><div class="wrap nav"><a class="logo"><img class="logo-img" src="/images/brand/logo.png" alt="${esc(nav?.logo)}" width="254" height="22"></a><nav class="navlinks">${links}</nav><div class="navutil">${util}</div></div></header>`;
 }
 
 /** SiteFooter — footer: 메인 페이지 footer 데이터 */
 export function siteFooter(footer: any, nav: any) {
   if (!footer) return "";
   return `<footer class="site-footer"><div class="wrap">
-    <div class="foot-top"><div><div class="logo" style="margin-bottom:12px">${esc(nav?.logo)}</div><p style="font-size:13px;color:var(--ink-3);max-width:280px;margin:0">${esc(footer.desc)}</p></div>
+    <div class="foot-top"><div><div class="logo" style="margin-bottom:12px"><img class="logo-img" src="/images/brand/logo.png" alt="${esc(nav?.logo)}" width="231" height="20"></div><p style="font-size:13px;color:var(--ink-3);max-width:280px;margin:0">${esc(footer.desc)}</p></div>
       <div class="foot-links">${(footer.cols || []).map((c: any) => `<div class="foot-col"><h4>${esc(c.h)}</h4>${sp(c.links).map((l) => `<a>${esc(l)}</a>`).join("")}</div>`).join("")}</div></div>
     <div class="foot-bottom"><div class="foot-legal"><a>이용약관</a><a><b>개인정보처리방침</b></a></div>
       <ul class="foot-biz">${(footer.biz || []).filter((b: any) => String(b.v || "").trim()).map((b: any) => `<li><b>${esc(b.k)}</b>${esc(b.v)}</li>`).join("")}</ul>
