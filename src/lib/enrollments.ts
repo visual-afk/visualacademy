@@ -89,6 +89,7 @@ export type Student = {
   note: string;
   startedAt: string;
   lastWatchedAt: string | null;
+  completedAt: string | null;
   unlockAll: boolean;
   /** 낸 워크시트 수 (수강생이 강의 화면을 열 때 2000플랜 DB 에서 확인해 둔 값) */
   wsDone: number;
@@ -98,13 +99,13 @@ export type Student = {
 export async function getStudents(classId: number): Promise<Student[]> {
   const { data, error } = await getAdminSupabase()
     .from("enrollments")
-    .select("id, source, expires_at, progress, note, created_at, last_watched_at, unlock_all, ws_done, profiles(name, phone, email, shop), enrollment_changes(kind, prev_expires_at, new_expires_at, reason, actor, created_at)")
+    .select("id, source, expires_at, progress, note, created_at, last_watched_at, completed_at, unlock_all, ws_done, profiles(name, phone, email, shop), enrollment_changes(kind, prev_expires_at, new_expires_at, reason, actor, created_at)")
     .eq("class_id", classId)
     .order("created_at", { ascending: true });
   if (error) throw new Error(`수강생 조회 실패: ${error.message}`);
   type Row = {
     id: string; source: EnrollmentSource; expires_at: string | null; progress: number; note: string | null; created_at: string;
-    last_watched_at: string | null; unlock_all: boolean; ws_done: string[] | null;
+    last_watched_at: string | null; completed_at: string | null; unlock_all: boolean; ws_done: string[] | null;
     profiles: { name: string | null; phone: string | null; email: string | null; shop: string | null } | null;
     enrollment_changes: { kind: ChangeKind; prev_expires_at: string | null; new_expires_at: string | null; reason: string | null; actor: string; created_at: string }[];
   };
@@ -120,6 +121,7 @@ export async function getStudents(classId: number): Promise<Student[]> {
     note: r.note ?? "",
     startedAt: r.created_at,
     lastWatchedAt: r.last_watched_at,
+    completedAt: r.completed_at,
     unlockAll: r.unlock_all,
     wsDone: (r.ws_done ?? []).length,
     history: r.enrollment_changes

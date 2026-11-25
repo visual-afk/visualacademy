@@ -8,8 +8,12 @@ import { ROUTES } from "@/data/site";
 import type { ChangeKind, Student } from "@/lib/enrollments";
 import { daysLeft, expiryLabel, nextExpiry, type ExpiryChange } from "@/lib/expiry";
 import { formatPhone } from "@/lib/format";
+import { LEARNING_LABEL, learningStatus, type Learning } from "@/lib/learning";
 
-const FILTERS = ["수강 중", "30일 내 만료", "만료", "전체"] as const;
+const FILTERS = ["수강 중", "챙겨야 할 사람", "30일 내 만료", "만료", "전체"] as const;
+/** 챙겨야 할 사람 = 7일 이상 안 봄 · 기한 임박인데 진도 낮음 (lib/learning.ts — 알림톡과 같은 기준) */
+const NEEDS_CARE: Learning[] = ["warn", "risk", "behind"];
+const LEARN_PILL: Record<Learning, string> = { ok: "p-결제완료", done: "p-발행완료", warn: "p-부분환불", risk: "p-입금대기", behind: "p-입금대기", expired: "p-환불완료" };
 type Filter = (typeof FILTERS)[number];
 const SOURCE: Record<string, string> = { order: "결제", admin: "직접 부여", imweb: "아임웹 이관" };
 const KIND: Record<ChangeKind, string> = { grant: "부여", repurchase: "재결제 연장", change: "기한 변경", revoke: "회수" };
@@ -114,11 +118,12 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
   const [edit, setEdit] = useState<(Form & { id: string; note: string; historyOpen: boolean }) | null>(null);
   const [grant, setGrant] = useState<(Form & { phone: string; name: string }) | null>(null);
 
-  const st = rows.map((s) => ({ s, status: status(s) }));
+  const st = rows.map((s) => ({ s, status: status(s), learning: learningStatus(s) }));
   const active = st.filter((r) => r.status !== "만료");
-  const list = st.filter(({ s, status: x }) => {
+  const list = st.filter(({ s, status: x, learning }) => {
     if (filter === "수강 중" && x === "만료") return false;
     if (filter === "30일 내 만료" && x !== "만료 임박") return false;
+    if (filter === "챙겨야 할 사람" && !NEEDS_CARE.includes(learning)) return false;
     if (filter === "만료" && x !== "만료") return false;
     const q = search.replace(/-/g, "");
     return !q || s.name.includes(q) || s.phone.includes(q);
@@ -230,7 +235,7 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
 
       <div className="summary">
         <div className="sitem mint"><p className="sn">{active.length}명</p><p className="sl">수강 중</p></div>
-        <div className="sitem warn"><p className="sn">{st.filter((r) => r.status === "만료 임박").length}명</p><p className="sl">30일 안에 만료</p></div>
+        <div className="sitem warn"><p className="sn">{st.filter((r) => NEEDS_CARE.includes(r.learning)).length}명</p><p className="sl">챙겨야 할 사람 (7일+ 안 봄 · 기한 임박 저진도)</p></div>
         <div className="sitem"><p className="sn">{avg}%</p><p className="sl">수강 중인 사람 평균 진도</p></div>
         <div className="sitem danger"><p className="sn">{st.filter((r) => r.status === "만료").length}명</p><p className="sl">만료</p></div>
       </div>
@@ -249,10 +254,10 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
         <div className="table-scroll">
           <table>
             <thead>
-              <tr><th>수강생</th><th>연락처</th><th>진도</th><th>마지막 시청</th><th>수강기한</th><th>상태</th><th /></tr>
+              <tr><th>수강생</th><th>연락처</th><th>진도</th><th>마지막 시청</th><th>수강기한</th><th>상태</th><th>학습</th><th /></tr>
             </thead>
             <tbody>
-              {list.map(({ s, status: x }) => {
+              {list.map(({ s, status: x, learning }) => {
                 const dl = daysLeft(s.expiresAt);
                 return (
                   <tr key={s.id}>
@@ -274,6 +279,7 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
                       {dl !== null && x !== "만료" && <p className="cell-order">{dl === 0 ? "오늘 만료" : `${dl}일 남음`}</p>}
                     </td>
                     <td><span className={`pill ${PILL[x]}`}>{x}</span></td>
+                    <td>{learning !== "expired" && <span className={`pill ${LEARN_PILL[learning]}`}>{LEARNING_LABEL[learning]}</span>}</td>
                     <td>
                       <button type="button" className="ca-btn" onClick={() => setEdit({ ...blank, id: s.id, note: s.note, historyOpen: false })}>
                         기한 변경

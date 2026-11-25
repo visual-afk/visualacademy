@@ -4,13 +4,14 @@
  * visual-auto lib/notifications/kakao.ts 와 같은 Solapi 방식. 발신 프로필은 아카데미 채널(KAKAO_SENDER_KEY)만 쓴다 (살롱 채널로 나가지 않게 기본값 없음).
  *
  * 환경변수: SOLAPI_API_KEY, SOLAPI_API_SECRET, KAKAO_SENDER_KEY(아카데미 채널 pfId), KAKAO_SENDER_PHONE(선택, SMS 대체)
- *          KAKAO_TMPL_PAID · KAKAO_TMPL_VBANK · KAKAO_TMPL_D3 · KAKAO_TMPL_EXPIRE30 · KAKAO_TMPL_WAITLIST_OPEN (알림톡 템플릿 ID)
+ *          KAKAO_TMPL_PAID · KAKAO_TMPL_VBANK · KAKAO_TMPL_D3 · KAKAO_TMPL_EXPIRE30 · KAKAO_TMPL_WAITLIST_OPEN
+ *          KAKAO_TMPL_IDLE · KAKAO_TMPL_BEHIND (온라인 강의 안 보는 사람 · 기한 임박 저진도) (알림톡 템플릿 ID)
  *          ACADEMY_CHAT_WEBHOOK_URL (본사 Google Chat 스페이스 webhook)
  */
 import crypto from "crypto";
 import { getAdminSupabase } from "./supabase/admin";
 
-export type NotifyKind = "paid" | "vbank" | "d-3" | "expire-30" | "waitlist-open";
+export type NotifyKind = "paid" | "vbank" | "d-3" | "expire-30" | "waitlist-open" | "idle" | "behind";
 
 const TEMPLATE_ENV: Record<NotifyKind, string> = {
   paid: "KAKAO_TMPL_PAID",
@@ -18,6 +19,8 @@ const TEMPLATE_ENV: Record<NotifyKind, string> = {
   "d-3": "KAKAO_TMPL_D3",
   "expire-30": "KAKAO_TMPL_EXPIRE30",
   "waitlist-open": "KAKAO_TMPL_WAITLIST_OPEN",
+  idle: "KAKAO_TMPL_IDLE",
+  behind: "KAKAO_TMPL_BEHIND",
 };
 
 function alimtalkReady(kind: NotifyKind): string | null {
