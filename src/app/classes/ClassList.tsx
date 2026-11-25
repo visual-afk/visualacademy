@@ -6,7 +6,8 @@ import { useMemo, useState } from "react";
 import ClassThumb from "@/components/site/ClassThumb";
 import GrowthRoadmap, { type RoadmapColumn } from "@/components/site/GrowthRoadmap";
 import { ROUTES } from "@/data/site";
-import { dayLabel, ddayLabel, priceLabel } from "@/lib/format";
+import { dayLabel, ddayLabel } from "@/lib/format";
+import { optionLine } from "@/lib/pricing";
 import { badgeClass, computeStatus, ctaLabel, STEP_NAMES } from "@/lib/status";
 import type { AcademyClass, ClassStatus } from "@/lib/types";
 
@@ -15,6 +16,7 @@ const STATUS_TABS: { value: string; label: string }[] = [
   { value: "모집중", label: "이번 기수 모집중" },
   { value: "온라인상시", label: "상시 수강" },
   { value: "개설대기", label: "개설 대기" },
+  { value: "품절", label: "품절" },
   { value: "종료", label: "종료된 클래스" },
 ];
 const ROW_CATS = [
@@ -48,9 +50,14 @@ function matchesCommon(c: Row, f: Filters) {
     (!f.q || c.name.toLowerCase().includes(f.q.toLowerCase()))
   );
 }
-/** 상태 탭 "전체"는 종료된 클래스를 숨긴다 */
+/** 필터·검색을 하나라도 쓰고 있는지 (상태 탭 제외) */
+function filtering(f: Filters) {
+  return f.cat !== "all" || f.field !== "all" || f.target !== "all" || f.day !== "all" || f.cert !== "all" || f.noob !== "all" || !!f.q;
+}
+/** 상태 탭 "전체"는 종료된 클래스를 숨기고, 품절은 필터·검색을 쓸 때만 보여준다 */
 function matchesStatus(c: Row, f: Filters) {
-  return f.status === "all" ? c.status !== "종료" : c.status === f.status;
+  if (f.status !== "all") return c.status === f.status;
+  return c.status !== "종료" && (c.status !== "품절" || filtering(f));
 }
 function matchesDay(c: Row, f: Filters) {
   return f.day === "all" || c.day === f.day;
@@ -59,14 +66,16 @@ function matchesDay(c: Row, f: Filters) {
 function metaLine(c: Row, withPlace: boolean) {
   const place = withPlace ? ` · ${c.place}` : "";
   if (c.status === "종료") return `${c.date} 종료됨${place}`;
+  if (c.status === "품절") return "지금은 신청을 받지 않아요";
   if (c.type === "online") return withPlace ? `상시 · 수강 기간 ${c.months}개월` : "상시";
   if (c.type === "waitlist") return `일정 미정${place}`;
-  return `${c.date} (${ddayLabel(c.date!)})${place}`;
+  if (!c.date) return `${optionLine(c) ?? "일정 미정"}${place}`;
+  return `${c.date} (${ddayLabel(c.date)})${place}`;
 }
 
 function ClassButton({ c, small }: { c: Row; small?: boolean }) {
   const label = ctaLabel(c, c.status);
-  const disabled = c.status === "종료" || c.status === "마감";
+  const disabled = c.status === "종료" || c.status === "마감" || c.status === "품절";
   const ghost = disabled || c.type === "waitlist" || c.type === "upcoming";
   const cls = `btn ${ghost ? "btn-ghost" : "btn-mint"}${small ? " btn-sm" : ""}`;
   if (disabled) {
@@ -90,10 +99,10 @@ function OrderCard({ c, flash }: { c: Row; flash: boolean }) {
     <div className={`order-card ${upcoming ? "muted" : "active"}${flash ? " flash" : ""}`} id={`level-${c.level}`}>
       <div className={`order-node s${c.level}`}>{c.level}</div>
       <div className="headrow">
-        <ClassThumb src={c.images?.thumb} alt={c.name} />
+        <ClassThumb c={c} />
         <div className="ht">
           <p className="ostep">STEP {c.level} · {STEP_NAMES[(c.level ?? 1) - 1]}</p>
-          <h3><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
+          <h3><Link className="card-link" href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
         </div>
       </div>
       {upcoming ? (
@@ -105,9 +114,14 @@ function OrderCard({ c, flash }: { c: Row; flash: boolean }) {
         <>
           <span className={`badge ${badgeClass(c.status)}`}>{c.status}</span>
           <p className="ometa">
-            {c.date} ({ddayLabel(c.date!)})<span className="sep">·</span>{c.place}
+            {c.date ? (
+              <>
+                {c.date} ({ddayLabel(c.date)})<span className="sep">·</span>{c.place}
+              </>
+            ) : (
+              optionLine(c) ?? c.place
+            )}
           </p>
-          <p className="oprice">{priceLabel(c)}</p>
         </>
       )}
       <ClassButton c={c} />
@@ -118,12 +132,12 @@ function OrderCard({ c, flash }: { c: Row; flash: boolean }) {
 function LinkedCard({ c }: { c: Row }) {
   const ended = c.status === "종료";
   return (
-    <div className={`linked-card${ended ? " past" : ""}`}>
+    <div className={`linked-card${ended ? " past" : ""}`} data-cat={c.cat}>
       <div className="linkrow">
-        <ClassThumb src={c.images?.thumb} alt={c.name} />
+        <ClassThumb c={c} />
         <div className="lr-txt">
           <span className={`badge ${ended ? "badge-ended" : "badge-line"}`}>{ended ? "종료" : c.cat}</span>
-          <h4><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h4>
+          <h4><Link className="card-link" href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h4>
         </div>
       </div>
       <p className="lc-meta">
@@ -131,7 +145,6 @@ function LinkedCard({ c }: { c: Row }) {
         <span className="sep">·</span>
         {c.place}
       </p>
-      <p className="lc-price">{priceLabel(c)}</p>
       <ClassButton c={c} />
     </div>
   );
@@ -139,29 +152,30 @@ function LinkedCard({ c }: { c: Row }) {
 
 function RowCard({ c }: { c: Row }) {
   return (
-    <div className={`row-card${c.status === "종료" ? " past" : ""}`}>
+    <div className={`row-card${c.status === "종료" || c.status === "품절" ? " past" : ""}`}>
       <div className="rctop">
         <span className="badge badge-line">{c.cat}</span>
         <span className={`badge ${badgeClass(c.status)}`}>{c.status}</span>
       </div>
       <div className="headrow">
-        <ClassThumb src={c.images?.thumb} alt={c.name} />
+        <ClassThumb c={c} />
         <div className="ht">
-          <h3><Link href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
+          <h3><Link className="card-link" href={ROUTES.classDetail(c.slug)}>{c.name}</Link></h3>
         </div>
       </div>
-      <p className="meta">
-        {dayLabel(c.day)}
-        <span className="sep">·</span>
-        {c.time}
-      </p>
+      {c.status !== "품절" && (
+        <p className="meta">
+          {dayLabel(c.day)}
+          <span className="sep">·</span>
+          {c.time}
+        </p>
+      )}
       <p className="meta" style={{ marginTop: 2 }}>{metaLine(c, true)}</p>
       <div className="tags">
         {c.step && <span className={`step-chip s${c.step}`}>STEP {c.step} · {STEP_NAMES[c.step - 1]}</span>}
         {c.cert && <span className="tagchip">수료증 발급</span>}
         {c.noob && <span className="tagchip">비전공자 가능</span>}
       </div>
-      <p className="price">{priceLabel(c)}</p>
       <ClassButton c={c} />
     </div>
   );
@@ -224,9 +238,14 @@ export default function ClassList({ classes }: { classes: AcademyClass[] }) {
     const statusCls = oc.status === "모집중" ? "st-mint" : oc.status === "마감임박" ? "st-amber" : "st-line";
     const statusText = oc.status === "개설예정" ? "개설 예정" : oc.status;
     const linked = rowClasses.filter((r) => r.step === oc.level);
-    const meta = oc.type === "upcoming"
-      ? `${["월", "화", "수", "목"][i]}요일반 · ${oc.weeks}주 · 레벨${i} 수료 필요`
-      : `${oc.day}요일반 · ${oc.weeks}주 · ${i === 0 ? oc.place : `레벨${i} 수료 필요`}`;
+    // 정해지지 않은 요일·주차는 빼고 보여준다
+    const meta = [
+      oc.day && oc.type !== "upcoming" ? `${oc.day}요일반` : null,
+      oc.weeks ? `${oc.weeks}주` : null,
+      i === 0 ? (oc.type === "upcoming" ? "개설 예정" : oc.place) : `레벨${i} 수료 필요`,
+    ]
+      .filter(Boolean)
+      .join(" · ");
     return {
       labelPos: i < 2 ? "top" : "bottom",
       title: STEP_NAMES[i],
@@ -269,7 +288,11 @@ export default function ClassList({ classes }: { classes: AcademyClass[] }) {
           <div className="frow">
             <span className="flabel">상태</span>
             {STATUS_TABS.map((t) => (
-              <button key={t.value} type="button" className={`tab${f.status === t.value ? " on" : ""}`} onClick={() => set("status")(t.value)}>
+              <button key={t.value} type="button" className={`tab${f.status === t.value ? " on" : ""}`} onClick={() => {
+                set("status")(t.value);
+                // 품절 수업은 레벨에 묶이지 않아 수업별 보기에서만 보인다
+                if (t.value === "품절") setView("class");
+              }}>
                 {t.label}
               </button>
             ))}
@@ -335,7 +358,7 @@ export default function ClassList({ classes }: { classes: AcademyClass[] }) {
                   <h2>디자이너의 정석 — 레벨 1부터 4까지</h2>
                   <p>레벨 순서대로 이어지는 정규 커리큘럼이에요. 지금 열려 있는 레벨부터 신청할 수 있어요.</p>
                 </div>
-                <Link href={ROUTES.classDetail("designer-level-1")}>전체 커리큘럼 소개 보기 ›</Link>
+                <Link href={ROUTES.classDetail("level-1")}>전체 커리큘럼 소개 보기 ›</Link>
               </div>
               <div className="order-track">
                 <div className="order-line" />

@@ -2,7 +2,7 @@
  * 관리자 클래스 폼 입력 → classes 테이블 컬럼. 브라우저(ClassForm)와 서버(API)가 같은 타입을 쓴다.
  * 폼에 없는 값(분야·대상·수료증 등)은 새 클래스면 분류에 맞춘 기본값, 편집이면 기존 값을 유지한다.
  */
-import type { AcademyClass, ClassCategory, ClassType, RoadmapStep, TaxType } from "./types";
+import type { AcademyClass, ClassCategory, ClassType, PriceOption, RoadmapStep, SaleStatus, TaxType } from "./types";
 
 export type ClassInput = {
   name: string;
@@ -17,6 +17,9 @@ export type ClassInput = {
   place: string | null;
   months: number | null;
   price: number | null;
+  /** 비어 있으면 단일 가격 */
+  options: PriceOption[];
+  saleStatus: SaleStatus;
   taxType: TaxType;
   summary: string;
   checklist: string[];
@@ -35,7 +38,20 @@ export function validateClassInput(v: Partial<ClassInput>): string | null {
   if (v.opType === "offline" && !v.date) return "개강일을 입력해주세요";
   if (v.date && !/^\d{4}-\d{2}-\d{2}$/.test(v.date)) return "개강일 형식이 올바르지 않아요";
   if (v.capacity != null && (!Number.isInteger(v.capacity) || v.capacity < 1)) return "정원을 확인해주세요";
-  if (v.cat !== "세미나" && !v.price) return "가격을 입력해주세요";
+  const opts = v.options ?? [];
+  if (opts.length) {
+    if (opts.length > 10) return "가격 옵션은 10개까지 넣을 수 있어요";
+    for (const o of opts) {
+      if (!o.label?.trim()) return "가격 옵션 이름을 입력해주세요 (예: 4회)";
+      if (!Number.isInteger(o.price) || o.price < 0) return `'${o.label}' 옵션 가격을 확인해주세요`;
+      if (o.listPrice != null && (!Number.isInteger(o.listPrice) || o.listPrice < 0)) return `'${o.label}' 정가를 확인해주세요`;
+      if (o.earlyPrice != null) {
+        if (!Number.isInteger(o.earlyPrice) || o.earlyPrice < 0) return `'${o.label}' 얼리버드 가격을 확인해주세요`;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(o.earlyUntil ?? "")) return `'${o.label}' 얼리버드 마감일을 입력해주세요`;
+      }
+    }
+  } else if (v.cat !== "세미나" && !v.price) return "가격을 입력해주세요";
+  if (v.saleStatus && !["on", "soldout", "hidden"].includes(v.saleStatus)) return "판매 상태를 확인해주세요";
   if ((v.summary ?? "").length > 40) return "한 줄 요약은 40자 이내로 입력해주세요";
   return null;
 }
@@ -62,7 +78,15 @@ export function classColumns(v: ClassInput, prev?: AcademyClass) {
     capacity: type === "online" ? null : v.capacity,
     place: type === "online" ? "온라인" : v.place,
     months: type === "online" ? v.months : null,
-    price: v.price,
+    // 옵션이 있으면 대표 가격 = 가장 싼 옵션 (목록·정렬·'~원부터' 표시용)
+    price: v.options?.length ? Math.min(...v.options.map((o) => o.price)) : v.price,
+    price_options: (v.options ?? []).map((o) => ({
+      label: o.label.trim(),
+      price: o.price,
+      ...(o.listPrice ? { listPrice: o.listPrice } : {}),
+      ...(o.earlyPrice != null && o.earlyUntil ? { earlyPrice: o.earlyPrice, earlyUntil: o.earlyUntil } : {}),
+    })),
+    sale_status: v.saleStatus ?? "on",
     tax_type: v.taxType,
     summary: v.summary.trim(),
     cert: prev?.cert ?? false,

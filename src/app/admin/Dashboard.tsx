@@ -219,7 +219,12 @@ export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
                 <span className="cat">{c.cat}</span>
                 <span className={`status s-${c.status}`}>{c.status}</span>
               </div>
-              <p className="ctitle">{c.draft && <span className="badge badge-line" style={{ marginRight: 6 }}>임시저장 · 비공개</span>}{c.name}</p>
+              <p className="ctitle">
+                {c.draft && <span className="sale-tag">임시저장 · 비공개</span>}
+                {c.saleStatus === "hidden" && <span className="sale-tag">숨김</span>}
+                {c.saleStatus === "soldout" && <span className="sale-tag red">품절</span>}
+                {c.name}
+              </p>
               <p className="cmeta">
                 <span>{dayLabel(c.day)}</span><span className="sep">·</span><span>{c.time ?? "-"}</span><span className="sep">·</span><span>{c.place ?? "장소 미정"}</span>
                 {dated && (
@@ -250,6 +255,8 @@ export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
               <div className="card-actions">
                 <Link className="ca-btn" href={ROUTES.adminEditClass(c.id)}>기본 정보</Link>
                 <Link className="ca-btn" href={ROUTES.adminClassContent(c.id)}>콘텐츠 관리</Link>
+                <Link className="ca-btn" href={`/admin/classes/${c.id}/applicants`}>신청자</Link>
+                {c.type === "online" && <Link className="ca-btn" href={`/admin/classes/${c.id}/videos`}>강의 영상</Link>}
                 <Link className="ca-btn primary" href={ROUTES.classDetail(c.slug)} target="_blank">미리보기</Link>
               </div>
               {!isPast && dated && (

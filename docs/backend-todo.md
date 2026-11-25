@@ -84,3 +84,14 @@
 - `src/app/about/PartnerForm.tsx`, `src/app/mypage/MyPageView.tsx` — 폼 제출
 - `src/data/siteContent.ts` `getMainContent()` — 게시된 페이지 콘텐츠 조회 (현재 메인·상단 메뉴·푸터가 사용, 나머지 페이지 문구도 같은 방식으로 연결 예정)
 - `src/app/admin/design/DesignMode.tsx` — `loadState()`/`persist()`(현재 localStorage) → 콘텐츠 API, 사진은 data URL 대신 업로드 API URL
+
+## 관리자 문의함 (`/admin/inquiries`)
+
+화면은 `getInquiries()`(`src/lib/api.ts`)로 `inquiries` 테이블을 읽고, 상태 변경·메모·알림 설정은 지금 화면 상태만 바뀝니다 (`src/app/admin/inquiries/Inquiries.tsx`의 `TODO(backend)`). CSV는 브라우저에서 현재 필터 결과로 만듭니다.
+
+| 메서드 | 경로 | 비고 |
+|---|---|---|
+| PATCH | `/api/admin/inquiries/:id` | `{ status?: "new" \| "prog" \| "done", memo?: string }` — 신규 문의를 열면 자동으로 `prog` 로 보냄 |
+| GET / PUT | `/api/admin/inquiries/notify-settings` | `{ email: boolean, emails: string(쉼표 구분), kakao: boolean, phone: string }` — 기본 받는 메일 khn@visualacademy.co.kr. 실제 발송(이메일·카카오 알림톡·구글챗)은 `POST /api/inquiries` 의 `notifyHq` 옆에서 이 설정을 읽어 연결 |
+
+테이블에 없는 필드: `inquiries` 는 지금 `handled boolean` 뿐이라 처리 상태 3단계(`status text check in ('new','prog','done') default 'new'`)와 `memo text` 컬럼이 필요합니다 (임시로 `handled=true` → 완료, 그 외 → 신규로 읽음, `payload.status/memo` 가 있으면 우선). 처리 이력(확인·완료 시각, 담당자)을 남기려면 `status_changed_at`, `handled_by` 도 추가 권장. 알림 설정을 저장할 테이블(또는 설정 key-value)도 없음.

@@ -6,7 +6,7 @@ import SiteHeader from "@/components/site/SiteHeader";
 import { ROUTES } from "@/data/site";
 import { getLoginContent } from "@/data/siteContent";
 import { login } from "@/lib/loginState";
-import { getBrowserSupabase } from "@/lib/supabase/client";
+import { getBrowserSupabase, KAKAO_EXTRA_SCOPES } from "@/lib/supabase/client";
 import { saveSignup, type SignupState } from "./actions";
 
 /*
@@ -57,6 +57,8 @@ export default function SignupFlow({
   const [agree, setAgree] = useState<boolean[]>(() => AGREE_KEYS.map(() => false));
   const [state, action, pending] = useActionState<SignupState, FormData>(saveSignup, { error: "" });
   const [mockError, setMockError] = useState("");
+  const fromKakao = real && Boolean(prefill.name && prefill.phone);
+  const [editInfo, setEditInfo] = useState(false);
 
   const doneName = state.done?.name ?? mockDone;
   const step = doneName ? 2 : real ? (signedIn ? 1 : 0) : mockStep;
@@ -71,7 +73,7 @@ export default function SignupFlow({
     const back = next ? ROUTES.signup(next) : ROUTES.signup();
     const { error } = await getBrowserSupabase().auth.signInWithOAuth({
       provider: "kakao",
-      options: { redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(back)}` },
+      options: { scopes: KAKAO_EXTRA_SCOPES, redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(back)}` },
     });
     if (error) {
       setBusy(false);
@@ -117,16 +119,32 @@ export default function SignupFlow({
         <h1>{C.profile.title}</h1>
         <p className="lead">{C.profile.lead}</p>
         <form className="card" action={real ? action : undefined} onSubmit={real ? undefined : mockSubmit}>
-          <div className="field">
-            <label htmlFor="su-name">이름</label>
-            <input id="su-name" name="name" type="text" defaultValue={prefill.name} autoComplete="name" required />
-            {prefill.name && <div className="pre-note">{C.profile.nameNote}</div>}
-          </div>
-          <div className="field">
-            <label htmlFor="su-phone">휴대폰 번호</label>
-            <input id="su-phone" name="phone" type="tel" inputMode="tel" placeholder="010-0000-0000" defaultValue={prefill.phone} autoComplete="tel" required />
-            <div className="pre-note">수강 안내 알림톡을 이 번호로 보내드려요 · 기존 아카데미 회원은 수강 내역이 이어져요</div>
-          </div>
+          {fromKakao && !editInfo ? (
+            /* 카카오에서 이름·휴대폰을 받아 왔으면 입력칸 대신 확인만 — 약관 동의 한 번으로 가입이 끝난다 */
+            <div className="field">
+              <input type="hidden" name="name" value={prefill.name} />
+              <input type="hidden" name="phone" value={prefill.phone} />
+              <label>카카오에서 가져온 정보</label>
+              <div className="pre-note">
+                {prefill.name} · {prefill.phone}{" "}
+                <button type="button" className="link-btn" onClick={() => setEditInfo(true)}>수정</button>
+              </div>
+              <div className="pre-note">수강 안내 알림톡을 이 번호로 보내드려요 · 기존 아카데미 회원은 수강 내역이 이어져요</div>
+            </div>
+          ) : (
+            <>
+              <div className="field">
+                <label htmlFor="su-name">이름</label>
+                <input id="su-name" name="name" type="text" defaultValue={prefill.name} autoComplete="name" required />
+                {prefill.name && <div className="pre-note">{C.profile.nameNote}</div>}
+              </div>
+              <div className="field">
+                <label htmlFor="su-phone">휴대폰 번호</label>
+                <input id="su-phone" name="phone" type="tel" inputMode="tel" placeholder="010-0000-0000" defaultValue={prefill.phone} autoComplete="tel" required />
+                <div className="pre-note">수강 안내 알림톡을 이 번호로 보내드려요 · 기존 아카데미 회원은 수강 내역이 이어져요</div>
+              </div>
+            </>
+          )}
           <div className="field">
             <label htmlFor="su-shop">{C.profile.shop}<span className="opt">(선택)</span></label>
             <input id="su-shop" name="shop" type="text" placeholder="예: 비주얼살롱 성수점" />
