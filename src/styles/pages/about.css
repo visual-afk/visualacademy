@@ -84,6 +84,7 @@
   .split-text{background:var(--charcoal);color:#fff;padding:52px 38px;display:flex;flex-direction:column;justify-content:center}
   .split-text .qtag{font-size:12px;font-weight:700;color:var(--gold-l);letter-spacing:.08em;margin:0 0 14px}
   .split-text h3{font-size:19px;font-weight:700;margin:0 0 19px;letter-spacing:-.012em;line-height:1.5}
+  .split-text .ifbs-logo{display:block;width:100%;max-width:300px;height:auto;margin:0 0 22px}
   .split-text p{font-size:13.5px;color:rgba(255,255,255,.62);line-height:1.95;margin:0}
   .split-text p+p{margin-top:10px}
   .split-photo{min-height:220px}

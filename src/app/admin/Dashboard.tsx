@@ -11,7 +11,8 @@ import type { AcademyClass, ClassStatus } from "@/lib/types";
 const STATUS_FILTERS = ["all", "모집중", "마감임박", "마감", "개설대기", "종료"] as const;
 const CAT_FILTERS = ["all", "정석", "특강", "세미나", "경영", "온라인"] as const;
 /** 최근 7일 결제 건수 추이 (샘플) — 백엔드: GET /api/admin/stats/daily */
-const SPARK_7D = [14, 19, 16, 23, 21, 27, 24];
+/* 최근 7일 결제 건수 — 결제 집계 API 연결 전까지 0 (11.17: 예시 숫자 제거) */
+const SPARK_7D = [0, 0, 0, 0, 0, 0, 0];
 
 function computeRevenue(classes: AcademyClass[]) {
   let total = 0;
@@ -55,9 +56,10 @@ export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
 
   const { total, paidCount, catMap } = computeRevenue(classes);
   const avg = paidCount ? Math.round(total / paidCount) : 0;
-  const prevMonth = Math.round(total / 1.18); // 전월 매출 (샘플 비교값)
+  /* 전월 매출은 집계 API 연결 전까지 없음 → 전월 대비 표시는 숨김 (11.17: 샘플 비교값 제거) */
+  const prevMonth: number = 0;
   const deltaPct = prevMonth ? Math.round(((total - prevMonth) / prevMonth) * 100) : 0;
-  const maxSpark = Math.max(...SPARK_7D);
+  const maxSpark = Math.max(1, ...SPARK_7D);
   const catEntries = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
   const maxCat = catEntries[0]?.[1] || 1;
   const t = today();
@@ -87,7 +89,7 @@ export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
           <p className="rh-label">이번 달 누적 매출 (결제 완료 기준) <span className="rh-goto">결제 내역·환불 처리 보기 ›</span></p>
           <div className="rh-amt-row">
             <p className="rh-amt">{won(total)}</p>
-            <span className={`rh-delta ${deltaPct >= 0 ? "up" : "down"}`}>{deltaPct >= 0 ? "▲" : "▼"} 전월 대비 {Math.abs(deltaPct)}%</span>
+            {prevMonth > 0 && <span className={`rh-delta ${deltaPct >= 0 ? "up" : "down"}`}>{deltaPct >= 0 ? "▲" : "▼"} 전월 대비 {Math.abs(deltaPct)}%</span>}
           </div>
           <p className="rh-period">{periodLabel} 기준 · 개설 대기(미결제) 신청자는 제외돼요</p>
         </div>
@@ -95,7 +97,7 @@ export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
           <p className="spark-label">최근 7일 결제 건수</p>
           <div className="spark">
             {SPARK_7D.map((v, i) => (
-              <div key={i} className={`sbar${i === SPARK_7D.length - 1 ? " today" : ""}`} style={{ height: Math.max(8, Math.round((v / maxSpark) * 52)) }} title={`${v}건`} />
+              <div key={i} className={`sbar${i === SPARK_7D.length - 1 ? " today" : ""}`} style={{ height: v ? Math.max(8, Math.round((v / maxSpark) * 52)) : 4 }} title={`${v}건`} />
             ))}
           </div>
         </div>
@@ -110,7 +112,8 @@ export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
 
       <div className="cat-revenue">
         <h3>분류별 매출</h3>
-        {catEntries.map(([cat, amt]) => (
+        {total === 0 && <p className="cr-empty">아직 결제 내역이 없어요. 클래스 신청과 결제가 쌓이면 분류별로 보여요.</p>}
+        {total > 0 && catEntries.filter(([, amt]) => amt > 0).map(([cat, amt]) => (
           <div key={cat} className="cr-row">
             <span className="cr-label">{CATEGORY_LABELS[cat] ?? cat}</span>
             <div className="cr-track"><div className="cr-fill" style={{ width: `${Math.round((amt / maxCat) * 100)}%` }} /></div>
@@ -149,7 +152,15 @@ export default function Dashboard({ initial }: { initial: AcademyClass[] }) {
       </div>
 
       <div className="grid">
-        {visible.length === 0 && <div className="empty-grid">조건에 맞는 클래스가 없어요</div>}
+        {rows.length === 0 ? (
+          <div className="empty-classes">
+            <p className="ec-t">아직 등록된 클래스가 없어요</p>
+            <p className="ec-s">첫 클래스를 등록하면 모집 현황과 신청 인원이 여기에 나타나요.</p>
+            <Link className="btn btn-mint" href={ROUTES.adminNewClass}>+ 새 클래스 등록</Link>
+          </div>
+        ) : (
+          visible.length === 0 && <div className="empty-grid">조건에 맞는 클래스가 없어요</div>
+        )}
         {visible.map((c) => {
           const isPast = c.status === "종료";
           const dated = (c.type === "offline" || c.type === "seminar") && c.date;

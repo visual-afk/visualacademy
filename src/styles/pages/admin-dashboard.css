@@ -44,6 +44,11 @@
   @media(max-width:1040px){.grid{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:680px){.grid{grid-template-columns:1fr}}
   .empty-grid{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink-3);font-size:13.5px}
+  /* 데이터가 하나도 없을 때 (11.17) */
+  .empty-classes{grid-column:1/-1;background:#fff;border-radius:22px;padding:56px 24px;text-align:center}
+  .empty-classes .ec-t{font-size:16px;font-weight:700;margin:0 0 6px}
+  .empty-classes .ec-s{font-size:13.5px;color:var(--ink-3);margin:0 0 20px}
+  .cr-empty{margin:6px 0 0;font-size:13.5px;color:var(--ink-3)}
 
   .card{background:var(--bg);border-radius:22px;padding:26px;box-shadow:var(--shadow);
     transition:box-shadow .18s ease,transform .18s ease;position:relative}

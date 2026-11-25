@@ -43,7 +43,10 @@ export default async function CheckoutSuccess({ searchParams }: PageProps<"/chec
   const topbar = (
     <div className="topbar">
       <div className="wrap topbar-inner">
-        <Link href={ROUTES.home} className="co-logo"><span className="dot" />비주얼아카데미</Link>
+        <Link href={ROUTES.home} className="co-logo">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="logo-img" src="/images/brand/logo.png" alt="비주얼아카데미" width={231} height={20} />
+        </Link>
       </div>
     </div>
   );

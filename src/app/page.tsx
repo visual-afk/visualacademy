@@ -73,19 +73,15 @@ function RecruitCard({ c, hot }: { c: AcademyClass & { status: ClassStatus }; ho
   const wait = c.type === "waitlist";
   const badge = online ? "상시 수강" : wait ? "개설 대기" : c.status;
   const applied = c.applied ?? 0;
+  /* (11.17) 확정된 정보만 — 정원·잔여석 바와 장소 줄은 빼고 일정·시간(또는 구성)만 보여준다 */
   const info: [string, string][] = online
-    ? [["구성", `영상 강의 · 수강 기간 ${c.months}개월`], ["시작", "결제 후 바로 시작 가능"]]
+    ? [["구성", c.months ? `영상 강의 · 수강 기간 ${c.months}개월` : "영상 강의"]]
     : wait
       ? [["일정", "인원이 차면 일정 안내"], ["구성", `${CATEGORY_LABELS[c.cat] ?? c.cat} · ${c.weeks ? `${c.weeks}주 과정` : "1일 과정"}`]]
       : [
           ["일정", c.date ? `${shortDate(c.date)} 개강${c.weeks ? ` · 총 ${c.weeks}주` : ""}` : (optionLine(c) ?? "신청 후 안내")],
-          ["장소", c.day ? `${c.place} · ${c.day}요일${c.weeks ? "반" : ""}` : (c.place ?? "장소 미정")],
+          ...(c.time ? [["시간", c.time] as [string, string]] : []),
         ];
-  const seat = online || (!wait && c.capacity == null)
-    ? { label: "모집 현황", value: <>인원 제한 없음</>, pct: 100, dim: true }
-    : wait
-      ? { label: "개설 기준", value: <><b>{applied}명</b> / 개설 기준 {c.goal ?? applied}명</>, pct: c.goal ? Math.min(100, (applied / c.goal) * 100) : 0, dim: false }
-      : { label: "모집 현황", value: <><b>잔여 {Math.max(0, (c.capacity ?? 0) - applied)}석</b> / {c.capacity}석</>, pct: c.capacity ? Math.min(100, (applied / c.capacity) * 100) : 0, dim: false };
   return (
     <div className={`class-card${hot ? " hot" : ""}`}>
       <div className="cc-top">
@@ -102,10 +98,6 @@ function RecruitCard({ c, hot }: { c: AcademyClass & { status: ClassStatus }; ho
       <ul className="cc-info">
         {info.map(([k, v]) => <li key={k}><b>{k}</b><span>{v}</span></li>)}
       </ul>
-      <div className="seat">
-        <div className="seat-top"><span>{seat.label}</span><span>{seat.value}</span></div>
-        <div className="seat-bar"><i style={{ width: `${seat.pct}%`, opacity: seat.dim ? 0.35 : undefined }} /></div>
-      </div>
       {/* 가격은 목록에서 빼고 상세·신청 화면에서만 보여준다 */}
       {wait ? (
         <Link className="btn btn-ghost" href={ROUTES.classDetail(c.slug)}>개설 알림 신청</Link>
