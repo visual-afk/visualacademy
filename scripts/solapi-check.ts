@@ -36,6 +36,8 @@ async function get(path: string) {
     KAKAO_TMPL_D3: ["이름", "클래스명", "일정", "장소", "준비물"],
     KAKAO_TMPL_EXPIRE30: ["이름", "클래스명", "만료일"],
     KAKAO_TMPL_WAITLIST_OPEN: ["클래스명", "일정", "링크"],
+    KAKAO_TMPL_IDLE: ["이름", "클래스명", "다음강의", "링크"],
+    KAKAO_TMPL_BEHIND: ["이름", "클래스명", "만료일", "진도", "링크"],
   };
   console.log("\n▶ 템플릿 변수 대조 (이름이 환경변수와 같은 템플릿)");
   for (const [k, want] of Object.entries(expected)) {
