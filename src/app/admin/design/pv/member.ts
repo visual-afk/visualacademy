@@ -77,7 +77,7 @@ export const PV_MY: PagePreview = {
 
 /* ═════════════ 신청 · 결제 ═════════════ */
 
-const coTopbar = (crumb: boolean) => `<div class="topbar"><div class="wrap topbar-inner"><a class="co-logo"><span class="dot"></span>비주얼아카데미</a>${
+const coTopbar = (crumb: boolean) => `<div class="topbar"><div class="wrap topbar-inner"><a class="co-logo"><img class="logo-img" src="/images/brand/logo.png" alt="비주얼아카데미" width="231" height="20"></a>${
   crumb ? `<div class="crumb"><a>클래스</a> &nbsp;›&nbsp; <a>${esc(EX_CAT)}</a> &nbsp;›&nbsp; ${esc(EX.name)}</div>` : ""}</div></div>`;
 
 function flowBar(list: any[], step: number) {
