@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>오토사장반 6파트 워크시트</title>
+<style>html,body{margin:0;background:#fff}</style>
+<script>
+/* 비주얼아카데미 강의 플레이어 연결 (scripts/sync-worksheet-widgets.mjs 가 붙임) */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var EMAIL = q.get("email") || "", LECTURE = Number(q.get("lecture")) || 0;
+  function post(m) { m.source = "va-worksheet"; try { parent.postMessage(m, location.origin); } catch (e) {} }
+  var orig = window.fetch;
+  window.fetch = function (input) {
+    var p = orig.apply(this, arguments);
+    var url = String((input && input.url) || input);
+    if (/\/submit$/.test(url)) p.then(function (r) { r.clone().json().then(function (d) { if (r.ok && d && d.success !== false) post({ type: "submitted" }); }).catch(function () {}); }).catch(function () {});
+    return p;
+  };
+  function fill() {
+    if (!EMAIL) return;
+    ["wsEmail", "f_email"].forEach(function (id) { var el = document.getElementById(id); if (el && !el.value) el.value = EMAIL; });
+  }
+  var n = 0, t = setInterval(function () { fill(); if (++n > 60) clearInterval(t); }, 500);
+  document.addEventListener("focusin", fill);
+  function height() { post({ type: "height", h: document.documentElement.scrollHeight }); }
+  window.addEventListener("load", function () {
+    if (LECTURE && window.wsSelectLecture) {
+      window.wsSelectLecture(LECTURE);
+      if (EMAIL && window.wsCheckEmail) { document.getElementById("wsEmail").value = EMAIL; window.wsCheckEmail(); }
+    }
+    height();
+    if (window.ResizeObserver) new ResizeObserver(height).observe(document.body);
+  });
+})();
+</script>
+</head>
+<body>
+<!-- ============================================================
+  오토사장반 PART 6 워크시트 — 아티스트 데뷔 기획서
+  아임웹 코드위젯에 통째로 붙여넣거나 iframe 임베드.
+  ★ 배포 후 아래 API_URL 을 autoceo-worksheet Worker 주소로 바꾸세요.
+============================================================ -->
+<div id="vsRoot">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Montserrat:wght@600;700;800&display=swap');
+  #vsRoot{--mint:#00F5D4;--mint-deep:#00C4AA;--mint-sub:#CFF7EF;--ink:#141414;
+    --gray:#6b6b6b;--gray-l:#F4F6F5;--border:#E2E6E4;
+    max-width:480px;margin:0 auto;font-family:'Noto Sans KR','Apple SD Gothic Neo',-apple-system,sans-serif;
+    color:#141414;font-weight:500;line-height:1.65;-webkit-text-size-adjust:100%;background:#fff;}
+  #vsRoot *{box-sizing:border-box;}
+  #vsRoot .vs-screen{display:none;padding:30px 20px 44px;min-height:60vh;background:#fff;color:var(--ink);}
+  #vsRoot .vs-screen.on{display:block;}
+  #vsRoot .vs-dark{background:linear-gradient(180deg,#F1FCF9 0%,#FFFFFF 70%);}
+  #vsRoot .vs-progress{height:5px;background:#E9EDEB;border-radius:3px;overflow:hidden;margin-bottom:6px;}
+  #vsRoot .vs-progress > i{display:block;height:100%;background:var(--mint-deep);width:0;transition:width .3s;}
+  #vsRoot .vs-steplabel{font-size:12px;font-weight:700;color:var(--mint-deep);margin-bottom:22px;letter-spacing:.5px;}
+  #vsRoot h2.vs-t{font-size:26px;font-weight:900;margin:0 0 10px;line-height:1.32;letter-spacing:-.4px;}
+  #vsRoot p.vs-d{font-size:15px;font-weight:500;margin:0 0 22px;color:#4a4f4d;white-space:pre-line;}
+  #vsRoot label.vs-l{display:block;font-size:14px;font-weight:700;margin:18px 0 7px;color:#1f2320;}
+  #vsRoot .vs-hint{font-size:13px;font-weight:500;color:var(--gray);margin:5px 0 0;}
+  #vsRoot .vs-quote{font-size:13.5px;font-weight:600;color:#00806f;background:var(--mint-sub);border-left:3px solid var(--mint-deep);border-radius:0 10px 10px 0;padding:11px 13px;margin:10px 0 16px;line-height:1.7;}
+  #vsRoot .vs-quote b{font-weight:800;}
+  #vsRoot input[type=text],#vsRoot input[type=email],#vsRoot input[type=number],#vsRoot textarea,#vsRoot select{
+    width:100%;min-height:52px;border:1.5px solid var(--border);border-radius:12px;background:var(--gray-l);
+    padding:0 14px;font-size:16px;font-weight:600;font-family:inherit;color:var(--ink);outline:none;}
+  #vsRoot textarea{min-height:64px;padding:13px 14px;line-height:1.6;resize:vertical;}
+  #vsRoot input::placeholder,#vsRoot textarea::placeholder{color:#9aa09d;font-weight:500;}
+  #vsRoot input:focus,#vsRoot textarea:focus,#vsRoot select:focus{border-color:var(--mint-deep);background:#fff;}
+  #vsRoot .vs-count{font-size:12px;font-weight:600;color:var(--gray);text-align:right;margin-top:4px;}
+  #vsRoot .vs-btn{display:block;width:100%;height:56px;border:0;border-radius:14px;background:var(--mint-deep);
+    color:#fff;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;margin-top:28px;box-shadow:0 6px 16px rgba(0,196,170,.28);}
+  #vsRoot .vs-btn:active{transform:translateY(1px);}
+  #vsRoot .vs-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+  #vsRoot .vs-back{background:none;border:0;color:var(--gray);font-size:14px;font-weight:600;cursor:pointer;padding:6px 0;margin-bottom:8px;font-family:inherit;}
+  #vsRoot .vs-err{color:#e03131;font-size:13px;font-weight:600;margin-top:8px;min-height:16px;}
+  #vsRoot .vs-rcard{background:linear-gradient(135deg,#EAFCF8,#F7FFFD);border:1.5px solid var(--mint-deep);border-radius:14px;padding:18px;margin:16px 0;}
+  #vsRoot .vs-rcard .cap{font-size:13px;font-weight:700;color:var(--gray);}
+  #vsRoot .vs-rcard .big-n{font-size:30px;font-weight:800;color:var(--mint-deep);font-family:'Montserrat',sans-serif;margin-top:4px;}
+  #vsRoot .vs-rcard .sub{font-size:14px;color:var(--ink);font-weight:600;margin-top:6px;}
+  #vsRoot .vs-rcard .rowline{display:flex;justify-content:space-between;font-size:14px;font-weight:600;padding:5px 0;border-top:1px dashed rgba(0,196,170,.35);margin-top:6px;}
+  #vsRoot .vs-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  #vsRoot .vs-chip{height:38px;padding:0 15px;border-radius:19px;border:1.5px solid var(--border);background:#fff;font-size:14px;font-weight:600;cursor:pointer;color:#3a3f3d;}
+  #vsRoot .vs-chip.on{background:var(--mint-sub);border-color:var(--mint-deep);color:#00806f;font-weight:800;}
+  #vsRoot .vs-dcard{background:var(--gray-l);border-radius:14px;padding:20px 18px;margin:14px 0;}
+  #vsRoot .vs-dcard .num{display:inline-block;font-size:12px;color:#00806f;font-weight:800;letter-spacing:.5px;white-space:nowrap;background:var(--mint-sub);padding:5px 12px;border-radius:20px;}
+  #vsRoot .vs-dcard .sit{font-size:15px;font-weight:600;margin:8px 0 16px;white-space:pre-line;line-height:1.7;}
+  #vsRoot .vs-opt{display:block;border:1.5px solid var(--border);border-radius:12px;padding:14px 15px;margin:8px 0;background:#fff;cursor:pointer;font-size:15px;font-weight:600;}
+  #vsRoot .vs-opt.on{border-color:var(--mint-deep);background:var(--mint-sub);font-weight:800;color:#00806f;}
+  #vsRoot .vs-rev{border:1.5px solid var(--border);border-radius:12px;padding:12px;margin:8px 0;background:#fff;}
+  #vsRoot .vs-rev .rl{font-size:13px;font-weight:800;color:#1f2320;margin-bottom:6px;}
+  #vsRoot .vs-rev input{margin-bottom:6px;min-height:46px;}
+  #vsRoot .vs-consent{display:flex;align-items:flex-start;gap:10px;margin:12px 0;font-size:14px;font-weight:500;}
+  #vsRoot .vs-consent input{width:20px;height:20px;margin-top:2px;accent-color:var(--mint-deep);}
+  #vsRoot .vs-done{background:linear-gradient(135deg,#00C4AA,#00A088);border-radius:20px;padding:28px 22px;margin-top:22px;text-align:center;color:#fff;box-shadow:0 10px 28px rgba(0,196,170,.32);}
+  #vsRoot .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+</style>
+
+<!-- 인트로 -->
+<section class="vs-screen vs-dark on" data-screen="intro">
+  <div class="vs-progress"><i style="width:0"></i></div><div class="vs-steplabel">&nbsp;</div>
+  <h2 class="vs-t">첫 번째 아티스트를 지명해요</h2>
+  <p class="vs-d">오늘부터 대표님은 소속사 대표예요. 디자이너 한 명을 지명하고, 매칭을 진단하고, 데뷔 기획서를 쓰면 완성된 프로필 카드를 메일로 보내드려요.</p>
+  <p class="vs-d" style="color:var(--mint-deep);font-weight:700">약 25분 걸려요</p>
+  <button class="vs-btn" onclick="vsGo('s1')">아티스트 지명하러 가기</button>
+</section>
+
+<!-- STEP 1 지명서 -->
+<section class="vs-screen" data-screen="s1">
+  <div class="vs-progress"><i style="width:16%"></i></div><div class="vs-steplabel">4단계 중 1단계 · 아티스트 지명서</div>
+  <button class="vs-back" onclick="vsGo('intro')">← 뒤로</button>
+  <h2 class="vs-t">첫 번째 아티스트를 지명해요</h2>
+  <p class="vs-d">가장 먼저 데뷔시킬 디자이너 한 명을 정해요. 지금 제일 잘 나가는 사람이어도, 가능성이 보이는 사람이어도 좋아요.</p>
+  <div class="vs-quote">💬 <b>강의 한마디</b> — 기획은 <b>이미 잘 팔리는 사람·시술</b>에서 출발해요. 시장이 검증해준 거니까요. 왜 이 사람을 1호로 정했는지 한 줄이 곧 기획의 시작이에요.</div>
+  <label class="vs-l">지명할 디자이너 이름</label><input type="text" id="f_dname" placeholder="예: 김서연">
+  <label class="vs-l">지금 쓰는 활동명</label><input type="text" id="f_alias" placeholder="없으면 '없음' 이라고 적어요">
+  <label class="vs-l">경력 (년)</label><input type="number" id="f_career" inputmode="numeric" placeholder="예: 5">
+  <label class="vs-l">이 사람을 1호로 정한 이유</label><input type="text" id="f_reason" maxlength="40" placeholder="예: 컬러 재방률이 제일 높아서">
+  <div class="vs-count"><span id="cnt_reason">0</span>/40</div>
+  <label class="vs-l">소속사 대표 이름 (서명)</label><input type="text" id="f_ceo" placeholder="대표님 성함을 직접 적어요">
+  <p class="vs-hint">이름을 적으면 지명서에 서명한 게 돼요.</p>
+  <p class="vs-err" id="err_s1"></p>
+  <button class="vs-btn" onclick="vsSubmitS1()">진단 카드 풀러 가기</button>
+</section>
+
+<!-- STEP 2 진단 카드 -->
+<section class="vs-screen" data-screen="s2">
+  <div class="vs-progress"><i style="width:38%"></i></div><div class="vs-steplabel">4단계 중 2단계 · 매칭 진단 카드</div>
+  <button class="vs-back" onclick="vsGo('s1')">← 뒤로</button>
+  <h2 class="vs-t">매칭을 진단해요</h2>
+  <p class="vs-d">정답은 화면에 없어요. 판단하고 근거까지 적으면 메일로 강의 관점을 보내드려요.</p>
+  <div id="s2out"></div>
+  <p class="vs-err" id="err_s2"></p>
+  <button class="vs-btn" onclick="vsSubmitS2()">기획서 작성하러 가기</button>
+</section>
+
+<!-- STEP 3 데뷔 기획서 -->
+<section class="vs-screen" data-screen="s3">
+  <div class="vs-progress"><i style="width:60%"></i></div><div class="vs-steplabel">4단계 중 3단계 · 데뷔 기획서</div>
+  <button class="vs-back" onclick="vsGo('s2')">← 뒤로</button>
+  <h2 class="vs-t">데뷔 기획서를 써요</h2>
+  <p class="vs-d">시그니처에서 출발해 역산하는 거예요. 여기 쓴 게 그대로 실무 도구가 돼요.</p>
+  <div class="vs-quote">💬 <b>강의 한마디</b> — 보통 디자이너는 <b>자기 자신</b>에서 출발하지만, 대표님은 <b>시그니처에서 출발해 타겟을 역산</b>해요. 이름·프사·옷·피드·응대 톤을 타겟에 맞춰요. 성 하나만 붙여도 타겟이 바뀌어요(유경 → <b>이유경 디자이너</b>).</div>
+
+  <label class="vs-l">이 아티스트가 제일 잘 파는 게 뭐예요? (매출 1위 시술)</label>
+  <input type="text" id="f_top1" placeholder="예: 볼륨 매직">
+  <div class="grid2" style="margin-top:8px">
+    <div><label class="vs-l" style="margin-top:0">1위 매출 비중(%)</label><input type="number" id="f_share1" inputmode="numeric" placeholder="예: 42"></div>
+    <div><label class="vs-l" style="margin-top:0">매출 2위 시술</label><input type="text" id="f_top2" placeholder="예: 뿌리펌"></div>
+  </div>
+  <label class="vs-l">2위 매출 비중(%)</label><input type="number" id="f_share2" inputmode="numeric" placeholder="예: 20">
+  <label class="vs-l">확정 시그니처</label><input type="text" id="f_sig" placeholder="1·2위 중 밀어줄 하나">
+
+  <label class="vs-l" style="margin-top:26px">그 시술을 사는 사람은 누구예요? (연령대)</label>
+  <select id="f_age"><option value="">선택해요</option><option>20대</option><option>30대</option><option>40대</option><option>50대</option><option>60대 이상</option></select>
+  <label class="vs-l">직업군</label><input type="text" id="f_job" placeholder="예: 전문직, 주부, 영업직">
+  <label class="vs-l">이 사람이 미용실에서 원하는 것 3개</label>
+  <input type="text" id="f_want0" placeholder="1. 예: 자연스러운 색" style="margin-bottom:8px">
+  <input type="text" id="f_want1" placeholder="2. 예: 손상 적게" style="margin-bottom:8px">
+  <input type="text" id="f_want2" placeholder="3. 예: 대접받는 느낌">
+
+  <label class="vs-l" style="margin-top:26px">타겟이 상상하는 최고의 디자이너 — 말투</label><input type="text" id="f_itone" placeholder="예: 간결하고 정중한 톤">
+  <label class="vs-l">옷차림</label><input type="text" id="f_ioutfit" placeholder="예: 블랙·네이비 정장 느낌">
+  <label class="vs-l">분위기</label><input type="text" id="f_imood" placeholder="예: 차분하고 세련됨">
+  <label class="vs-l">이름 느낌</label><input type="text" id="f_iname" placeholder="예: 무게감 있는 이름">
+
+  <label class="vs-l" style="margin-top:26px">이제 현재 모습을 바꿔볼게요 (지금 → 바꾼 뒤)</label>
+  <div class="vs-rev"><div class="rl">활동명</div>
+    <input type="text" id="f_r_alias_now" placeholder="지금: 예) 유경"><input type="text" id="f_r_alias_aft" placeholder="바꾼 뒤: 예) 이유경 디자이너">
+    <p class="vs-hint">💡 성을 붙여보세요. 유경 → 이유경. 느낌이 어떻게 달라지나요?</p>
+  </div>
+  <div class="vs-rev"><div class="rl">프로필 사진</div>
+    <input type="text" id="f_r_photo_now" placeholder="지금: 예) 환하게 웃는 셀카"><input type="text" id="f_r_photo_aft" placeholder="바꾼 뒤: 예) 자연광 프로 촬영">
+  </div>
+  <div class="vs-rev"><div class="rl">매장 출근복</div>
+    <input type="text" id="f_r_outfit_now" placeholder="지금: 예) 후드티"><input type="text" id="f_r_outfit_aft" placeholder="바꾼 뒤: 예) 베이지 니트">
+  </div>
+  <div class="vs-rev"><div class="rl">인스타 피드</div>
+    <input type="text" id="f_r_feed_now" placeholder="지금: 예) 일상·셀카"><input type="text" id="f_r_feed_aft" placeholder="바꾼 뒤: 예) 컬러 전후 컷">
+  </div>
+  <div class="vs-rev"><div class="rl">매장 응대 톤</div>
+    <input type="text" id="f_r_tone_now" placeholder="지금: 예) 반말 섞임"><input type="text" id="f_r_tone_aft" placeholder="바꾼 뒤: 예) 정중한 존댓말">
+  </div>
+
+  <label class="vs-l" style="margin-top:26px">바꾼 톤으로 인스타 캡션을 하나만 써보세요</label>
+  <textarea id="f_caption" maxlength="100" rows="3" placeholder="시술 사진 한 장 올린다고 생각하면 돼요"></textarea>
+  <div class="vs-count"><span id="cnt_caption">0</span>/100</div>
+  <p class="vs-err" id="err_s3"></p>
+  <button class="vs-btn" onclick="vsSubmitS3()">수익 계산하러 가기</button>
+</section>
+
+<!-- STEP 4 수익 시뮬 -->
+<section class="vs-screen" data-screen="s4">
+  <div class="vs-progress"><i style="width:82%"></i></div><div class="vs-steplabel">4단계 중 4단계 · 데뷔 수익 시뮬</div>
+  <button class="vs-back" onclick="vsGo('s3')">← 뒤로</button>
+  <h2 class="vs-t">매칭이 돈으로 얼마인지 계산해요</h2>
+  <p class="vs-d">본인 매장 숫자로 직접 넣어봐요. 같은 사람, 같은 시술이에요.</p>
+  <div class="vs-quote">💬 <b>강의 한마디</b> — 매칭은 만족도가 아니라 <b>핏</b> 문제예요. 같은 사람, 같은 시술인데 <b>재방률만 올려도</b> 돈이 달라져요. 이게 기획의 힘이에요.</div>
+  <label class="vs-l">이 디자이너 월 시술 고객 수 (명)</label><input type="number" id="f_cust" inputmode="numeric" placeholder="예: 120" oninput="vsCalc()">
+  <label class="vs-l">객단가 (원)</label><input type="number" id="f_price" inputmode="numeric" placeholder="예: 80000" oninput="vsCalc()">
+  <div class="grid2">
+    <div><label class="vs-l">현재 재방률(%)</label><input type="number" id="f_cur" inputmode="numeric" placeholder="예: 30" oninput="vsCalc()"></div>
+    <div><label class="vs-l">목표 재방률(%)</label><input type="number" id="f_tgt" inputmode="numeric" placeholder="예: 55" oninput="vsCalc(true)"></div>
+  </div>
+  <label class="vs-l">우리 매장 디자이너 총 인원 (명)</label><input type="number" id="f_total" inputmode="numeric" placeholder="예: 4" oninput="vsCalc()">
+  <div id="s4out"></div>
+  <label class="vs-l">이 돈이면 뭘 할 수 있어요?</label>
+  <input type="text" id="f_vision" maxlength="40" placeholder="예: 2호점 보증금, 대출 상환, 차 바꾸기">
+  <div class="vs-count"><span id="cnt_vision">0</span>/40</div>
+  <p class="vs-err" id="err_s4"></p>
+  <button class="vs-btn" onclick="vsSubmitS4()">기획서 받으러 가기</button>
+</section>
+
+<!-- 이메일 + 동의 -->
+<section class="vs-screen vs-dark" data-screen="sign">
+  <div class="vs-progress"><i style="width:94%"></i></div><div class="vs-steplabel">거의 다 왔어요 · 회신 받기</div>
+  <button class="vs-back" onclick="vsGo('s4')">← 뒤로</button>
+  <h2 class="vs-t">완성된 프로필 카드를 받아요</h2>
+  <p class="vs-d" id="signHead">기획서를 만들어서 메일로 보내드릴게요.</p>
+  <label class="vs-l">이메일</label><input type="email" id="f_email" inputmode="email" placeholder="you@example.com">
+  <label class="vs-consent"><input type="checkbox" id="f_privacy"><span>(필수) 기획서 작성에 필요한 정보만 받고, 회신 후에는 다시 쓰지 않아요. 개인정보 수집·이용에 동의해요.</span></label>
+  <label class="vs-consent"><input type="checkbox" id="f_mkt"><span>(선택) 오토사장반 소식·혜택 메일을 받을게요.</span></label>
+  <p class="vs-err" id="err_sign"></p>
+  <button class="vs-btn" id="subBtn" onclick="vsSubmitFinal()">기획서 받기</button>
+</section>
+
+<!-- 완료 -->
+<section class="vs-screen vs-dark" data-screen="done">
+  <div class="vs-progress"><i style="width:100%"></i></div><div class="vs-steplabel">&nbsp;</div>
+  <h2 class="vs-t">기획서를 만들고 있어요.</h2>
+  <div class="vs-done"><div id="doneName" style="font-size:18px;font-weight:800"></div><div id="doneMoney" style="font-size:15px;margin-top:8px;color:rgba(255,255,255,.9)"></div></div>
+  <p class="vs-d" style="margin-top:22px">완성된 프로필 카드를 5분 안에 메일로 보내드릴게요.</p>
+  <button class="vs-btn" onclick="vsBack()">강의로 돌아가기</button>
+</section>
+
+<script>
+(function(){
+  var API_URL = 'https://autoceo-worksheet.visual-f2e.workers.dev';
+  var LECTURE_URL = '';
+  var STORE = 'vs_worksheet_part6';
+  var CASES = [
+    { id:'case_01', num:'진단 카드 01', sit:'활동명은 "체리". 프로필 사진은 밝고 러블리한 셀카예요.\n근데 매출 1위 메뉴는 40대 그레이 커버 컬러예요.\n신규 예약은 20대가 대부분인데, 이 사람들은 컬러를 안 해요.',
+      radioLabel:'매칭이 됐나요?', opts:['매칭 성공','매칭 실패'],
+      checkLabel:'어디가 어긋났어요? (여러 개 선택 가능)', checks:['말투','닉네임','옷','얼굴 분위기','시그니처'],
+      reasonLabel:'대표로서 어떻게 고칠 거예요?', max:60, ph:'예: 활동명 성 붙이고 프사 정돈, 피드는 그레이 커버 전후로' },
+    { id:'case_02', num:'진단 카드 02', sit:'인스타 프로필, 피드, 캡션 말투가 전부 차분하고 세련됐어요.\n타겟도 딱 맞아요.\n근데 매장 출근복이 후드티에 크록스예요.\n\n고객 후기: "실력은 좋은데 인스타랑 느낌이 좀 달라서 어색했어요"',
+      radioLabel:'4요소 중 몇 개가 어긋났어요?', opts:['1개','2개','3개','4개'],
+      reasonLabel:'하나만 어긋났는데 왜 티가 날까요?', max:60, ph:'예: 고객이 완성된 그림을 들고 오는데 하나 깨지면 전체가 의심돼요' },
+    { id:'case_03', num:'진단 카드 03', sit:'신규 예약은 매장에서 제일 많아요. 근데 재방률이 30%예요.\n프로필 사진에 얼굴 축소랑 피부 보정이 들어가 있어요.\n\n본인 말: "다들 이 정도는 해요. 저만 안 하면 손해예요."',
+      radioLabel:'어떻게 할 거예요?', opts:['그냥 둔다','바로 바꾸게 한다'],
+      reasonLabel:'이 사람을 숫자로 설득해보세요', max:80, ph:'예: 예약 100건에 재방 20명 vs 예약 60건에 재방 50명' },
+    { id:'case_04', num:'진단 카드 04', sit:'3년차 디자이너예요. 커트도 하고 펌도 하고 컬러도 해요.\n다 평균이에요. 딱히 잘 팔리는 게 없어요.',
+      radioLabel:'', opts:[],
+      reasonLabel:'역산할 시그니처가 없어요. 대표로서 먼저 뭘 할 거예요?', max:80, ph:'예: 매출 데이터에서 그나마 높은 걸 골라 예약 몰아주고 교육을 붙여요' }
+  ];
+
+  var state = {
+    step1:{designerName:'',currentAlias:'',career:null,pickReason:'',ceoName:''},
+    step2:{cases:CASES.map(function(c){return {id:c.id, choice:'', checks:[], reason:''};})},
+    step3:{topService1:'',topShare1:null,topService2:'',topShare2:null,signature:'',
+      targetAge:'',targetJob:'',targetWants:['','',''],
+      idealTone:'',idealOutfit:'',idealMood:'',idealNameFeel:'',
+      reverse:{alias:{now:'',after:''},photo:{now:'',after:''},outfit:{now:'',after:''},feed:{now:'',after:''},tone:{now:'',after:''}},
+      caption:''},
+    step4:{customers:null,price:null,currentRevisit:null,targetRevisit:null,totalDesigners:null,visionText:''}
+  };
+  var email='', mkt=false, tgtTouched=false;
+
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function num(v){var n=parseInt(String(v).replace(/[^0-9]/g,''),10);return isNaN(n)?null:n;}
+  function money(w){if(w==null||!isFinite(w)||w<=0)return'0원';var m=Math.round(w/10000);var e=Math.floor(m/10000),k=m%10000;if(e>0)return k>0?e+'억 '+k.toLocaleString()+'만원':e+'억원';return m.toLocaleString()+'만원';}
+  function save(){try{localStorage.setItem(STORE,JSON.stringify({state:state,email:email,mkt:mkt}));}catch(e){}}
+  function restore(){try{var r=JSON.parse(localStorage.getItem(STORE)||'null');if(r&&r.state){state=r.state;email=r.email||'';mkt=!!r.mkt;}}catch(e){}}
+
+  function vsGo(name){var s=document.querySelectorAll('#vsRoot .vs-screen');for(var i=0;i<s.length;i++)s[i].classList.toggle('on',s[i].getAttribute('data-screen')===name);save();post();}
+  window.vsGo=vsGo;
+  function err(id,m){var e=$(id);if(e)e.textContent=m||'';post();}
+  function post(){try{window.parent.postMessage({type:'vs-worksheet-height',part:6,height:$('vsRoot').scrollHeight},'*');}catch(e){}}
+  window.addEventListener('load',post);window.addEventListener('resize',post);
+
+  function bindCount(inputId,cntId){var el=$(inputId),c=$(cntId);if(!el||!c)return;function u(){c.textContent=(el.value||'').length;}el.addEventListener('input',u);u();}
+
+  // ── STEP 1 ──
+  window.vsSubmitS1=function(){
+    var a=state.step1;
+    a.designerName=$('f_dname').value.trim();a.currentAlias=$('f_alias').value.trim();a.career=num($('f_career').value);
+    a.pickReason=$('f_reason').value.trim();a.ceoName=$('f_ceo').value.trim();save();
+    if(!a.designerName){err('err_s1','지명할 디자이너 이름을 적어주세요');return;}
+    if(!a.currentAlias){err('err_s1','지금 쓰는 활동명을 적어주세요 (없으면 "없음")');return;}
+    if(a.career==null){err('err_s1','경력을 숫자로 적어주세요');return;}
+    if(!a.pickReason){err('err_s1','1호로 정한 이유를 적어주세요');return;}
+    if(!a.ceoName){err('err_s1','대표님 성함으로 서명해주세요');return;}
+    err('err_s1','');vsGo('s2');
+  };
+
+  // ── STEP 2 ──
+  function renderS2(){
+    var w=$('s2out');w.innerHTML='';
+    CASES.forEach(function(card){
+      var saved=state.step2.cases.find(function(x){return x.id===card.id;})||{choice:'',checks:[],reason:''};
+      var el=document.createElement('div');el.className='vs-dcard';
+      var html='<div class="num">'+card.num+'</div><div class="sit">'+esc(card.sit)+'</div>';
+      if(card.opts.length){
+        html+='<label class="vs-l" style="margin-top:0">'+esc(card.radioLabel)+'</label>';
+        html+=card.opts.map(function(o){return '<div class="vs-opt'+(saved.choice===o?' on':'')+'" data-c="'+card.id+'" data-o="'+esc(o)+'">'+esc(o)+'</div>';}).join('');
+      }
+      if(card.checks&&card.checks.length){
+        html+='<label class="vs-l">'+esc(card.checkLabel)+'</label><div class="vs-chips" data-checks="'+card.id+'">'+
+          card.checks.map(function(c){return '<span class="vs-chip'+(saved.checks.indexOf(c)>=0?' on':'')+'" data-c="'+card.id+'" data-k="'+esc(c)+'">'+esc(c)+'</span>';}).join('')+'</div>';
+      }
+      html+='<label class="vs-l">'+esc(card.reasonLabel)+'</label><textarea data-r="'+card.id+'" maxlength="'+card.max+'" rows="2" placeholder="'+esc(card.ph)+'">'+esc(saved.reason)+'</textarea>'+
+        '<div class="vs-count"><span data-cnt="'+card.id+'">'+(saved.reason||'').length+'</span>/'+card.max+'</div>';
+      el.innerHTML=html;w.appendChild(el);
+    });
+    w.querySelectorAll('.vs-opt').forEach(function(o){o.onclick=function(){var cid=o.getAttribute('data-c');o.parentNode.querySelectorAll('.vs-opt').forEach(function(x){x.classList.remove('on');});o.classList.add('on');getCase(cid).choice=o.getAttribute('data-o');save();};});
+    w.querySelectorAll('.vs-chip').forEach(function(ch){ch.onclick=function(){var cid=ch.getAttribute('data-c'),k=ch.getAttribute('data-k');var c=getCase(cid);var p=c.checks.indexOf(k);if(p>=0){c.checks.splice(p,1);ch.classList.remove('on');}else{c.checks.push(k);ch.classList.add('on');}save();};});
+    w.querySelectorAll('textarea[data-r]').forEach(function(t){t.oninput=function(){var cid=t.getAttribute('data-r');getCase(cid).reason=t.value;var cnt=w.querySelector('[data-cnt="'+cid+'"]');if(cnt)cnt.textContent=t.value.length;save();};});
+  }
+  function getCase(cid){var c=state.step2.cases.find(function(x){return x.id===cid;});if(!c){c={id:cid,choice:'',checks:[],reason:''};state.step2.cases.push(c);}return c;}
+  window.vsSubmitS2=function(){
+    for(var i=0;i<CASES.length;i++){var card=CASES[i];var c=getCase(card.id);
+      if(card.opts.length&&!c.choice){err('err_s2',card.num+'의 판단을 선택해주세요');return;}
+      if(!c.reason||c.reason.trim().length<5){err('err_s2',card.num+'의 근거를 5자 이상 적어주세요');return;}
+    }
+    err('err_s2','');vsGo('s3');
+  };
+
+  // ── STEP 3 ──
+  window.vsSubmitS3=function(){
+    var a=state.step3;
+    a.topService1=$('f_top1').value.trim();a.topShare1=num($('f_share1').value);a.topService2=$('f_top2').value.trim();a.topShare2=num($('f_share2').value);a.signature=$('f_sig').value.trim();
+    a.targetAge=$('f_age').value;a.targetJob=$('f_job').value.trim();a.targetWants=[$('f_want0').value.trim(),$('f_want1').value.trim(),$('f_want2').value.trim()];
+    a.idealTone=$('f_itone').value.trim();a.idealOutfit=$('f_ioutfit').value.trim();a.idealMood=$('f_imood').value.trim();a.idealNameFeel=$('f_iname').value.trim();
+    a.reverse={
+      alias:{now:$('f_r_alias_now').value.trim(),after:$('f_r_alias_aft').value.trim()},
+      photo:{now:$('f_r_photo_now').value.trim(),after:$('f_r_photo_aft').value.trim()},
+      outfit:{now:$('f_r_outfit_now').value.trim(),after:$('f_r_outfit_aft').value.trim()},
+      feed:{now:$('f_r_feed_now').value.trim(),after:$('f_r_feed_aft').value.trim()},
+      tone:{now:$('f_r_tone_now').value.trim(),after:$('f_r_tone_aft').value.trim()}
+    };
+    a.caption=$('f_caption').value.trim();save();
+    if(!a.topService1){err('err_s3','매출 1위 시술을 적어주세요');return;}
+    if(!a.signature){err('err_s3','확정 시그니처를 적어주세요');return;}
+    if(!a.targetAge){err('err_s3','타겟 연령대를 선택해주세요');return;}
+    err('err_s3','');vsGo('s4');
+  };
+
+  // ── STEP 4 ──
+  window.vsCalc=function(fromTgt){
+    if(fromTgt)tgtTouched=true;
+    var s=state.step4;
+    s.customers=num($('f_cust').value);s.price=num($('f_price').value);s.currentRevisit=num($('f_cur').value);s.totalDesigners=num($('f_total').value);
+    if(!tgtTouched&&s.currentRevisit!=null&&!$('f_tgt').value){$('f_tgt').value=Math.min(100,s.currentRevisit+25);}
+    s.targetRevisit=num($('f_tgt').value);
+    var c=s.customers||0,p=s.price||0,cur=s.currentRevisit||0,tgt=s.targetRevisit||0,total=Math.max(1,s.totalDesigners||1);
+    var adj=false;if(cur>0&&tgt<cur){tgt=Math.min(100,cur+25);adj=true;}
+    var nowM=c*p, matM=cur>0?Math.round(c*(tgt/cur)*p):nowM, mDiff=Math.max(0,matM-nowM), yDiff=mDiff*12, all=yDiff*total;
+    $('s4out').innerHTML=(nowM>0||matM>0)?('<div class="vs-rcard"><div class="cap">매칭 성공 후 1년에 더 버는 돈</div><div class="big-n">'+money(yDiff)+'</div>'+
+      '<div class="rowline"><span>지금 월매출</span><span>'+money(nowM)+'</span></div>'+
+      '<div class="rowline"><span>매칭 후 월매출</span><span>'+money(matM)+'</span></div>'+
+      '<div class="rowline"><span>매장 전체 적용</span><span>'+money(all)+'</span></div>'+
+      (adj?'<div class="sub" style="color:#e08a2b;margin-top:8px">목표 재방률이 현재보다 낮아 '+tgt+'%로 계산했어요</div>':'')+'</div>'):'';
+    save();
+  };
+  window.vsSubmitS4=function(){
+    vsCalc();var s=state.step4;s.visionText=$('f_vision').value.trim();save();
+    if(!s.customers){err('err_s4','월 시술 고객 수를 적어주세요');return;}
+    if(!s.price){err('err_s4','객단가를 적어주세요');return;}
+    if(!s.currentRevisit){err('err_s4','현재 재방률을 적어주세요');return;}
+    if(!s.targetRevisit){err('err_s4','목표 재방률을 적어주세요');return;}
+    if(!s.totalDesigners){err('err_s4','디자이너 총 인원을 적어주세요');return;}
+    if(!s.visionText){err('err_s4','이 돈이면 뭘 할지 적어주세요');return;}
+    err('err_s4','');$('signHead').textContent=state.step1.designerName+' 아티스트 기획서를 만들어서 메일로 보내드릴게요.';vsGo('sign');
+  };
+
+  // ── 제출 ──
+  window.vsSubmitFinal=function(){
+    email=$('f_email').value.trim();mkt=$('f_mkt').checked;
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){err('err_sign','이메일 주소를 다시 확인해주세요');return;}
+    if(!$('f_privacy').checked){err('err_sign','개인정보 수집에 동의해주세요');return;}
+    err('err_sign','');var b=$('subBtn');b.disabled=true;b.textContent='보내는 중…';
+    fetch(API_URL+'/api/worksheet/part6/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,marketingConsent:mkt,data:state})})
+      .then(function(r){return r.json();}).then(function(res){
+        if(!res||!res.success){err('err_sign',(res&&res.message)||'잠시 후 다시 시도해주세요');b.disabled=false;b.textContent='기획서 받기';return;}
+        var s=state.step4,cur=s.currentRevisit||0,tgt=s.targetRevisit||0;if(cur>0&&tgt<cur)tgt=Math.min(100,cur+25);
+        var c=s.customers||0,p=s.price||0,nowM=c*p,matM=cur>0?Math.round(c*(tgt/cur)*p):nowM,yDiff=Math.max(0,matM-nowM)*12;
+        $('doneName').textContent=state.step1.designerName+' 아티스트 데뷔 준비 완료';
+        $('doneMoney').textContent='매칭 성공 시 1년에 '+money(yDiff)+' 더';
+        vsGo('done');try{localStorage.removeItem(STORE);}catch(e){}
+      }).catch(function(){err('err_sign','잠시 후 다시 시도해주세요');b.disabled=false;b.textContent='기획서 받기';});
+  };
+  window.vsBack=function(){if(LECTURE_URL){try{window.top.location.href=LECTURE_URL;}catch(e){location.href=LECTURE_URL;}}else{try{window.scrollTo(0,0);}catch(e){}}};
+
+  // ── 초기화 ──
+  restore();
+  var s1=state.step1;$('f_dname').value=s1.designerName;$('f_alias').value=s1.currentAlias;if(s1.career!=null)$('f_career').value=s1.career;$('f_reason').value=s1.pickReason;$('f_ceo').value=s1.ceoName;
+  var s3=state.step3;$('f_top1').value=s3.topService1;if(s3.topShare1!=null)$('f_share1').value=s3.topShare1;$('f_top2').value=s3.topService2;if(s3.topShare2!=null)$('f_share2').value=s3.topShare2;$('f_sig').value=s3.signature;
+  $('f_age').value=s3.targetAge||'';$('f_job').value=s3.targetJob;$('f_want0').value=s3.targetWants[0]||'';$('f_want1').value=s3.targetWants[1]||'';$('f_want2').value=s3.targetWants[2]||'';
+  $('f_itone').value=s3.idealTone;$('f_ioutfit').value=s3.idealOutfit;$('f_imood').value=s3.idealMood;$('f_iname').value=s3.idealNameFeel;
+  var rv=s3.reverse;$('f_r_alias_now').value=rv.alias.now;$('f_r_alias_aft').value=rv.alias.after;$('f_r_photo_now').value=rv.photo.now;$('f_r_photo_aft').value=rv.photo.after;
+  $('f_r_outfit_now').value=rv.outfit.now;$('f_r_outfit_aft').value=rv.outfit.after;$('f_r_feed_now').value=rv.feed.now;$('f_r_feed_aft').value=rv.feed.after;$('f_r_tone_now').value=rv.tone.now;$('f_r_tone_aft').value=rv.tone.after;
+  $('f_caption').value=s3.caption;
+  var s4=state.step4;if(s4.customers!=null)$('f_cust').value=s4.customers;if(s4.price!=null)$('f_price').value=s4.price;if(s4.currentRevisit!=null)$('f_cur').value=s4.currentRevisit;if(s4.targetRevisit!=null){$('f_tgt').value=s4.targetRevisit;tgtTouched=true;}if(s4.totalDesigners!=null)$('f_total').value=s4.totalDesigners;$('f_vision').value=s4.visionText;
+  $('f_email').value=email;
+  bindCount('f_reason','cnt_reason');bindCount('f_caption','cnt_caption');bindCount('f_vision','cnt_vision');
+  renderS2();vsCalc();post();
+})();
+</script>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>오토사장반 5파트 워크시트</title>
+<style>html,body{margin:0;background:#fff}</style>
+<script>
+/* 비주얼아카데미 강의 플레이어 연결 (scripts/sync-worksheet-widgets.mjs 가 붙임) */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var EMAIL = q.get("email") || "", LECTURE = Number(q.get("lecture")) || 0;
+  function post(m) { m.source = "va-worksheet"; try { parent.postMessage(m, location.origin); } catch (e) {} }
+  var orig = window.fetch;
+  window.fetch = function (input) {
+    var p = orig.apply(this, arguments);
+    var url = String((input && input.url) || input);
+    if (/\/submit$/.test(url)) p.then(function (r) { r.clone().json().then(function (d) { if (r.ok && d && d.success !== false) post({ type: "submitted" }); }).catch(function () {}); }).catch(function () {});
+    return p;
+  };
+  function fill() {
+    if (!EMAIL) return;
+    ["wsEmail", "f_email"].forEach(function (id) { var el = document.getElementById(id); if (el && !el.value) el.value = EMAIL; });
+  }
+  var n = 0, t = setInterval(function () { fill(); if (++n > 60) clearInterval(t); }, 500);
+  document.addEventListener("focusin", fill);
+  function height() { post({ type: "height", h: document.documentElement.scrollHeight }); }
+  window.addEventListener("load", function () {
+    if (LECTURE && window.wsSelectLecture) {
+      window.wsSelectLecture(LECTURE);
+      if (EMAIL && window.wsCheckEmail) { document.getElementById("wsEmail").value = EMAIL; window.wsCheckEmail(); }
+    }
+    height();
+    if (window.ResizeObserver) new ResizeObserver(height).observe(document.body);
+  });
+})();
+</script>
+</head>
+<body>
+<!-- ============================================================
+  오토사장반 PART 5 워크시트 — 시그니처 진단 (오각형)
+  아임웹 코드위젯에 통째로 붙여넣거나 iframe 임베드.
+  ★ 배포 후 아래 API_URL 을 autoceo-worksheet Worker 주소로 바꾸세요.
+============================================================ -->
+<div id="vsRoot">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Montserrat:wght@600;700;800&display=swap');
+  #vsRoot{--mint:#00F5D4;--mint-deep:#00C4AA;--mint-sub:#CFF7EF;--ink:#141414;--red:#E63946;
+    --gray:#6b6b6b;--gray-l:#F4F6F5;--border:#E2E6E4;
+    max-width:480px;margin:0 auto;font-family:'Noto Sans KR','Apple SD Gothic Neo',-apple-system,sans-serif;
+    color:#141414;font-weight:500;line-height:1.65;-webkit-text-size-adjust:100%;background:#fff;}
+  #vsRoot *{box-sizing:border-box;}
+  #vsRoot .vs-screen{display:none;padding:30px 20px 44px;min-height:60vh;background:#fff;color:var(--ink);}
+  #vsRoot .vs-screen.on{display:block;}
+  #vsRoot .vs-dark{background:linear-gradient(180deg,#F1FCF9 0%,#FFFFFF 70%);}
+  #vsRoot .vs-progress{height:5px;background:#E9EDEB;border-radius:3px;overflow:hidden;margin-bottom:6px;}
+  #vsRoot .vs-progress > i{display:block;height:100%;background:var(--mint-deep);width:0;transition:width .3s;}
+  #vsRoot .vs-steplabel{font-size:12px;font-weight:700;color:var(--mint-deep);margin-bottom:22px;letter-spacing:.5px;}
+  #vsRoot h2.vs-t{font-size:26px;font-weight:900;margin:0 0 10px;line-height:1.32;letter-spacing:-.4px;}
+  #vsRoot p.vs-d{font-size:15px;font-weight:500;margin:0 0 22px;color:#4a4f4d;}
+  #vsRoot label.vs-l{display:block;font-size:14px;font-weight:700;margin:18px 0 7px;color:#1f2320;}
+  #vsRoot .vs-hint{font-size:13px;font-weight:500;color:var(--gray);margin:5px 0 0;}
+  #vsRoot .vs-quote{font-size:13.5px;font-weight:600;color:#00806f;background:var(--mint-sub);border-left:3px solid var(--mint-deep);border-radius:0 10px 10px 0;padding:11px 13px;margin:10px 0 16px;line-height:1.7;}
+  #vsRoot .vs-quote b{font-weight:800;}
+  #vsRoot input[type=text],#vsRoot input[type=email],#vsRoot input[type=number]{
+    width:100%;min-height:52px;border:1.5px solid var(--border);border-radius:12px;background:var(--gray-l);
+    padding:0 14px;font-size:16px;font-weight:600;font-family:inherit;color:var(--ink);outline:none;}
+  #vsRoot input::placeholder{color:#9aa09d;font-weight:500;}
+  #vsRoot input:focus{border-color:var(--mint-deep);background:#fff;}
+  #vsRoot .vs-btn{display:block;width:100%;height:56px;border:0;border-radius:14px;background:var(--mint-deep);
+    color:#fff;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;margin-top:28px;box-shadow:0 6px 16px rgba(0,196,170,.28);}
+  #vsRoot .vs-btn:active{transform:translateY(1px);}
+  #vsRoot .vs-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+  #vsRoot .vs-btn.ghost{background:none;color:var(--gray);box-shadow:none;font-weight:700;margin-top:10px;}
+  #vsRoot .vs-back{background:none;border:0;color:var(--gray);font-size:14px;font-weight:600;cursor:pointer;padding:6px 0;margin-bottom:8px;font-family:inherit;}
+  #vsRoot .vs-err{color:#e03131;font-size:13px;font-weight:600;margin-top:8px;min-height:16px;}
+  #vsRoot .vs-info{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:12px 0;}
+  #vsRoot .vs-info .r{display:flex;font-size:13.5px;}
+  #vsRoot .vs-info .r + .r{border-top:1px solid var(--border);}
+  #vsRoot .vs-info .k{width:104px;flex:none;padding:9px 12px;background:#FAFBFB;font-weight:700;color:var(--gray);}
+  #vsRoot .vs-info .v{padding:9px 12px;font-weight:600;}
+  #vsRoot .vs-dcard{background:var(--gray-l);border-radius:14px;padding:20px 18px;margin:16px 0;}
+  #vsRoot .vs-dcard .num{display:inline-block;font-size:12px;color:#00806f;font-weight:800;letter-spacing:.5px;white-space:nowrap;background:var(--mint-sub);padding:5px 12px;border-radius:20px;}
+  #vsRoot .vs-dcard .sit{font-size:16px;font-weight:700;margin:8px 0 14px;white-space:pre-line;line-height:1.7;}
+  #vsRoot .vs-opt{display:block;border:1.5px solid var(--border);border-radius:12px;padding:14px 15px;margin:8px 0;background:#fff;cursor:pointer;font-size:15px;font-weight:600;}
+  #vsRoot .vs-opt.on{border-color:var(--mint-deep);background:var(--mint-sub);font-weight:800;color:#00806f;}
+  #vsRoot .vs-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+  #vsRoot .vs-chip{height:40px;padding:0 16px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:14px;font-weight:700;cursor:pointer;color:#3a3f3d;}
+  #vsRoot .vs-chip.on{background:var(--mint-sub);border-color:var(--mint-deep);color:#00806f;}
+  #vsRoot .vs-reveal{margin-top:12px;border-left:3px solid var(--mint-deep);background:var(--mint-sub);border-radius:0 10px 10px 0;padding:12px 14px;font-size:14px;line-height:1.7;color:#0f3d36;display:none;}
+  #vsRoot .vs-reveal.show{display:block;}
+  #vsRoot .vs-reveal .ok{font-weight:800;color:#00806f;display:block;margin-bottom:4px;}
+  #vsRoot input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:#E9EDEB;outline:none;margin:16px 0 4px;}
+  #vsRoot input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;background:var(--mint-deep);cursor:pointer;box-shadow:0 2px 8px rgba(0,196,170,.45);}
+  #vsRoot input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radius:50%;background:var(--mint-deep);cursor:pointer;}
+  #vsRoot .vs-axis{border:1.5px solid var(--border);border-radius:14px;padding:16px 16px 12px;margin:14px 0;}
+  #vsRoot .vs-axis .ax-h{font-size:12px;font-weight:800;color:var(--mint-deep);letter-spacing:.5px;}
+  #vsRoot .vs-axis .ax-q{font-size:16px;font-weight:700;margin:4px 0 10px;}
+  #vsRoot .vs-slabels{display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin-top:2px;}
+  #vsRoot .vs-scoreN{font-size:15px;font-weight:800;color:var(--mint-deep);text-align:center;margin-top:2px;}
+  #vsRoot .vs-count{font-size:12px;color:var(--gray);text-align:right;margin-top:4px;}
+  #vsRoot .vs-svgwrap{text-align:center;margin:8px 0 10px;}
+  #vsRoot .vs-rcard{background:linear-gradient(135deg,#EAFCF8,#F7FFFD);border:1.5px solid var(--mint-deep);border-radius:14px;padding:18px;margin:16px 0;}
+  #vsRoot .vs-rcard .cap{font-size:13px;font-weight:700;color:var(--gray);}
+  #vsRoot .vs-rcard .big-n{font-size:34px;font-weight:800;color:var(--mint-deep);font-family:'Montserrat',sans-serif;margin-top:4px;}
+  #vsRoot .vs-rcard .sub{font-size:14px;color:var(--ink);font-weight:600;margin-top:6px;}
+  #vsRoot .vs-grade{display:inline-block;padding:6px 16px;border-radius:20px;background:var(--mint-sub);color:#00806f;font-size:15px;font-weight:800;margin:2px 0 6px;}
+  #vsRoot .vs-lowlist .li{display:flex;justify-content:space-between;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;margin:8px 0;font-weight:700;font-size:15px;}
+  #vsRoot .vs-lowlist .li.low{border-color:var(--red);color:var(--red);background:#FDECEE;}
+  #vsRoot .vs-simout{border:1px solid var(--border);border-radius:12px;padding:4px 14px;margin:12px 0;}
+  #vsRoot .vs-simout .row{display:flex;justify-content:space-between;padding:10px 0;font-size:15px;font-weight:600;}
+  #vsRoot .vs-simout .row + .row{border-top:1px solid var(--border);}
+  #vsRoot .vs-simout .row b{color:var(--mint-deep);font-family:'Montserrat',sans-serif;}
+  #vsRoot .vs-consent{display:flex;align-items:flex-start;gap:10px;margin:12px 0;font-size:14px;font-weight:500;}
+  #vsRoot .vs-consent input{width:20px;height:20px;margin-top:2px;accent-color:var(--mint-deep);}
+  #vsRoot .vs-done{background:linear-gradient(135deg,#00C4AA,#00A088);border-radius:20px;padding:28px 22px;margin-top:22px;text-align:center;color:#fff;box-shadow:0 10px 28px rgba(0,196,170,.32);}
+  #vsRoot .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+</style>
+
+<!-- 인트로 -->
+<section class="vs-screen vs-dark on" data-screen="intro">
+  <div class="vs-progress"><i style="width:0"></i></div><div class="vs-steplabel">&nbsp;</div>
+  <h2 class="vs-t">시그니처 진단</h2>
+  <p class="vs-d">우리 매장 디자이너 한 명이 지금 어디가 어긋났는지 찾아봐요. 훈련장에서 눈을 맞춘 다음, 내 아티스트를 오각형으로 진단해요.</p>
+  <p class="vs-d" style="color:var(--mint-deep);font-weight:700">약 12분 걸려요 · 진단 리포트를 메일로 보내드려요</p>
+  <button class="vs-btn" onclick="vsGo('t1')">진단 시작하기</button>
+</section>
+
+<!-- 1부 훈련장 STEP1 -->
+<section class="vs-screen" data-screen="t1">
+  <div class="vs-progress"><i style="width:9%"></i></div><div class="vs-steplabel">1부 훈련장 · STEP 1 / 3</div>
+  <button class="vs-back" onclick="vsGo('intro')">← 뒤로</button>
+  <h2 class="vs-t">강남점 4인을 진단해요</h2>
+  <p class="vs-d">매출만 보면 헷갈려요. 재방률을 보면 풀려요. 답을 고르면 바로 정답을 보여드려요.</p>
+  <div id="t1out"></div>
+  <p class="vs-err" id="err_t1"></p>
+  <button class="vs-btn" onclick="vsSubmitT1()">자기잠식 판정으로</button>
+</section>
+
+<!-- 1부 훈련장 STEP2 -->
+<section class="vs-screen" data-screen="t2">
+  <div class="vs-progress"><i style="width:18%"></i></div><div class="vs-steplabel">1부 훈련장 · STEP 2 / 3</div>
+  <button class="vs-back" onclick="vsGo('t1')">← 뒤로</button>
+  <h2 class="vs-t">자기잠식일까요?</h2>
+  <p class="vs-d">레이어드 컷 디자이너 3명. 같은 시술은 괜찮아요. 같은 결이 문제예요.</p>
+  <div class="vs-info" id="t2roster"></div>
+  <div id="t2out"></div>
+  <p class="vs-err" id="err_t2"></p>
+  <button class="vs-btn" onclick="vsSubmitT2()">활동명 심사로</button>
+</section>
+
+<!-- 1부 훈련장 STEP3 -->
+<section class="vs-screen" data-screen="t3">
+  <div class="vs-progress"><i style="width:27%"></i></div><div class="vs-steplabel">1부 훈련장 · STEP 3 / 3</div>
+  <button class="vs-back" onclick="vsGo('t2')">← 뒤로</button>
+  <h2 class="vs-t">이 활동명, 쓸까요?</h2>
+  <p class="vs-d">신입이 활동명을 정해왔어요. 이름 하나로 캐릭터의 70%가 정해져요.</p>
+  <div class="vs-info" id="t3roster"></div>
+  <label class="vs-l">'루나' 하면 어떤 사람이 떠올라요?</label>
+  <input type="text" id="f_impr" maxlength="20" placeholder="한 줄로 (예: 부드럽고 조용한 사람)">
+  <div id="t3out"></div>
+  <p class="vs-err" id="err_t3"></p>
+  <button class="vs-btn" onclick="vsSubmitT3()">내 매장 진단하기</button>
+</section>
+
+<!-- 중간 결과 -->
+<section class="vs-screen vs-dark" data-screen="mid">
+  <div class="vs-progress"><i style="width:36%"></i></div><div class="vs-steplabel">1부 훈련장 끝</div>
+  <h2 class="vs-t">훈련장 끝났어요</h2>
+  <div class="vs-rcard"><div class="cap">7문항 중</div><div class="big-n" id="midScore">0개 정답</div><div class="sub">이제 눈이 맞춰졌어요. 우리 매장 차례예요.</div></div>
+  <p class="vs-d">가장 아깝거나 가장 답답한 아티스트 한 명을 골라주세요. 잘 되는 사람 말고요.</p>
+  <button class="vs-btn" onclick="vsGo('s4')">내 매장 진단하기</button>
+</section>
+
+<!-- 2부 STEP4 아티스트 -->
+<section class="vs-screen" data-screen="s4">
+  <div class="vs-progress"><i style="width:45%"></i></div><div class="vs-steplabel">2부 실전 · STEP 4</div>
+  <button class="vs-back" onclick="vsGo('mid')">← 뒤로</button>
+  <h2 class="vs-t">누구를 진단할까요?</h2>
+  <p class="vs-d">활동명만 필수예요. 나머지는 넣으면 리포트가 더 정확해져요.</p>
+  <label class="vs-l">활동명</label><input type="text" id="f_aname" placeholder="예: 레이">
+  <label class="vs-l">연차 (년차)</label><input type="number" id="f_years" inputmode="numeric" placeholder="예: 4">
+  <label class="vs-l">현재 월매출 (만원)</label><input type="number" id="f_arev" inputmode="numeric" placeholder="예: 480">
+  <label class="vs-l">재방률 (%)</label><input type="number" id="f_avisit" inputmode="numeric" placeholder="예: 12">
+  <p class="vs-err" id="err_s4"></p>
+  <button class="vs-btn" onclick="vsSubmitS4()">오각형 진단으로</button>
+</section>
+
+<!-- 2부 STEP5 오각형 -->
+<section class="vs-screen" data-screen="s5">
+  <div class="vs-progress"><i style="width:63%"></i></div><div class="vs-steplabel">2부 실전 · STEP 5 · 오각형</div>
+  <button class="vs-back" onclick="vsGo('s4')">← 뒤로</button>
+  <h2 class="vs-t">다섯 가지가 맞아떨어져요?</h2>
+  <p class="vs-d">각 항목을 한 줄로 적고, 나머지 넷과 얼마나 맞는지 점수를 매겨요. 슬라이더를 움직이면 오각형이 그려져요.</p>
+  <div class="vs-quote">💬 <b>강의 한마디</b> — "다섯 개가 <b>일치하면 팬</b>이 되고, 하나라도 어긋나면 일회성으로 끝나요." 인스타·매장·디자이너·시그니처·고객핏이 <b>같은 사람</b>을 가리켜야 해요. <b>낮은 점수는 나쁜 소식이 아니라, 어디가 어긋났는지 찾았다는 소식</b>이에요.</div>
+  <div class="vs-svgwrap" id="s5svg"></div>
+  <div id="s5out"></div>
+  <p class="vs-err" id="err_s5"></p>
+  <button class="vs-btn" onclick="vsSubmitS5()">수익 시뮬레이터로</button>
+</section>
+
+<!-- 2부 STEP6 수익 시뮬 -->
+<section class="vs-screen" data-screen="s6">
+  <div class="vs-progress"><i style="width:81%"></i></div><div class="vs-steplabel">2부 실전 · STEP 6 · 수익</div>
+  <button class="vs-back" onclick="vsGo('s5')">← 뒤로</button>
+  <h2 class="vs-t">정렬되면 얼마까지 갈까요?</h2>
+  <p class="vs-d">강의에서 들은 숫자를 내 숫자로 바꿔봐요. 순이익률 15%는 강의 기준값이에요.</p>
+  <label class="vs-l">우리 매장 디자이너는 몇 명이에요?</label><input type="number" id="f_dcount" inputmode="numeric" placeholder="예: 5" oninput="vsSim()">
+  <label class="vs-l">지금 매장 월매출은요? (만원)</label><input type="number" id="f_curr" inputmode="numeric" placeholder="예: 6200" oninput="vsSim()">
+  <label class="vs-l">전원 정렬되면 얼마까지 갈 것 같아요? (만원)</label><input type="number" id="f_aligned" inputmode="numeric" placeholder="예: 9000" oninput="vsSim()">
+  <div id="s6out"></div>
+  <p class="vs-err" id="err_s6"></p>
+  <button class="vs-btn" onclick="vsSubmitS6()">결과 보기</button>
+</section>
+
+<!-- STEP7 결과 요약 -->
+<section class="vs-screen vs-dark" data-screen="s7">
+  <div class="vs-progress"><i style="width:90%"></i></div><div class="vs-steplabel">진단 결과</div>
+  <h2 class="vs-t">진단 결과예요</h2>
+  <div class="vs-rcard" style="text-align:center">
+    <div class="big-n" id="r_total">0 / 25점</div>
+    <div class="vs-grade" id="r_grade">—</div>
+  </div>
+  <div class="vs-svgwrap" id="s7svg"></div>
+  <label class="vs-l">가장 낮은 항목</label>
+  <div class="vs-lowlist" id="r_low"></div>
+  <div id="r_sim"></div>
+  <button class="vs-btn" onclick="vsGo('s8')">리포트 메일로 받기</button>
+  <button class="vs-btn ghost" onclick="vsBack()">그냥 닫기</button>
+</section>
+
+<!-- STEP8 이메일 -->
+<section class="vs-screen" data-screen="s8">
+  <div class="vs-progress"><i style="width:96%"></i></div><div class="vs-steplabel">리포트 받기</div>
+  <button class="vs-back" onclick="vsGo('s7')">← 뒤로</button>
+  <h2 class="vs-t">리포트를 어디로 보낼까요?</h2>
+  <p class="vs-d">항목별로 뭘 어떻게 바꿀지, 디자이너에게 어떻게 말을 꺼낼지까지 정리해서 보내드려요.</p>
+  <label class="vs-l">이메일</label><input type="email" id="f_email" inputmode="email" placeholder="you@example.com">
+  <label class="vs-consent"><input type="checkbox" id="f_privacy"><span>(필수) 결과 발송을 위한 개인정보 수집·이용에 동의해요.</span></label>
+  <label class="vs-consent"><input type="checkbox" id="f_mkt"><span>(선택) 오토사장반 소식도 받을래요.</span></label>
+  <p class="vs-err" id="err_s8"></p>
+  <button class="vs-btn" id="subBtn" onclick="vsSubmitFinal()">리포트 받기</button>
+  <button class="vs-btn ghost" onclick="vsBack()">안 받을래요</button>
+</section>
+
+<!-- 완료 -->
+<section class="vs-screen vs-dark" data-screen="done">
+  <div class="vs-progress"><i style="width:100%"></i></div><div class="vs-steplabel">&nbsp;</div>
+  <h2 class="vs-t">보냈어요</h2>
+  <div class="vs-done"><div id="doneName" style="font-size:18px;font-weight:800"></div><div id="doneSub" style="font-size:15px;margin-top:8px;color:rgba(255,255,255,.9)"></div></div>
+  <p class="vs-d" style="margin-top:22px">3분 안에 도착해요. 안 보이면 스팸함도 확인해주세요. 한 달 뒤에 다시 재보면 점수가 움직였는지 보여요.</p>
+  <button class="vs-btn" onclick="vsBack()">강의로 돌아가기</button>
+</section>
+
+<script>
+(function(){
+  var API_URL = 'https://autoceo-worksheet.visual-f2e.workers.dev';
+  var LECTURE_URL = '';
+  var STORE = 'vs_worksheet_part5';
+
+  var AXES = [
+    {key:'instagram',label:'인스타',q:'인스타는 지금 어떤 무드예요?',ex:'화이트톤 차분한 무드'},
+    {key:'store',label:'매장',q:'이 사람이 있는 공간은 어떤 분위기예요?',ex:'우드톤 조용한 살롱'},
+    {key:'designer',label:'디자이너',q:'실제 성격이랑 말투는 어때요?',ex:'텐션 높고 말 빠름'},
+    {key:'signature',label:'시그니처',q:'주력 시술이랑 결은 뭐예요?',ex:'레이어드컷, 키치한 결'},
+    {key:'customerfit',label:'고객핏',q:'실제로 어떤 손님이 와요?',ex:'20대 초반 대학생'}
+  ];
+  var TIE = [2,0,3,4,1]; // 동점 우선순위: 디자이너>인스타>시그니처>고객핏>매장 (§10-1)
+
+  var T1 = [
+    {id:'sol',name:'솔',rows:[['인스타','화이트·차분·단정'],['실제 모습','문신, 스모키 메이크업'],['주력 시술','단발컷'],['월매출','620만원'],['재방률','18%']],verdict:'어긋남',pattern:'옷차림',
+      reveal:'솔은 옷차림이 어긋나 있어요. 인스타는 차분한데 실제는 문신에 스모키라, 기대하고 온 손님이 놀라요. 재방률 18%가 그 신호예요.'},
+    {id:'byeol',name:'별',rows:[['인스타','청순·파스텔'],['실제 모습','청순·조용함'],['주력 시술','다운펌'],['월매출','1,340만원'],['재방률','71%']],verdict:'괜찮음',pattern:null,
+      reveal:'별은 인스타도 청순·파스텔, 실제도 청순·조용해요. 두 개가 맞아떨어져요. 재방률 71%가 그 증거예요.'},
+    {id:'kai',name:'카이',rows:[['인스타','럭셔리·시크·블랙'],['실제 모습','럭셔리·시크'],['주력 시술','컬러'],['월매출','1,180만원'],['재방률','66%']],verdict:'괜찮음',pattern:null,
+      reveal:'카이는 인스타도 실제도 럭셔리·시크예요. 미스매치는 "특이한가"가 아니라 "인스타와 실제가 다른가"로 봐요. 재방률 66%면 잘 맞는 거예요.'},
+    {id:'bom',name:'봄',rows:[['인스타','파마 잘 올림 강조'],['실제 모습','실제론 컷이 90%'],['주력 시술','컷'],['월매출','740만원'],['재방률','24%']],verdict:'어긋남',pattern:'시술',
+      reveal:'봄은 실력은 문제 없어요. 그런데 인스타에서 파마를 강조하니 파마 하러 온 손님이 컷 디자이너를 만나요. "어, 컷도 하시나 봐요?" 소리가 나오면 이미 어긋난 거예요. 시술 미스매치.'}
+  ];
+  var PATTERNS = ['텐션','옷차림','시술'];
+  var T2_ROSTER = [['주력','리아·제이·유나 모두 레이어드'],['인스타','핑크비비드 / 블랙모노 / 파스텔플로럴'],['말투','발랄 / 시크과묵 / 부드러움'],['타겟','대학생 / 커리어우먼 / 소개팅']];
+  var T3_ROSTER = [['희망 활동명','루나'],['실제 외모','타투 다수, 숏컷, 강한 아이라인'],['말투','직설적, 낮은 목소리, 과묵'],['잘하는 시술','블리치·비비드 컬러·언더컷'],['평소 옷차림','올블랙, 체인, 부츠']];
+
+  var state = {
+    artist:{name:'',years:null,revenue:null,revisitRate:null},
+    training:{answers:[],correct:0,total:7},
+    pentagon:{instagram:{text:'',score:3},store:{text:'',score:3},designer:{text:'',score:3},signature:{text:'',score:3},customerfit:{text:'',score:3}},
+    simulation:{designerCount:null,currentRevenue:null,alignedRevenue:null}
+  };
+  var tAns = {}; // id -> {id,correct,chosen}
+  var t1sel = {}; // id -> {verdict,pattern}
+  var t2sel = {c1:'',a:'',b:''};
+  var t3sel = {choice:'',newName:''};
+  var email='', mkt=false;
+
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function num(v){var n=parseInt(String(v).replace(/[^0-9]/g,''),10);return isNaN(n)?null:n;}
+  function manwon(m){if(m==null||!isFinite(m))return'-';var neg=m<0;m=Math.abs(m);var e=Math.floor(m/10000),k=m%10000;var s=e>0?(k>0?e+'억 '+k.toLocaleString()+'만원':e+'억원'):m.toLocaleString()+'만원';return (neg?'-':'')+s;}
+  function save(){try{localStorage.setItem(STORE,JSON.stringify({state:state,email:email,mkt:mkt,tAns:tAns,t1sel:t1sel,t2sel:t2sel,t3sel:t3sel}));}catch(e){}}
+  function restore(){try{var r=JSON.parse(localStorage.getItem(STORE)||'null');if(r&&r.state){state=r.state;email=r.email||'';mkt=!!r.mkt;tAns=r.tAns||{};t1sel=r.t1sel||{};t2sel=r.t2sel||{c1:'',a:'',b:''};t3sel=r.t3sel||{choice:'',newName:''};}}catch(e){}}
+
+  function vsGo(name){var s=document.querySelectorAll('#vsRoot .vs-screen');for(var i=0;i<s.length;i++)s[i].classList.toggle('on',s[i].getAttribute('data-screen')===name);save();post();}
+  window.vsGo=vsGo;
+  function err(id,m){var e=$(id);if(e)e.textContent=m||'';post();}
+  function post(){try{window.parent.postMessage({type:'vs-worksheet-height',part:5,height:$('vsRoot').scrollHeight},'*');}catch(e){}}
+  window.addEventListener('load',post);window.addEventListener('resize',post);
+
+  function values(){return AXES.map(function(a){return state.pentagon[a.key].score;});}
+  function total(){return values().reduce(function(s,v){return s+v;},0);}
+  function grade(t){if(t>=21)return'잘 맞아떨어져요';if(t>=14)return'손볼 수 있어요';if(t>=8)return'정리가 필요해요';return'시그니처부터 다시 잡아요';}
+  function lowTwo(){
+    var idx=[0,1,2,3,4],vs=values();
+    idx.sort(function(a,b){var d=vs[a]-vs[b];if(d!==0)return d;return TIE.indexOf(a)-TIE.indexOf(b);});
+    return [idx[0],idx[1]];
+  }
+  function commitTraining(){
+    var arr=Object.keys(tAns).map(function(k){return tAns[k];});
+    state.training.answers=arr;state.training.correct=arr.filter(function(x){return x.correct;}).length;state.training.total=7;
+  }
+  function setTrain(id,correct,chosen){tAns[id]={id:id,correct:correct,chosen:chosen};commitTraining();save();}
+
+  // ── 오각형 SVG (서버 email-part5.ts 와 동일 지오메트리) ──
+  function pentagon(vals,lowIdx){
+    var CX=130,CY=138,R=84,N=5;lowIdx=lowIdx||[];
+    function ang(i){return (-90+(360/N)*i)*Math.PI/180;}
+    function pt(i,r){return [(CX+r*Math.cos(ang(i))).toFixed(1),(CY+r*Math.sin(ang(i))).toFixed(1)];}
+    function poly(r,mul){var o=[];for(var i=0;i<N;i++){var m=mul?mul(i):1;o.push(pt(i,r*m).join(','));}return o.join(' ');}
+    var s='';
+    for(var ring=1;ring<=5;ring++)s+='<polygon points="'+poly(R*ring/5)+'" fill="none" stroke="#E2E6E4" stroke-width="1"/>';
+    for(var i=0;i<N;i++){var p=pt(i,R);s+='<line x1="'+CX+'" y1="'+CY+'" x2="'+p[0]+'" y2="'+p[1]+'" stroke="#E2E6E4" stroke-width="1"/>';}
+    s+='<polygon points="'+poly(R,function(i){return Math.max(0,Math.min(5,vals[i]||0))/5;})+'" fill="#00C4AA" fill-opacity="0.25" stroke="#00C4AA" stroke-width="2" stroke-linejoin="round"/>';
+    for(var j=0;j<N;j++){var q=pt(j,R*Math.max(0,Math.min(5,vals[j]||0))/5),low=lowIdx.indexOf(j)>=0;s+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(low?5:4)+'" fill="'+(low?'#E63946':'#00C4AA')+'"/>';}
+    for(var k=0;k<N;k++){var l=pt(k,R+20),an=l[0]<CX-6?'end':(l[0]>CX+6?'start':'middle'),lw=lowIdx.indexOf(k)>=0;
+      s+='<text x="'+l[0]+'" y="'+l[1]+'" text-anchor="'+an+'" font-size="12" font-weight="700" fill="'+(lw?'#E63946':'#6b6b6b')+'">'+esc(AXES[k].label)+'</text>';
+      s+='<text x="'+l[0]+'" y="'+(+l[1]+14)+'" text-anchor="'+an+'" font-size="11" font-weight="800" fill="'+(lw?'#E63946':'#141414')+'">'+Math.round(vals[k]||0)+'점</text>';}
+    return '<svg width="260" height="270" viewBox="0 0 260 276" xmlns="http://www.w3.org/2000/svg">'+s+'</svg>';
+  }
+
+  // ── STEP1 렌더 ──
+  function revealBox(id,ansText,text){return '<div class="vs-reveal" id="rv_'+id+'"><span class="ok">정답: '+esc(ansText)+'</span>'+esc(text)+'</div>';}
+  function showReveal(id){var e=$('rv_'+id);if(e)e.classList.add('show');post();}
+  function renderT1(){
+    var w=$('t1out');w.innerHTML='';
+    T1.forEach(function(c){
+      var sel=t1sel[c.id]||{verdict:'',pattern:''};
+      var el=document.createElement('div');el.className='vs-dcard';
+      var info='<div class="vs-info">'+c.rows.map(function(r){return '<div class="r"><div class="k">'+esc(r[0])+'</div><div class="v">'+esc(r[1])+'</div></div>';}).join('')+'</div>';
+      var ansTxt=c.verdict+(c.pattern?' ('+c.pattern+')':'');
+      var opts=['어긋남','괜찮음'].map(function(o){return '<div class="vs-opt'+(sel.verdict===o?' on':'')+'" data-v="'+esc(o)+'">'+esc(o)+'</div>';}).join('');
+      var pat='<div id="pat_'+c.id+'" style="display:'+(sel.verdict==='어긋남'?'block':'none')+'"><label class="vs-l">어떤 패턴이에요?</label><div class="vs-chips">'+PATTERNS.map(function(p){return '<span class="vs-chip'+(sel.pattern===p?' on':'')+'" data-p="'+esc(p)+'">'+esc(p)+'</span>';}).join('')+'</div></div>';
+      el.innerHTML='<div class="num">'+esc(c.name)+' 진단</div><div class="sit" style="font-weight:600;font-size:15px">'+esc(c.name)+'은(는) 어긋나 있나요?</div>'+info+opts+pat+revealBox(c.id,ansTxt,c.reveal);
+      w.appendChild(el);
+      el.querySelectorAll('.vs-opt').forEach(function(o){o.onclick=function(){
+        el.querySelectorAll('.vs-opt').forEach(function(x){x.classList.remove('on');});o.classList.add('on');
+        var v=o.getAttribute('data-v');t1sel[c.id]=t1sel[c.id]||{};t1sel[c.id].verdict=v;
+        $('pat_'+c.id).style.display=v==='어긋남'?'block':'none';
+        evalT1(c);};});
+      el.querySelectorAll('.vs-chip').forEach(function(ch){ch.onclick=function(){
+        el.querySelectorAll('.vs-chip').forEach(function(x){x.classList.remove('on');});ch.classList.add('on');
+        t1sel[c.id]=t1sel[c.id]||{};t1sel[c.id].pattern=ch.getAttribute('data-p');evalT1(c);};});
+      if(sel.verdict&&(sel.verdict==='괜찮음'||sel.pattern))showReveal(c.id);
+    });
+  }
+  function evalT1(c){
+    var s=t1sel[c.id]||{};if(!s.verdict)return;
+    if(c.verdict==='어긋남'&&!s.pattern){return;} // 패턴 기다림
+    var correct=(s.verdict===c.verdict)&&(c.verdict==='괜찮음'||s.pattern===c.pattern);
+    var chosen=s.verdict+(s.pattern?' ('+s.pattern+')':'');
+    setTrain(c.id,correct,chosen);showReveal(c.id);
+  }
+  window.vsSubmitT1=function(){
+    for(var i=0;i<T1.length;i++){var c=T1[i],s=t1sel[c.id]||{};
+      if(!s.verdict){err('err_t1',c.name+' 진단을 골라주세요');return;}
+      if(s.verdict==='어긋남'&&!s.pattern){err('err_t1',c.name+'의 패턴을 골라주세요');return;}}
+    err('err_t1','');vsGo('t2');
+  };
+
+  // ── STEP2 렌더 ──
+  function renderT2(){
+    $('t2roster').innerHTML=T2_ROSTER.map(function(r){return '<div class="r"><div class="k">'+esc(r[0])+'</div><div class="v">'+esc(r[1])+'</div></div>';}).join('');
+    var w=$('t2out');
+    var q1='<div class="vs-dcard"><div class="num">몰아줄까요?</div><div class="sit">"레이어드 디자이너가 3명이에요. 자기잠식 아닐까요? 한 명한테 몰아줄까요?"</div>'+
+      ['몰아준다','그대로 둔다'].map(function(o){return '<div class="vs-opt c1'+(t2sel.c1===o?' on':'')+'" data-o="'+esc(o)+'">'+esc(o)+'</div>';}).join('')+
+      revealBox('cannibal_1','그대로 둔다','세 명 다 레이어드지만 결이 달라서 손님이 알아서 나뉘어요. 같은 시술은 괜찮아요, 같은 결이 문제예요. 몰아주면 3,700이 2,000으로 줄어 매장이 손해예요.')+'</div>';
+    var q2='<div class="vs-dcard"><div class="num">매출로 뒤집기</div><div class="sit">매출이 이렇게 나오면 판단이 달라질까요?</div>'+
+      '<label class="vs-l">케이스 A · 리아 1,200 · 제이 1,400 · 유나 1,100</label>'+['그대로','조정한다'].map(function(o){return '<div class="vs-opt ca'+(t2sel.a===o?' on':'')+'" data-o="'+esc(o)+'">'+esc(o)+'</div>';}).join('')+
+      '<label class="vs-l">케이스 B · 리아 2,500 · 제이 600 · 유나 400</label>'+['그대로','조정한다'].map(function(o){return '<div class="vs-opt cb'+(t2sel.b===o?' on':'')+'" data-o="'+esc(o)+'">'+esc(o)+'</div>';}).join('')+
+      revealBox('cannibal_2','A 그대로 / B 조정한다','A는 셋 다 고르게 나오니 이미 손님이 나뉜 거예요, 그대로 둬요. B는 한 명만 폭발하고 둘이 죽었으니 진짜 자기잠식이에요, 조정해요. 같은 3인인데 매출 분포로 판단이 뒤집혀요.')+'</div>';
+    w.innerHTML=q1+q2;
+    w.querySelectorAll('.vs-opt.c1').forEach(function(o){o.onclick=function(){w.querySelectorAll('.vs-opt.c1').forEach(function(x){x.classList.remove('on');});o.classList.add('on');t2sel.c1=o.getAttribute('data-o');
+      setTrain('cannibal_1',t2sel.c1==='그대로 둔다','몰아주기: '+t2sel.c1);showReveal('cannibal_1');};});
+    w.querySelectorAll('.vs-opt.ca').forEach(function(o){o.onclick=function(){w.querySelectorAll('.vs-opt.ca').forEach(function(x){x.classList.remove('on');});o.classList.add('on');t2sel.a=o.getAttribute('data-o');evalT2();};});
+    w.querySelectorAll('.vs-opt.cb').forEach(function(o){o.onclick=function(){w.querySelectorAll('.vs-opt.cb').forEach(function(x){x.classList.remove('on');});o.classList.add('on');t2sel.b=o.getAttribute('data-o');evalT2();};});
+    if(t2sel.c1)showReveal('cannibal_1');if(t2sel.a&&t2sel.b)showReveal('cannibal_2');
+  }
+  function evalT2(){if(!t2sel.a||!t2sel.b)return;var correct=(t2sel.a==='그대로')&&(t2sel.b==='조정한다');setTrain('cannibal_2',correct,'A '+t2sel.a+' / B '+t2sel.b);showReveal('cannibal_2');}
+  window.vsSubmitT2=function(){
+    if(!t2sel.c1){err('err_t2','몰아줄지 골라주세요');return;}
+    if(!t2sel.a||!t2sel.b){err('err_t2','케이스 A와 B를 모두 골라주세요');return;}
+    err('err_t2','');vsGo('t3');
+  };
+
+  // ── STEP3 렌더 ──
+  function renderT3(){
+    $('t3roster').innerHTML=T3_ROSTER.map(function(r){return '<div class="r"><div class="k">'+esc(r[0])+'</div><div class="v">'+esc(r[1])+'</div></div>';}).join('');
+    var w=$('t3out');
+    w.innerHTML='<label class="vs-l">그래서 이 이름, 쓸까요?</label>'+
+      ['그대로 써요','다시 지어요'].map(function(o){return '<div class="vs-opt c3'+(t3sel.choice===o?' on':'')+'" data-o="'+esc(o)+'">'+esc(o)+'</div>';}).join('')+
+      '<div id="newname_wrap" style="display:'+(t3sel.choice==='다시 지어요'?'block':'none')+'"><label class="vs-l">어떤 이름이 좋을까요? (선택)</label><input type="text" id="f_newname" maxlength="20" placeholder="예: 록, 카이, 젠" value="'+esc(t3sel.newName||'')+'"></div>'+
+      revealBox('naming','다시 지어요',"'루나'는 부드럽고 몽환적인데, 이 신입은 블리치·언더컷에 올블랙이라 이름과 실제가 반대예요. 이름 하나로 캐릭터의 70%가 정해지는데 그 70%가 반대로 가 있어요. 이름은 평생 쓰는 자산이라 지금 바꾸는 게 싸요.");
+    w.querySelectorAll('.vs-opt.c3').forEach(function(o){o.onclick=function(){w.querySelectorAll('.vs-opt.c3').forEach(function(x){x.classList.remove('on');});o.classList.add('on');
+      t3sel.choice=o.getAttribute('data-o');$('newname_wrap').style.display=t3sel.choice==='다시 지어요'?'block':'none';
+      setTrain('naming',t3sel.choice==='다시 지어요',t3sel.choice);showReveal('naming');};});
+    var nn=$('f_newname');if(nn)nn.oninput=function(){t3sel.newName=nn.value;save();};
+    if(t3sel.choice)showReveal('naming');
+  }
+  window.vsSubmitT3=function(){
+    if(!t3sel.choice){err('err_t3','이 이름을 쓸지 골라주세요');return;}
+    commitTraining();err('err_t3','');
+    $('midScore').textContent=state.training.correct+'개 정답';
+    vsGo('mid');
+  };
+
+  // ── STEP4 ──
+  window.vsSubmitS4=function(){
+    state.artist.name=$('f_aname').value.trim();
+    state.artist.years=num($('f_years').value);state.artist.revenue=num($('f_arev').value);state.artist.revisitRate=num($('f_avisit').value);
+    if(!state.artist.name){err('err_s4','활동명을 입력하면 다음으로 넘어가요');return;}
+    err('err_s4','');renderS5();vsGo('s5');
+  };
+
+  // ── STEP5 오각형 ──
+  function renderPentaLive(){$('s5svg').innerHTML=pentagon(values(),[]);}
+  function renderS5(){
+    var w=$('s5out');w.innerHTML='';
+    AXES.forEach(function(a){
+      var v=state.pentagon[a.key];
+      var el=document.createElement('div');el.className='vs-axis';
+      el.innerHTML='<div class="ax-h">'+esc(a.label)+'</div><div class="ax-q">'+esc(a.q)+'</div>'+
+        '<input type="text" id="tx_'+a.key+'" maxlength="30" placeholder="예) '+esc(a.ex)+'" value="'+esc(v.text)+'">'+
+        '<div class="vs-count"><span id="cn_'+a.key+'">'+(v.text?v.text.length:0)+'</span>/30</div>'+
+        '<div style="font-size:13px;color:var(--gray);margin-top:10px">나머지 4개와 얼마나 맞아떨어져요?</div>'+
+        '<input type="range" id="sl_'+a.key+'" min="1" max="5" step="1" value="'+v.score+'">'+
+        '<div class="vs-slabels"><span>1 아예 다른 사람</span><span>3 애매해요</span><span>5 완전 맞음</span></div>'+
+        '<div class="vs-scoreN" id="sn_'+a.key+'">'+v.score+'점</div>';
+      w.appendChild(el);
+      var tx=$('tx_'+a.key);tx.oninput=function(){v.text=tx.value;$('cn_'+a.key).textContent=tx.value.length;save();};
+      var sl=$('sl_'+a.key);sl.oninput=function(){v.score=+sl.value;$('sn_'+a.key).textContent=sl.value+'점';renderPentaLive();save();};
+    });
+    renderPentaLive();
+  }
+  window.vsSubmitS5=function(){err('err_s5','');vsSim();vsGo('s6');};
+
+  // ── STEP6 시뮬 ──
+  window.vsSim=function(){
+    state.simulation.designerCount=num($('f_dcount').value);
+    state.simulation.currentRevenue=num($('f_curr').value);
+    state.simulation.alignedRevenue=num($('f_aligned').value);
+    var cur=state.simulation.currentRevenue||0,al=state.simulation.alignedRevenue||0;
+    if(al>0){
+      var dm=al-cur,dy=dm*12,pm=Math.round(al*0.15),can=pm>=2000,gap=Math.max(0,2000-pm);
+      $('s6out').innerHTML='<div class="vs-simout">'+
+        '<div class="row"><span>늘어나는 돈</span><b>월 '+manwon(dm)+' · 연 '+manwon(dy)+'</b></div>'+
+        '<div class="row"><span>순이익 (매출×15%)</span><b>월 '+manwon(pm)+'</b></div>'+
+        '<div class="row"><span>2호점 (순이익 2,000만)</span><b>'+(can?'들어왔어요':manwon(gap)+' 남음')+'</b></div>'+
+        '</div>';
+    } else {$('s6out').innerHTML='';}
+    save();
+  };
+  window.vsSubmitS6=function(){err('err_s6','');renderS7();vsGo('s7');};
+
+  // ── STEP7 결과 ──
+  function renderS7(){
+    var t=total();$('r_total').textContent=t+' / 25점';$('r_grade').textContent=grade(t);
+    var low=lowTwo();$('s7svg').innerHTML=pentagon(values(),low);
+    var vs=values();
+    $('r_low').innerHTML=low.map(function(i,rank){return '<div class="li low"><span>'+(rank+1)+'위  '+esc(AXES[i].label)+'</span><span>'+vs[i]+'점</span></div>';}).join('');
+    var al=state.simulation.alignedRevenue||0,cur=state.simulation.currentRevenue||0;
+    if(al>0){var dm=al-cur;$('r_sim').innerHTML='<div class="vs-rcard" style="text-align:center"><div class="cap">전원 정렬되면</div><div class="sub" style="font-size:16px;margin-top:6px">월 '+manwon(dm)+' · 연 '+manwon(dm*12)+'이 늘어나요</div></div>';}
+    else{$('r_sim').innerHTML='';}
+  }
+
+  // ── STEP8 제출 ──
+  window.vsSubmitFinal=function(){
+    email=$('f_email').value.trim();mkt=$('f_mkt').checked;
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){err('err_s8','메일 주소를 다시 확인해주세요');return;}
+    if(!$('f_privacy').checked){err('err_s8','개인정보 수집에 동의해주세요');return;}
+    err('err_s8','');commitTraining();var b=$('subBtn');b.disabled=true;b.textContent='보내는 중…';
+    fetch(API_URL+'/api/worksheet/part5/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,marketingConsent:mkt,data:state})})
+      .then(function(r){return r.json();}).then(function(res){
+        if(!res||!res.success){err('err_s8',(res&&res.message)||'잠시 뒤에 다시 해볼까요?');b.disabled=false;b.textContent='리포트 받기';return;}
+        $('doneName').textContent=state.artist.name+' 진단 · 오각형 '+total()+'점';
+        $('doneSub').textContent=grade(total());
+        vsGo('done');try{localStorage.removeItem(STORE);}catch(e){}
+      }).catch(function(){err('err_s8','잠시 뒤에 다시 해볼까요?');b.disabled=false;b.textContent='리포트 받기';});
+  };
+  window.vsBack=function(){if(LECTURE_URL){try{window.top.location.href=LECTURE_URL;}catch(e){location.href=LECTURE_URL;}}else{try{window.scrollTo(0,0);}catch(e){}}};
+
+  // ── 초기화 ──
+  restore();
+  $('f_aname').value=state.artist.name||'';
+  if(state.artist.years!=null)$('f_years').value=state.artist.years;
+  if(state.artist.revenue!=null)$('f_arev').value=state.artist.revenue;
+  if(state.artist.revisitRate!=null)$('f_avisit').value=state.artist.revisitRate;
+  $('f_impr').value=(t3sel&&t3sel.impr)||'';
+  if(state.simulation.designerCount!=null)$('f_dcount').value=state.simulation.designerCount;
+  if(state.simulation.currentRevenue!=null)$('f_curr').value=state.simulation.currentRevenue;
+  if(state.simulation.alignedRevenue!=null)$('f_aligned').value=state.simulation.alignedRevenue;
+  $('f_email').value=email;
+  commitTraining();$('midScore').textContent=state.training.correct+'개 정답';
+  renderT1();renderT2();renderT3();renderS5();vsSim();post();
+})();
+</script>
+</div>
+
+</body>
+</html>

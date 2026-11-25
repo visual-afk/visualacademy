@@ -3,7 +3,22 @@ import { bad, guardAdmin } from "@/lib/adminApi";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { parseVimeo } from "@/lib/vod";
 
-type Body = { videos: { id?: string; title: string; url: string }[] };
+type Body = { videos: { id?: string; title: string; url: string; ws?: string; wsPart?: string | number; wsLecture?: string | number }[] };
+
+/** 붙일 워크시트 — 2000플랜은 파트(1~)·강(1~), 오토사장반은 파트(0~9) */
+function parseWs(v: Body["videos"][number]): { ws_source: string | null; ws_part: number | null; ws_lecture: number | null } | string {
+  if (!v.ws) return { ws_source: null, ws_part: null, ws_lecture: null };
+  const part = Number(v.wsPart), lecture = Number(v.wsLecture);
+  if (v.ws === "2000plan") {
+    if (!(Number.isInteger(part) && part >= 1 && part <= 20) || !(Number.isInteger(lecture) && lecture >= 1 && lecture <= 30)) return "2000플랜 워크시트의 파트·강 번호를 확인해주세요";
+    return { ws_source: "2000plan", ws_part: part, ws_lecture: lecture };
+  }
+  if (v.ws === "autoceo") {
+    if (!(Number.isInteger(part) && part >= 0 && part <= 9) || String(v.wsPart ?? "") === "") return "오토사장반 워크시트의 파트 번호(0~9)를 확인해주세요";
+    return { ws_source: "autoceo", ws_part: part, ws_lecture: null };
+  }
+  return "워크시트 종류를 확인해주세요";
+}
 
 /** PUT /api/admin/classes/:id/videos — 강의 영상 목록을 통째로 저장 (순서 = 배열 순서). 기존 id 는 유지해 진도가 끊기지 않게 한다 */
 export async function PUT(request: NextRequest, { params }: RouteContext<"/api/admin/classes/[id]/videos">) {
@@ -21,7 +36,9 @@ export async function PUT(request: NextRequest, { params }: RouteContext<"/api/a
     if (!parsed) return bad(`${i + 1}번째 강의의 Vimeo 주소를 확인해주세요`);
     // 새 줄도 id 를 여기서 정한다 (bulk upsert 는 빠진 열을 null 로 채운다)
     const id = v.id && /^[0-9a-f-]{36}$/i.test(v.id) ? v.id : crypto.randomUUID();
-    rows.push({ id, class_id: classId, sort_order: i, title, vimeo_id: parsed.id, vimeo_hash: parsed.hash });
+    const ws = parseWs(v);
+    if (typeof ws === "string") return bad(`${i + 1}번째 강의: ${ws}`);
+    rows.push({ id, class_id: classId, sort_order: i, title, vimeo_id: parsed.id, vimeo_hash: parsed.hash, ...ws });
   }
 
   const db = getAdminSupabase();

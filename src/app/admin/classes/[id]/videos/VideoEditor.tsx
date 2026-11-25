@@ -6,10 +6,12 @@ import { useState } from "react";
 import { useToast } from "@/components/common/useToast";
 import { ROUTES } from "@/data/site";
 
-type Row = { id?: string; title: string; url: string };
+/** ws = 이 강의 뒤에 붙일 기존 워크시트 (2000플랜 파트·강 / 오토사장반 파트) */
+type Row = { id?: string; title: string; url: string; ws: "" | "2000plan" | "autoceo"; wsPart: string; wsLecture: string };
+const EMPTY: Row = { title: "", url: "", ws: "", wsPart: "", wsLecture: "" };
 
 export default function VideoEditor({ classId, name, initial }: { classId: number; name: string; initial: Row[] }) {
-  const [rows, setRows] = useState<Row[]>(initial.length ? initial : [{ title: "", url: "" }]);
+  const [rows, setRows] = useState<Row[]>(initial.length ? initial : [EMPTY]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const { toast, showToast } = useToast();
@@ -58,13 +60,32 @@ export default function VideoEditor({ classId, name, initial }: { classId: numbe
       <div className="table-card">
         <div className="table-scroll">
           <table>
-            <thead><tr><th style={{ width: 48 }}>순서</th><th>강의 제목</th><th>Vimeo 주소</th><th style={{ width: 150 }} /></tr></thead>
+            <thead><tr><th style={{ width: 48 }}>순서</th><th>강의 제목</th><th>Vimeo 주소</th><th style={{ width: 250 }}>워크시트</th><th style={{ width: 150 }} /></tr></thead>
             <tbody>
               {rows.map((r, i) => (
                 <tr key={r.id ?? `new-${i}`}>
                   <td className="cell-order">{i + 1}강</td>
                   <td><input className="search" style={{ width: "100%" }} placeholder="예) 1강 모발의 구조" value={r.title} onChange={(e) => set(i, { title: e.target.value })} /></td>
                   <td><input className="search" style={{ width: "100%" }} placeholder="https://vimeo.com/123456789" value={r.url} onChange={(e) => set(i, { url: e.target.value })} /></td>
+                  <td>
+                    <div className="ws-pick">
+                      <select value={r.ws} onChange={(e) => set(i, { ws: e.target.value as Row["ws"] })}>
+                        <option value="">없음</option>
+                        <option value="2000plan">2000플랜</option>
+                        <option value="autoceo">오토사장반</option>
+                      </select>
+                      {r.ws && (
+                        <label>
+                          <input inputMode="numeric" value={r.wsPart} onChange={(e) => set(i, { wsPart: e.target.value.replace(/\D/g, "") })} />파트
+                        </label>
+                      )}
+                      {r.ws === "2000plan" && (
+                        <label>
+                          <input inputMode="numeric" value={r.wsLecture} onChange={(e) => set(i, { wsLecture: e.target.value.replace(/\D/g, "") })} />강
+                        </label>
+                      )}
+                    </div>
+                  </td>
                   <td>
                     <div className="row-actions">
                       <button type="button" className="ca-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label="위로">↑</button>
@@ -78,11 +99,13 @@ export default function VideoEditor({ classId, name, initial }: { classId: numbe
           </table>
         </div>
         <div style={{ padding: 16 }}>
-          <button type="button" className="ca-btn" onClick={() => setRows((rs) => [...rs, { title: "", url: "" }])}>+ 강의 추가</button>
+          <button type="button" className="ca-btn" onClick={() => setRows((rs) => [...rs, EMPTY])}>+ 강의 추가</button>
           {error && <p className="err" style={{ color: "var(--red-d)", fontSize: 13, margin: "12px 0 0" }}>{error}</p>}
         </div>
       </div>
       <p className="cell-tax">
+        워크시트를 붙인 강의는 영상을 다 본 뒤 그 워크시트를 내야 다음 강의가 열려요. 문항·AI 첨삭·결과 메일은 기존 2000플랜·오토사장반 시스템 그대로예요.
+        <br />
         Vimeo에서 영상마다 공개 범위를 &lsquo;숨김&rsquo;이나 &lsquo;비공개 링크&rsquo;로 두고, 임베드 허용 도메인에 아카데미 주소를 넣어주세요. 강의를 지우면 그 강의의 수강 진도도 함께 사라져요.
       </p>
       {toast}
