@@ -3,9 +3,10 @@ import { bad, guardAdmin } from "@/lib/adminApi";
 import { getAdmin } from "@/lib/auth";
 import { grantEnrollment } from "@/lib/enrollments";
 import { parseExpiryChange } from "@/lib/expiry";
+import { notifyAccess } from "@/lib/nudges";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 
-type Body = { phone?: string; name?: string; change?: unknown; reason?: string };
+type Body = { phone?: string; name?: string; change?: unknown; reason?: string; notify?: boolean };
 
 /** POST /api/admin/classes/:id/students — 결제 없이 수강권 직접 부여 (이미 있으면 기한만 바꾼다) */
 export async function POST(request: NextRequest, { params }: RouteContext<"/api/admin/classes/[id]/students">) {
@@ -26,7 +27,9 @@ export async function POST(request: NextRequest, { params }: RouteContext<"/api/
 
   const admin = await getAdmin();
   try {
-    return NextResponse.json(await grantEnrollment(classId, { phone, name: b?.name?.trim() ?? "", change, reason }, admin?.name ?? "관리자"));
+    const r = await grantEnrollment(classId, { phone, name: b?.name?.trim() ?? "", change, reason }, admin?.name ?? "관리자");
+    if (b?.notify !== false) await notifyAccess(r.id, request.nextUrl.origin);
+    return NextResponse.json(r);
   } catch (e) {
     return bad(e instanceof Error ? e.message : "수강권을 주지 못했어요", 500);
   }

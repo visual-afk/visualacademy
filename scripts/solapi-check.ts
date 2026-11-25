@@ -38,10 +38,17 @@ async function get(path: string) {
     KAKAO_TMPL_WAITLIST_OPEN: ["클래스명", "일정", "링크"],
     KAKAO_TMPL_IDLE: ["이름", "클래스명", "다음강의", "링크"],
     KAKAO_TMPL_BEHIND: ["이름", "클래스명", "만료일", "진도", "링크"],
+    KAKAO_TMPL_START: ["이름", "클래스명", "만료일", "링크"],
+    KAKAO_TMPL_WS_PENDING: ["이름", "클래스명", "강의명", "링크"],
+    KAKAO_TMPL_HALF: ["이름", "클래스명", "남은강의", "링크"],
+    KAKAO_TMPL_DONE: ["이름", "클래스명", "만료일", "링크"],
+    KAKAO_TMPL_ACCESS: ["이름", "클래스명", "만료일", "링크"],
+    KAKAO_TMPL_EXPIRED: ["이름", "클래스명", "만료일", "진도"],
   };
   console.log("\n▶ 템플릿 변수 대조 (이름이 환경변수와 같은 템플릿)");
   for (const [k, want] of Object.entries(expected)) {
-    const t = templates.find((x) => x.name === k);
+    // 반려돼서 같은 이름으로 다시 만든 경우가 있다 — 반려 안 된 것을 먼저 본다
+    const t = templates.find((x) => x.name === k && x.status !== "REJECTED") ?? templates.find((x) => x.name === k);
     if (!t) { console.log(`  ${k}: 템플릿 없음`); continue; }
     const have = [...new Set([...(t.content ?? "").matchAll(/#\{([^}]+)\}/g)].map((m) => m[1]))];
     const missing = want.filter((v) => !have.includes(v));

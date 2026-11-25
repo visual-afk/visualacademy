@@ -5,13 +5,15 @@
  *
  * 환경변수: SOLAPI_API_KEY, SOLAPI_API_SECRET, KAKAO_SENDER_KEY(아카데미 채널 pfId), KAKAO_SENDER_PHONE(선택, SMS 대체)
  *          KAKAO_TMPL_PAID · KAKAO_TMPL_VBANK · KAKAO_TMPL_D3 · KAKAO_TMPL_EXPIRE30 · KAKAO_TMPL_WAITLIST_OPEN
- *          KAKAO_TMPL_IDLE · KAKAO_TMPL_BEHIND (온라인 강의 안 보는 사람 · 기한 임박 저진도) (알림톡 템플릿 ID)
+ *          온라인 강의 넛지(lib/nudges.ts): KAKAO_TMPL_IDLE · KAKAO_TMPL_BEHIND · KAKAO_TMPL_START · KAKAO_TMPL_WS_PENDING
+ *          · KAKAO_TMPL_HALF · KAKAO_TMPL_DONE · KAKAO_TMPL_ACCESS · KAKAO_TMPL_EXPIRED (알림톡 템플릿 ID)
  *          ACADEMY_CHAT_WEBHOOK_URL (본사 Google Chat 스페이스 webhook)
  */
 import crypto from "crypto";
 import { getAdminSupabase } from "./supabase/admin";
 
-export type NotifyKind = "paid" | "vbank" | "d-3" | "expire-30" | "waitlist-open" | "idle" | "behind";
+export type NotifyKind = "paid" | "vbank" | "d-3" | "expire-30" | "waitlist-open" 
+  | "idle" | "behind" | "start" | "ws-pending" | "half" | "done" | "access" | "expired";
 
 const TEMPLATE_ENV: Record<NotifyKind, string> = {
   paid: "KAKAO_TMPL_PAID",
@@ -21,6 +23,12 @@ const TEMPLATE_ENV: Record<NotifyKind, string> = {
   "waitlist-open": "KAKAO_TMPL_WAITLIST_OPEN",
   idle: "KAKAO_TMPL_IDLE",
   behind: "KAKAO_TMPL_BEHIND",
+  start: "KAKAO_TMPL_START",
+  "ws-pending": "KAKAO_TMPL_WS_PENDING",
+  half: "KAKAO_TMPL_HALF",
+  done: "KAKAO_TMPL_DONE",
+  access: "KAKAO_TMPL_ACCESS",
+  expired: "KAKAO_TMPL_EXPIRED",
 };
 
 function alimtalkReady(kind: NotifyKind): string | null {

@@ -23,5 +23,5 @@ export async function POST(request: NextRequest, { params }: RouteContext<"/api/
 
   const access = await getMyCourse(profile.id, Number((await params).id));
   if (!access.ok) return NextResponse.json({ error: access.reason === "expired" ? "수강 기간이 끝났어요" : "수강 권한이 없어요" }, { status: 403 });
-  return NextResponse.json(await refreshWorksheets(access.course, { name: profile.name, email: profile.email, worksheetEmail }));
+  return NextResponse.json(await refreshWorksheets(access.course, { name: profile.name, email: profile.email, worksheetEmail }, request.nextUrl.origin));
 }

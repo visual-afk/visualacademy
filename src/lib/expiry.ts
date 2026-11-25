@@ -50,3 +50,6 @@ export function daysLeft(expiresAt: string | null, now = new Date()): number | n
 /** ISO → 2026.11.25 (KST) */
 export const expiryLabel = (iso: string | null) =>
   iso ? new Date(new Date(iso).getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10).replaceAll("-", ".") : "무제한";
+
+/** 알림톡 문구용 — 2026.11.25까지 / 기한 없이 */
+export const untilLabel = (iso: string | null) => (iso ? `${expiryLabel(iso)}까지` : "기한 없이");

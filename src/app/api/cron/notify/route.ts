@@ -1,15 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { daysLeft, expiryLabel } from "@/lib/expiry";
+import { daysLeft, expiryLabel, untilLabel } from "@/lib/expiry";
 import { fullDate } from "@/lib/format";
-import { behindStage, idleDays, idleStage, type LearnerInput } from "@/lib/learning";
+import { behindStage, idleDays, idleStage, startStage, wsPendingStage, type LearnerInput } from "@/lib/learning";
 import type { LessonProgress } from "@/lib/lessons";
 import { notifyHq, notifyOnce } from "@/lib/notify";
+import { courseLink, nudgeBudget } from "@/lib/nudges";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 
 /*
  * GET /api/cron/notify — Vercel Cron 이 매일 09:00 KST 에 부른다 (vercel.json).
  * ① 개강 3일 전 준비물·오시는 길 ② 온라인 수강 만료 30일 전 안내
- * ③ 온라인 강의를 3·7·14일 안 본 사람 ④ 기한 임박인데 진도가 낮은 사람 (규칙은 lib/learning.ts).
+ * ③ 온라인 강의 넛지 — 기한 임박 저진도 > 워크시트만 남음 > 결제 후 안 틂 > 무활동 순으로 하루 한 통 (규칙 lib/learning.ts, 제한 lib/nudges.ts)
+ * ④ 기한이 어제 끝난 사람 (완강 못 함)
  * notifyOnce 라 여러 번 돌아도 한 번만 나간다. 템플릿 ID 가 아직 없으면 조용히 건너뛴다.
  */
 const kstDate = (offsetDays: number) => new Date(Date.now() + 9 * 3600 * 1000 + offsetDays * 86400 * 1000).toISOString().slice(0, 10);
@@ -20,7 +22,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const db = getAdminSupabase();
-  const result = { d3: 0, expire30: 0, idle: 0, behind: 0 };
+  const result = { d3: 0, expire30: 0, idle: 0, behind: 0, start: 0, wsPending: 0, expired: 0 };
 
   // ① 개강 3일 전
   const d3 = kstDate(3);
@@ -60,7 +62,7 @@ export async function GET(request: NextRequest) {
     if (r.sent) result.expire30++;
   }
 
-  // ③④ 온라인 강의 학습 독려 — 수강 중(만료 전·완강 전)인 수강권만
+  // ③ 온라인 강의 넛지 — 수강 중(만료 전·완강 전)인 수강권만
   const now = new Date();
   const { data: learners } = await db
     .from("enrollments")
@@ -84,10 +86,13 @@ export async function GET(request: NextRequest) {
   const newlyAtRisk: string[] = [];
   for (const r of rows) {
     const s: LearnerInput = { expiresAt: r.expires_at, lastWatchedAt: r.last_watched_at, startedAt: r.created_at, progress: r.progress, completedAt: r.completed_at };
-    const link = `${request.nextUrl.origin}/mypage/courses/${r.class_id}`;
-    const base = { "#{이름}": r.profiles?.name ?? "", "#{클래스명}": r.classes?.name ?? "", "#{링크}": link };
+    const base = { "#{이름}": r.profiles?.name ?? "", "#{클래스명}": r.classes?.name ?? "", "#{링크}": courseLink(request.nextUrl.origin, r.class_id) };
     // 본사에는 그날 새로 위험해진 사람만 한 번 알린다
     if (idleDays(s, now) === 14 || (daysLeft(r.expires_at, now) === 7 && r.progress < 80)) newlyAtRisk.push(`${r.profiles?.name ?? "이름 없음"}(${r.classes?.name ?? ""} ${r.progress}%)`);
+
+    const budget = await nudgeBudget(r.id);
+    if (budget.sentToday) continue;
+
     const behind = behindStage(s, now);
     if (behind) {
       // 기한을 바꾸면(연장) 새 기한 기준으로 다시 보낼 수 있게 만료일을 ref 에 넣는다
@@ -97,7 +102,21 @@ export async function GET(request: NextRequest) {
         "#{진도}": `${r.progress}%`,
       });
       if (res.sent) result.behind++;
-      continue; // 같은 날 무활동 알림까지 두 번 보내지 않는다
+      continue; // 기한이 급한 사람에겐 다른 독려를 섞지 않는다
+    }
+    if (budget.pushLeft <= 0) continue;
+
+    // 영상은 다 봤는데 워크시트를 안 낸 첫 강의
+    const wsLesson = (vids ?? []).find((v) => v.class_id === r.class_id && v.ws_source && r.lesson_progress?.[v.id]?.done && !(r.ws_done ?? []).includes(v.id));
+    const wsStage = wsLesson ? wsPendingStage(s, now) : null;
+    if (wsLesson && wsStage) {
+      const res = await notifyOnce("ws-pending", `${r.id}:${wsLesson.id}:${wsStage}`, r.profiles?.phone, { ...base, "#{강의명}": wsLesson.title });
+      if (res.sent) { result.wsPending++; continue; }
+    }
+    const start = startStage(s, now);
+    if (start) {
+      const res = await notifyOnce("start", `${r.id}:start:${start}`, r.profiles?.phone, { ...base, "#{만료일}": untilLabel(r.expires_at) });
+      if (res.sent) { result.start++; continue; }
     }
     const stage = idleStage(s, now);
     if (stage) {
@@ -111,6 +130,25 @@ export async function GET(request: NextRequest) {
   }
   if (newlyAtRisk.length) {
     await notifyHq(`[아카데미 온라인] 오늘 챙겨야 할 수강생 ${newlyAtRisk.length}명 — 14일째 안 봄 · 만료 7일 전 진도 80% 미만\n${newlyAtRisk.slice(0, 20).join(", ")}${newlyAtRisk.length > 20 ? " 외" : ""}`);
+  }
+
+  // ④ 기한이 어제 끝났는데 완강 못 한 사람 — 연장은 카카오 채널로 문의 (만료일이 바뀌면 다시)
+  const y = kstDate(-1);
+  const { data: ended } = await db
+    .from("enrollments")
+    .select("id, expires_at, progress, profiles(name, phone), classes(name)")
+    .is("completed_at", null)
+    .lt("progress", 100)
+    .gte("expires_at", new Date(`${y}T00:00:00+09:00`).toISOString())
+    .lte("expires_at", new Date(`${y}T23:59:59.999+09:00`).toISOString());
+  for (const e of (ended ?? []) as unknown as { id: string; expires_at: string; progress: number; profiles: { name: string | null; phone: string | null } | null; classes: { name: string } | null }[]) {
+    const res = await notifyOnce("expired", `${e.id}:${e.expires_at.slice(0, 10)}`, e.profiles?.phone, {
+      "#{이름}": e.profiles?.name ?? "",
+      "#{클래스명}": e.classes?.name ?? "",
+      "#{만료일}": expiryLabel(e.expires_at),
+      "#{진도}": `${e.progress}%`,
+    });
+    if (res.sent) result.expired++;
   }
 
   return NextResponse.json({ ok: true, ...result });

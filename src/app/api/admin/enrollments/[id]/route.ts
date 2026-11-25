@@ -3,8 +3,9 @@ import { bad, guardAdmin } from "@/lib/adminApi";
 import { getAdmin } from "@/lib/auth";
 import { changeExpiry, revokeEnrollment, setUnlockAll, updateNote } from "@/lib/enrollments";
 import { parseExpiryChange } from "@/lib/expiry";
+import { notifyAccess } from "@/lib/nudges";
 
-type Body = { action?: "expiry" | "revoke" | "note" | "unlock"; change?: unknown; reason?: string; note?: string; on?: boolean };
+type Body = { action?: "expiry" | "revoke" | "note" | "unlock"; change?: unknown; reason?: string; note?: string; on?: boolean; notify?: boolean };
 
 /** PATCH /api/admin/enrollments/:id — 기한 변경 · 회수(즉시 만료) · 메모 · 순서 잠금 해제 */
 export async function PATCH(request: NextRequest, { params }: RouteContext<"/api/admin/enrollments/[id]">) {
@@ -33,6 +34,8 @@ export async function PATCH(request: NextRequest, { params }: RouteContext<"/api
       const change = parseExpiryChange(b.change);
       if (!change) return bad("수강기한을 확인해 주세요");
       r = await changeExpiry(id, change, reason, actor);
+      // 기본으로 수강생에게 바뀐 기한을 알림톡으로 알려준다 (팝업에서 끌 수 있음)
+      if (r && b.notify !== false) await notifyAccess(id, request.nextUrl.origin);
     }
     if (!r) return bad("수강권을 찾을 수 없어요", 404);
     return NextResponse.json(r);

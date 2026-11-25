@@ -1,5 +1,6 @@
 import "server-only";
 import { coursePct, DONE_RATIO, nextReach, unlockedIds, type LessonProgress } from "./lessons";
+import { notifyMilestone } from "./nudges";
 import { getAdminSupabase } from "./supabase/admin";
 import { cleanEmail, ensure2000User, getWsStates, twokplanConfigured, wsKey, type WsLink, type WsState } from "./twokplan";
 
@@ -62,6 +63,8 @@ export type Course = {
   completedAt: string | null;
   /** 워크시트를 낸 강의 id (2000플랜 DB 확인 결과를 담아 둔 것 — refreshWorksheets) */
   wsDone: string[];
+  /** 지금까지 저장된 진도 % (이정표 알림 — 50% · 완강 — 을 넘는 순간을 알려고) */
+  pct: number;
 };
 
 export type CourseAccess = { ok: true; course: Course } | { ok: false; reason: "none" | "expired" };
@@ -79,7 +82,7 @@ function withLocks(videos: ClassVideo[], progress: LessonProgress, unlockAll: bo
 export async function getMyCourse(profileId: string, classId: number): Promise<CourseAccess> {
   const { data: en } = await getAdminSupabase()
     .from("enrollments")
-    .select("id, expires_at, lesson_progress, last_video_id, unlock_all, started_at, completed_at, ws_done, classes(name)")
+    .select("id, expires_at, progress, lesson_progress, last_video_id, unlock_all, started_at, completed_at, ws_done, classes(name)")
     .eq("profile_id", profileId)
     .eq("class_id", classId)
     .maybeSingle();
@@ -101,6 +104,7 @@ export async function getMyCourse(profileId: string, classId: number): Promise<C
       startedAt: en.started_at,
       completedAt: en.completed_at,
       wsDone,
+      pct: en.progress ?? 0,
     },
   };
 }
@@ -108,11 +112,22 @@ export async function getMyCourse(profileId: string, classId: number): Promise<C
 const pctOf = (videos: ClassVideo[], progress: LessonProgress, wsDone: string[]) =>
   coursePct(videos.map((v) => v.id), progress, videos.filter((v) => v.ws).length, videos.filter((v) => v.ws && wsDone.includes(v.id)).length);
 
+/** 남은 할 일 수 — 안 본 영상 + 안 낸 워크시트 */
+const remainingOf = (videos: ClassVideo[], progress: LessonProgress, wsDone: string[]) =>
+  videos.filter((v) => !progress[v.id]?.done).length + videos.filter((v) => v.ws && !wsDone.includes(v.id)).length;
+
+/** 진도가 50% · 100% 를 넘는 순간 한 번 축하 알림 (notifyOnce 라 다시 넘어도 안 나감) */
+async function milestones(course: Course, pct: number, origin: string | undefined, remaining: number) {
+  if (!origin) return;
+  if (pct >= 100 && !course.completedAt) await notifyMilestone(course.enrollmentId, "done", origin);
+  else if (course.pct < 50 && pct >= 50) await notifyMilestone(course.enrollmentId, "half", origin, remaining);
+}
+
 /**
  * 플레이어가 주기적으로 보내는 시청 위치 저장.
  * 잠긴 강의는 저장하지 않고, 완료는 건너뛰지 않고 본 위치(reach)로만 판단한다. 완료는 한 번 되면 되돌리지 않는다.
  */
-export async function saveProgress(course: Course, videoId: string, sec: number, dur: number) {
+export async function saveProgress(course: Course, videoId: string, sec: number, dur: number, origin?: string) {
   const video = course.videos.find((v) => v.id === videoId);
   if (!video) return null;
   if (video.locked) return { locked: true as const };
@@ -140,6 +155,7 @@ export async function saveProgress(course: Course, videoId: string, sec: number,
     })
     .eq("id", course.enrollmentId);
   if (!video.durationSec && dur > 0) await db.from("class_videos").update({ duration_sec: Math.round(dur) }).eq("id", videoId);
+  await milestones(course, pct, origin, remainingOf(course.videos, progress, course.wsDone));
   // 방금 완료돼서 열린 다음 강의는 영상 주소를 같이 보내준다 (플레이어가 새로고침 없이 이어서 재생)
   const next = done && !prev?.done ? withLocks(await getClassVideos(course.classId), progress, course.unlockAll, course.wsDone) : null;
   return { locked: false as const, pct, done, reach, videos: next };
@@ -162,7 +178,11 @@ export type WorksheetSync = {
  * 워크시트 제출 여부를 2000플랜 DB 에서 다시 확인해 잠금·진도에 반영한다 — 강의 화면을 열 때와 위젯에서 제출했을 때 부른다.
  * 2000플랜 위젯이 이메일을 확인할 수 있게 수강생 등록(만료일 동기화)도 여기서 한다.
  */
-export async function refreshWorksheets(course: Course, profile: { name: string | null; email: string | null; worksheetEmail: string | null }): Promise<WorksheetSync> {
+export async function refreshWorksheets(
+  course: Course,
+  profile: { name: string | null; email: string | null; worksheetEmail: string | null },
+  origin?: string,
+): Promise<WorksheetSync> {
   const raw = profile.worksheetEmail || profile.email;
   const email = raw ? cleanEmail(raw) : null;
   const all = await getClassVideos(course.classId);
@@ -191,6 +211,7 @@ export async function refreshWorksheets(course: Course, profile: { name: string 
       .from("enrollments")
       .update({ ws_done: wsDone, progress: pct, ...(pct === 100 && !course.completedAt ? { completed_at: new Date().toISOString() } : {}) })
       .eq("id", course.enrollmentId);
+    await milestones(course, pct, origin, remainingOf(all, course.progress, wsDone));
   }
   return { email, states, videos: changed ? withLocks(all, course.progress, course.unlockAll, wsDone) : course.videos, pct, connected: true };
 }

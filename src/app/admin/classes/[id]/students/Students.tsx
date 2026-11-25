@@ -25,7 +25,7 @@ const MODES: { key: ExpiryChange["mode"]; label: string }[] = [
   { key: "unlimited", label: "무제한" },
 ];
 
-type Form = { mode: ExpiryChange["mode"]; n: string; date: string; reason: string; error: string };
+type Form = { mode: ExpiryChange["mode"]; n: string; date: string; reason: string; error: string; notify: boolean };
 type Status = "수강 중" | "만료 임박" | "만료" | "무제한";
 
 function status(s: Student): Status {
@@ -101,6 +101,10 @@ function ExpiryFields({ form, set, current, fresh }: { form: Form; set: (f: Form
         </div>
         <textarea id="ex-reason" placeholder="직접 적어도 돼요" value={form.reason} onChange={(e) => set({ ...form, reason: e.target.value, error: "" })} />
       </div>
+      <label className="notify-check">
+        <input type="checkbox" checked={form.notify} onChange={(e) => set({ ...form, notify: e.target.checked })} />
+        수강생에게 바뀐 수강기한을 알림톡으로 알려주기
+      </label>
     </>
   );
 }
@@ -114,7 +118,7 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
   const [filter, setFilter] = useState<Filter>("수강 중");
   const [search, setSearch] = useState("");
   const [busy, setBusy] = useState(false);
-  const blank: Form = { mode: "months", n: String(cls.months ?? 1), date: "", reason: "", error: "" };
+  const blank: Form = { mode: "months", n: String(cls.months ?? 1), date: "", reason: "", error: "", notify: true };
   const [edit, setEdit] = useState<(Form & { id: string; note: string; historyOpen: boolean }) | null>(null);
   const [grant, setGrant] = useState<(Form & { phone: string; name: string }) | null>(null);
 
@@ -154,7 +158,7 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
     const change = toChange(edit);
     if (!change) return setEdit({ ...edit, error: "기한을 확인해 주세요" });
     if (!edit.reason.trim()) return setEdit({ ...edit, error: "사유를 적어 주세요" });
-    const r = await send(`/api/admin/enrollments/${edit.id}`, "PATCH", { action: "expiry", change, reason: edit.reason });
+    const r = await send(`/api/admin/enrollments/${edit.id}`, "PATCH", { action: "expiry", change, reason: edit.reason, notify: edit.notify });
     if (!r.ok) return setEdit({ ...edit, error: r.error });
     patchRow(edit.id, "change", edit.reason.trim(), r.data.expiresAt);
     setEdit(null);
@@ -195,7 +199,7 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
     if (!/^01\d{8,9}$/.test(grant.phone.replace(/\D/g, ""))) return setGrant({ ...grant, error: "휴대폰 번호를 정확히 입력해 주세요" });
     if (!change) return setGrant({ ...grant, error: "기한을 확인해 주세요" });
     if (!grant.reason.trim()) return setGrant({ ...grant, error: "부여 사유를 적어 주세요" });
-    const r = await send(`/api/admin/classes/${cls.id}/students`, "POST", { phone: grant.phone, name: grant.name, change, reason: grant.reason });
+    const r = await send(`/api/admin/classes/${cls.id}/students`, "POST", { phone: grant.phone, name: grant.name, change, reason: grant.reason, notify: grant.notify });
     if (!r.ok) return setGrant({ ...grant, error: r.error });
     setGrant(null);
     showToast(r.data.created ? "수강권을 줬어요" : "이미 수강 중이라 기한만 바꿨어요");

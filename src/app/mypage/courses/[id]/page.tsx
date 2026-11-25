@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import SiteFooter from "@/components/site/SiteFooter";
 import SiteHeader from "@/components/site/SiteHeader";
@@ -9,6 +10,11 @@ import CoursePlayer from "./CoursePlayer";
 
 export const metadata: Metadata = { title: "온라인 강의" };
 
+async function siteOrigin() {
+  const h = await headers();
+  return `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
+}
+
 export default async function CoursePage({ params }: PageProps<"/mypage/courses/[id]">) {
   const classId = Number((await params).id);
   const user = await getUser();
@@ -17,7 +23,7 @@ export default async function CoursePage({ params }: PageProps<"/mypage/courses/
 
   const access = await getMyCourse(profile.id, classId);
   // 다른 곳(아임웹 위젯 등)에서 낸 워크시트도 반영되게 열 때마다 한 번 확인한다
-  const ws = access.ok ? await refreshWorksheets(access.course, { name: profile.name, email: profile.email, worksheetEmail: await getWorksheetEmail(profile.id) }) : null;
+  const ws = access.ok ? await refreshWorksheets(access.course, { name: profile.name, email: profile.email, worksheetEmail: await getWorksheetEmail(profile.id) }, await siteOrigin()) : null;
   return (
     <div className="site pg-course">
       <SiteHeader />

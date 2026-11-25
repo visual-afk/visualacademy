@@ -8,8 +8,12 @@ import { daysLeft } from "./expiry";
 export type Learning = "done" | "expired" | "behind" | "risk" | "warn" | "ok";
 export type LearnerInput = { expiresAt: string | null; lastWatchedAt: string | null; startedAt: string; progress: number; completedAt: string | null };
 
-/** 무활동 알림 단계 (안 본 날 수) */
+/** 무활동 알림 단계 (마지막 시청 후 안 본 날 수) */
 export const IDLE_STAGES = [3, 7, 14] as const;
+/** 결제하고 한 번도 안 튼 사람 — 수강 시작 후 날 수 */
+export const START_STAGES = [1, 3, 7] as const;
+/** 영상은 다 봤는데 워크시트를 안 낸 사람 — 마지막 시청 후 날 수 */
+export const WS_PENDING_STAGES = [2, 7] as const;
 /** 기한 임박 저진도 — 만료까지 남은 날 이하이고 진도가 이 % 미만이면 */
 export const BEHIND_STAGES = [
   { days: 30, below: 50 },
@@ -35,11 +39,20 @@ export function behindStage(s: LearnerInput, now = new Date()) {
   return [...BEHIND_STAGES].reverse().find((b) => left <= b.days && s.progress < b.below) ?? null;
 }
 
-/** 지금 해당하는 무활동 단계 (가장 긴 것) — 없으면 null */
+const stageOf = (stages: readonly number[], d: number) => [...stages].reverse().find((n) => d >= n) ?? null;
+
+/** 지금 해당하는 무활동 단계 (가장 긴 것) — 한 번도 안 튼 사람은 시작 안내(startStage)가 맡는다 */
 export function idleStage(s: LearnerInput, now = new Date()) {
-  const d = idleDays(s, now);
-  return [...IDLE_STAGES].reverse().find((n) => d >= n) ?? null;
+  return s.lastWatchedAt ? stageOf(IDLE_STAGES, idleDays(s, now)) : null;
 }
+
+/** 결제 후 아직 한 번도 안 튼 사람의 시작 안내 단계 */
+export function startStage(s: LearnerInput, now = new Date()) {
+  return s.lastWatchedAt ? null : stageOf(START_STAGES, idleDays(s, now));
+}
+
+/** 워크시트만 남은 사람의 안내 단계 (영상을 다 본 강의의 워크시트를 안 냈을 때) */
+export const wsPendingStage = (s: LearnerInput, now = new Date()) => (s.lastWatchedAt ? stageOf(WS_PENDING_STAGES, idleDays(s, now)) : null);
 
 export function learningStatus(s: LearnerInput, now = new Date()): Learning {
   if (s.completedAt || s.progress >= 100) return "done";
