@@ -15,6 +15,7 @@ import "@/styles/pages/checkout.css";
 import "@/styles/pages/admin-dashboard.css";
 import "@/styles/pages/admin-class-form.css";
 import "@/styles/pages/admin-payments.css";
+import "@/styles/pages/admin-students.css";
 import "@/styles/pages/admin-inquiries.css";
 import "@/styles/pages/admin-design.css";
 import "@/styles/pages/auth.css";

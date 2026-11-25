@@ -5,6 +5,7 @@
  */
 import { getClass } from "./api";
 import type { Profile } from "./auth";
+import { issueForOrder, revokeForOrder } from "./enrollments";
 import { fullDate, won } from "./format";
 import { notifyHq, notifyOnce } from "./notify";
 import { optionPrice } from "./pricing";
@@ -127,18 +128,10 @@ export async function applyTossPayment(order: OrderRow, p: TossPayment) {
     });
   }
 
-  // 온라인 강의는 결제 완료 시 수강권한 발급, 전액 취소되면 회수
+  // 온라인 강의는 결제 완료 시 수강권한 발급(재결제면 연장), 전액 취소되면 회수
   if (cls?.type === "online") {
-    if (payStatus === "결제완료") {
-      const exp = new Date();
-      exp.setMonth(exp.getMonth() + (cls.months ?? 12));
-      await db.from("enrollments").upsert(
-        { profile_id: order.profile_id, class_id: order.class_id, order_id: order.id, expires_at: exp.toISOString() },
-        { onConflict: "profile_id,class_id", ignoreDuplicates: true },
-      );
-    } else if (orderStatus === "신청취소") {
-      await db.from("enrollments").delete().eq("order_id", order.id);
-    }
+    if (payStatus === "결제완료") await issueForOrder(db, order, cls.months);
+    else if (orderStatus === "신청취소") await revokeForOrder(db, order.id);
   }
 }
 
@@ -220,6 +213,8 @@ export async function confirmFreeOrder(orderNo: string): Promise<"ok" | "full" |
   if (hold !== "ok") return "error";
   await db.from("orders").update({ status: "수강확정", updated_at: new Date().toISOString() }).eq("id", order.id);
   const { data: cls } = await db.from("classes").select("name, date, time, place, type, months").eq("id", order.class_id).single();
+  // 무료 온라인 강의도 수강권이 있어야 영상을 볼 수 있다
+  if (cls?.type === "online") await issueForOrder(db, order, cls.months);
   if (cls) await onConfirmed(order, cls);
   return "ok";
 }
