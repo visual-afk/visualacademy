@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>오토사장반 8파트 워크시트</title>
+<style>html,body{margin:0;background:#fff}</style>
+<script>
+/* 비주얼아카데미 강의 플레이어 연결 (scripts/sync-worksheet-widgets.mjs 가 붙임) */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var EMAIL = q.get("email") || "", LECTURE = Number(q.get("lecture")) || 0;
+  function post(m) { m.source = "va-worksheet"; try { parent.postMessage(m, location.origin); } catch (e) {} }
+  var orig = window.fetch;
+  window.fetch = function (input) {
+    var p = orig.apply(this, arguments);
+    var url = String((input && input.url) || input);
+    if (/\/submit$/.test(url)) p.then(function (r) { r.clone().json().then(function (d) { if (r.ok && d && d.success !== false) post({ type: "submitted" }); }).catch(function () {}); }).catch(function () {});
+    return p;
+  };
+  function fill() {
+    if (!EMAIL) return;
+    ["wsEmail", "f_email"].forEach(function (id) { var el = document.getElementById(id); if (el && !el.value) el.value = EMAIL; });
+  }
+  var n = 0, t = setInterval(function () { fill(); if (++n > 60) clearInterval(t); }, 500);
+  document.addEventListener("focusin", fill);
+  function height() { post({ type: "height", h: document.documentElement.scrollHeight }); }
+  window.addEventListener("load", function () {
+    if (LECTURE && window.wsSelectLecture) {
+      window.wsSelectLecture(LECTURE);
+      if (EMAIL && window.wsCheckEmail) { document.getElementById("wsEmail").value = EMAIL; window.wsCheckEmail(); }
+    }
+    height();
+    if (window.ResizeObserver) new ResizeObserver(height).observe(document.body);
+  });
+})();
+</script>
+</head>
+<body>
+<!-- ============================================================
+  오토사장반 PART 8 워크시트 — 2호점 사업계획서 겸 권한 이양 계획서
+  아임웹 코드위젯에 통째로 붙여넣거나 iframe 임베드.
+  ★ 배포 후 아래 API_URL 을 autoceo-worksheet Worker 주소로 바꾸세요.
+============================================================ -->
+<div id="vsRoot">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Montserrat:wght@600;700;800&display=swap');
+  #vsRoot{--mint:#00F5D4;--mint-deep:#00C4AA;--mint-sub:#CFF7EF;--ink:#141414;
+    --gray:#6b6b6b;--gray-l:#F4F6F5;--border:#E2E6E4;
+    max-width:480px;margin:0 auto;font-family:'Noto Sans KR','Apple SD Gothic Neo',-apple-system,sans-serif;
+    color:#141414;font-weight:500;line-height:1.65;-webkit-text-size-adjust:100%;background:#fff;}
+  #vsRoot *{box-sizing:border-box;}
+  #vsRoot .vs-screen{display:none;padding:30px 20px 44px;min-height:60vh;background:#fff;color:var(--ink);}
+  #vsRoot .vs-screen.on{display:block;}
+  #vsRoot .vs-dark{background:linear-gradient(180deg,#F1FCF9 0%,#FFFFFF 70%);}
+  #vsRoot .vs-progress{height:5px;background:#E9EDEB;border-radius:3px;overflow:hidden;margin-bottom:6px;}
+  #vsRoot .vs-progress > i{display:block;height:100%;background:var(--mint-deep);width:0;transition:width .3s;}
+  #vsRoot .vs-steplabel{font-size:12px;font-weight:700;color:var(--mint-deep);margin-bottom:22px;letter-spacing:.5px;}
+  #vsRoot h2.vs-t{font-size:26px;font-weight:900;margin:0 0 10px;line-height:1.32;letter-spacing:-.4px;}
+  #vsRoot p.vs-d{font-size:15px;font-weight:500;margin:0 0 22px;color:#4a4f4d;}
+  #vsRoot label.vs-l{display:block;font-size:14px;font-weight:700;margin:18px 0 7px;color:#1f2320;}
+  #vsRoot .vs-hint{font-size:13px;font-weight:500;color:var(--gray);margin:5px 0 0;}
+  #vsRoot .vs-quote{font-size:13.5px;font-weight:600;color:#00806f;background:var(--mint-sub);border-left:3px solid var(--mint-deep);border-radius:0 10px 10px 0;padding:11px 13px;margin:10px 0 16px;line-height:1.7;}
+  #vsRoot .vs-quote b{font-weight:800;}
+  #vsRoot input[type=text],#vsRoot input[type=email],#vsRoot input[type=number],#vsRoot textarea,#vsRoot select{
+    width:100%;min-height:52px;border:1.5px solid var(--border);border-radius:12px;background:var(--gray-l);
+    padding:0 14px;font-size:16px;font-weight:600;font-family:inherit;color:var(--ink);outline:none;}
+  #vsRoot textarea{min-height:64px;padding:13px 14px;line-height:1.6;resize:vertical;}
+  #vsRoot input::placeholder,#vsRoot textarea::placeholder{color:#9aa09d;font-weight:500;}
+  #vsRoot input:focus,#vsRoot textarea:focus,#vsRoot select:focus{border-color:var(--mint-deep);background:#fff;}
+  #vsRoot .vs-btn{display:block;width:100%;height:56px;border:0;border-radius:14px;background:var(--mint-deep);
+    color:#fff;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;margin-top:28px;box-shadow:0 6px 16px rgba(0,196,170,.28);}
+  #vsRoot .vs-btn:active{transform:translateY(1px);}
+  #vsRoot .vs-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+  #vsRoot .vs-btn.ghost{background:#fff;color:var(--gray);border:1.5px solid var(--border);box-shadow:none;height:48px;margin-top:12px;font-weight:700;}
+  #vsRoot .vs-back{background:none;border:0;color:var(--gray);font-size:14px;font-weight:600;cursor:pointer;padding:6px 0;margin-bottom:8px;font-family:inherit;}
+  #vsRoot .vs-err{color:#e03131;font-size:13px;font-weight:600;margin-top:8px;min-height:16px;}
+  #vsRoot .vs-doc{border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin:0 0 22px;background:#FAFBFB;font-family:'Montserrat','Noto Sans KR',sans-serif;}
+  #vsRoot .vs-doc .row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:#3a3f3d;}
+  #vsRoot .vs-doc .row b{font-weight:800;color:var(--ink);}
+  #vsRoot .vs-doc .k{color:var(--gray);letter-spacing:2px;}
+  #vsRoot .vs-rcard{background:linear-gradient(135deg,#EAFCF8,#F7FFFD);border:1.5px solid var(--mint-deep);border-radius:14px;padding:18px;margin:16px 0;}
+  #vsRoot .vs-rcard .cap{font-size:13px;font-weight:700;color:var(--gray);}
+  #vsRoot .vs-rcard .big-n{font-size:30px;font-weight:800;color:var(--mint-deep);font-family:'Montserrat',sans-serif;margin-top:4px;}
+  #vsRoot .vs-rcard .sub{font-size:14px;color:var(--ink);font-weight:600;margin-top:6px;}
+  #vsRoot .vs-simrow{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,.08);}
+  #vsRoot .vs-simrow:last-child{border-bottom:0;}
+  #vsRoot .vs-simrow b{font-family:'Montserrat',sans-serif;font-weight:800;color:var(--mint-deep);}
+  #vsRoot .vs-slider{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:4px;background:#E2E6E4;outline:none;padding:0;min-height:0;}
+  #vsRoot .vs-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;background:var(--mint-deep);cursor:pointer;box-shadow:0 2px 6px rgba(0,196,170,.4);}
+  #vsRoot .vs-slider::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:var(--mint-deep);cursor:pointer;}
+  #vsRoot .vs-dcard{background:var(--gray-l);border-radius:14px;padding:20px 18px;margin:14px 0;}
+  #vsRoot .vs-dcard .num{display:inline-block;font-size:12px;color:#00806f;font-weight:800;letter-spacing:.5px;white-space:nowrap;background:var(--mint-sub);padding:5px 12px;border-radius:20px;}
+  #vsRoot .vs-dcard .drafter{font-size:12px;color:var(--gray);font-weight:600;margin-top:2px;}
+  #vsRoot .vs-dcard .title{font-size:16px;font-weight:800;margin:10px 0 6px;}
+  #vsRoot .vs-dcard .sit{font-size:15px;font-weight:500;margin:0 0 14px;white-space:pre-line;line-height:1.7;color:#3a3f3d;}
+  #vsRoot .vs-radio3{display:flex;gap:8px;}
+  #vsRoot .vs-radio3 .vs-opt{flex:1;text-align:center;margin:0;}
+  #vsRoot .vs-opt{display:block;border:1.5px solid var(--border);border-radius:12px;padding:14px 15px;margin:8px 0;background:#fff;cursor:pointer;font-size:15px;font-weight:600;}
+  #vsRoot .vs-opt.on{border-color:var(--mint-deep);background:var(--mint-sub);font-weight:800;color:#00806f;}
+  #vsRoot .vs-check{display:flex;align-items:flex-start;gap:11px;border:1.5px solid var(--border);border-radius:12px;padding:14px 15px;margin:8px 0;background:#fff;cursor:pointer;font-size:15px;font-weight:600;}
+  #vsRoot .vs-check.on{border-color:var(--mint-deep);background:var(--mint-sub);color:#00806f;font-weight:700;}
+  #vsRoot .vs-check .box{flex:0 0 22px;width:22px;height:22px;border:2px solid var(--border);border-radius:6px;margin-top:1px;text-align:center;line-height:19px;font-size:15px;color:#fff;}
+  #vsRoot .vs-check.on .box{background:var(--mint-deep);border-color:var(--mint-deep);}
+  #vsRoot .vs-groupt{font-size:13px;font-weight:800;color:var(--gray);margin:20px 0 4px;letter-spacing:.5px;}
+  #vsRoot .vs-sigwrap{border:1.5px dashed var(--border);border-radius:14px;background:#fff;padding:0;overflow:hidden;margin-top:8px;}
+  #vsRoot #sigPad{display:block;width:100%;height:150px;touch-action:none;cursor:crosshair;background:#FCFDFD;}
+  #vsRoot .vs-consent{display:flex;align-items:flex-start;gap:10px;margin:12px 0;font-size:14px;font-weight:500;}
+  #vsRoot .vs-consent input{width:20px;height:20px;min-height:0;margin-top:2px;accent-color:var(--mint-deep);}
+  #vsRoot .vs-decl{background:var(--gray-l);border-radius:14px;padding:20px 18px;font-size:15px;line-height:1.9;white-space:pre-line;}
+  #vsRoot .vs-decl .blank{display:inline-block;min-width:90px;border-bottom:2px solid var(--mint-deep);color:var(--mint-deep);font-weight:800;text-align:center;padding:0 4px;}
+  #vsRoot .vs-done{background:linear-gradient(135deg,#00C4AA,#00A088);border-radius:20px;padding:28px 22px;margin-top:22px;text-align:center;color:#fff;box-shadow:0 10px 28px rgba(0,196,170,.32);}
+  #vsRoot .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+</style>
+
+<!-- STEP 0 · 시작 -->
+<section class="vs-screen vs-dark on" data-screen="intro">
+  <div class="vs-progress"><i style="width:6%"></i></div><div class="vs-steplabel">&nbsp;</div>
+  <h2 class="vs-t">대표님, 첫 결재를 시작해요</h2>
+  <p class="vs-d">PART 8 강의 내용으로 2호점 사업계획서를 만들어요. 다 쓰면 검토 의견서를 이메일로 보내드려요. 40분 정도 걸리고, 중간에 나가도 저장돼요.</p>
+  <div class="vs-doc">
+    <div class="row"><span class="k">문 서 번 호</span><b id="docPrev">AUTO-2026-****</b></div>
+    <div class="row"><span class="k">직　　　함</span><b>대표이사</b></div>
+    <div class="row"><span class="k">작 성 일 자</span><b>2026. 08. 11.</b></div>
+  </div>
+  <label class="vs-l">대표님 성함</label><input type="text" id="f_name" placeholder="예: 이유경" oninput="vsDoc()">
+  <label class="vs-l">현재 지점 수</label><input type="number" id="f_branch" inputmode="numeric" placeholder="예: 1" oninput="vsDoc()">
+  <p class="vs-err" id="err_intro"></p>
+  <button class="vs-btn" onclick="vsSubmitIntro()">계획서 작성 시작하기</button>
+</section>
+
+<!-- STEP 1 · 5년 후 결산 -->
+<section class="vs-screen" data-screen="s1">
+  <div class="vs-progress"><i style="width:25%"></i></div><div class="vs-steplabel">6단계 중 1단계 · 5년 후 결산 예상서</div>
+  <button class="vs-back" onclick="vsGo('intro')">← 뒤로</button>
+  <h2 class="vs-t">5년 후를 먼저 그려요</h2>
+  <p class="vs-d">숫자만 넣으면 의존도와 그룹 매출을 계산해드려요.</p>
+  <div class="vs-quote">💬 <b>강의 한마디</b> — 원장 <b>의존형</b>은 원장이 빠지면 매출이 반토막, <b>오토사장</b> 매장은 빠져도 유지돼요. 내가 직접 친 매출이 <b>50%를 넘으면</b> 아직 퍼포머예요. 가격은 매년 올려 프리미엄화해요(커트 1만 → 9만, 9배).</div>
+
+  <div class="vs-groupt">1. 지금 내 위치</div>
+  <label class="vs-l">현재 소속 디자이너 수</label><input type="number" id="f_dc" inputmode="numeric" placeholder="예: 3" oninput="vsCalc1()">
+  <label class="vs-l">현재 매장 월매출 (만원)</label><input type="number" id="f_rev" inputmode="numeric" placeholder="예: 8000" oninput="vsCalc1()">
+  <label class="vs-l">그중 내가 직접 친 매출 (만원)</label><input type="number" id="f_own" inputmode="numeric" placeholder="예: 4000" oninput="vsCalc1()">
+  <div id="depOut"></div>
+
+  <div class="vs-groupt">2. 가격 인상 시뮬레이터</div>
+  <label class="vs-l">내 메인 시술명</label><input type="text" id="f_main" placeholder="예: 복구매직" oninput="vsCalc1()">
+  <label class="vs-l">현재 가격 (원)</label><input type="number" id="f_price" inputmode="numeric" placeholder="예: 100000" oninput="vsCalc1()">
+  <label class="vs-l">연 인상률 <b id="rateLbl" style="color:var(--mint-deep)">12%</b></label>
+  <input type="range" min="5" max="20" step="1" value="12" id="f_rate" class="vs-slider" oninput="vsCalc1()">
+  <div id="priceOut"></div>
+  <p class="vs-hint">대표님 실제 이력은 커트 1만원에서 9만원, 매직 4만원에서 70~80만원이에요. 매년 한 번씩 18년 동안 올렸어요.</p>
+
+  <div class="vs-groupt">3. 확장 시뮬레이터</div>
+  <div class="grid2">
+    <div><label class="vs-l">5년 안에 도달할 지점 수</label><input type="number" id="f_tb" inputmode="numeric" placeholder="예: 3" oninput="vsCalc1()"></div>
+    <div><label class="vs-l">지점당 디자이너 수</label><input type="number" id="f_dpb" inputmode="numeric" placeholder="예: 5" oninput="vsCalc1()"></div>
+  </div>
+  <div id="groupOut"></div>
+  <p class="vs-err" id="err_s1"></p>
+  <button class="vs-btn" onclick="vsSubmitS1()">결재함으로</button>
+</section>
+
+<!-- STEP 2 · 대표 결재함 -->
+<section class="vs-screen" data-screen="s2">
+  <div class="vs-progress"><i style="width:42%"></i></div><div class="vs-steplabel">6단계 중 2단계 · 대표 결재함</div>
+  <button class="vs-back" onclick="vsGo('s1')">← 뒤로</button>
+  <h2 class="vs-t">대표님, 결재 부탁해요</h2>
+  <p class="vs-d">정답은 화면에 없어요. 강의 근거를 담아 지시사항을 적으면 참모가 검토 의견을 보내드려요.</p>
+  <div class="vs-quote">💬 <b>강의 한마디</b> — 조회는 애들이 <b>자기 입으로 하루를 여는 자리</b>예요(진행자는 80% 듣고 20% 말함). CCTV 상시 확인 공지는 <b>감시 사장</b>이라 역효과 — 필요한 건 사진이 아니라 "누가 본다는 <b>공기</b>"예요.</div>
+  <div id="s2out"></div>
+  <p class="vs-err" id="err_s2"></p>
+  <button class="vs-btn" onclick="vsSubmitS2()">적격 심사로</button>
+</section>
+
+<!-- STEP 3 · 대표 적격 심사 -->
+<section class="vs-screen" data-screen="s3">
+  <div class="vs-progress"><i style="width:58%"></i></div><div class="vs-steplabel">6단계 중 3단계 · 대표 적격 심사</div>
+  <button class="vs-back" onclick="vsGo('s2')">← 뒤로</button>
+  <h2 class="vs-t">대표 적격 심사</h2>
+  <p class="vs-d">해당하는 항목을 골라주세요. 우열이 아니라 방향을 보는 심사예요.</p>
+  <div class="vs-groupt">A군 · 나에게 해당하는 것</div>
+  <div id="grpA"></div>
+  <div class="vs-groupt">B군 · 나에게 해당하는 것</div>
+  <div id="grpB"></div>
+  <div id="eligOut"></div>
+  <label class="vs-l">어떤 길로 갈지 골라주세요</label>
+  <div id="pathOut"></div>
+  <p class="vs-err" id="err_s3"></p>
+  <button class="vs-btn" onclick="vsSubmitS3()">권한 이양으로</button>
+</section>
+
+<!-- STEP 4 · 권한 이양 -->
+<section class="vs-screen" data-screen="s4">
+  <div class="vs-progress"><i style="width:75%"></i></div><div class="vs-steplabel">6단계 중 4단계 · 권한 이양 계획서</div>
+  <button class="vs-back" onclick="vsGo('s3')">← 뒤로</button>
+  <h2 class="vs-t">진행자 레이어를 임명해요</h2>
+  <p class="vs-d">대표님이 없는 날에도 조회가 돌아가게, 실명으로 채워주세요.</p>
+  <div class="vs-quote">💬 <b>강의 한마디</b> — 진행자는 <b>4단 레이어</b>예요. Level 1 사장 / 2 원장 / 3 중간관리자 / 4 슈퍼바이저(지점 3개↑). 이 자리가 비면 대표·원장 둘 다 없는 날 <b>조회가 멈춰요</b>.</div>
+  <label class="vs-l">Level 1 사장</label><input type="text" id="f_l1" readonly style="background:#EEF2F1;color:var(--gray)">
+  <label class="vs-l">Level 2 원장</label><input type="text" id="f_l2" placeholder="대표님 없는 날 조회를 열 사람" oninput="vsSaveS4()">
+  <label class="vs-l">Level 3 중간관리자</label><input type="text" id="f_l3" placeholder="원장도 없는 날 조회를 이어갈 사람" oninput="vsSaveS4()">
+  <label class="vs-l">Level 4 슈퍼바이저 <span style="font-weight:500;color:var(--gray)">(지점 3개 이상일 때)</span></label>
+  <input type="text" id="f_l4" placeholder="지점 3개 미만이면 비워두세요 (해당 없음)" oninput="vsSaveS4()">
+  <p class="vs-err" id="err_s4"></p>
+  <button class="vs-btn" onclick="vsSubmitS4()">취임 선언으로</button>
+</section>
+
+<!-- STEP 5 · 취임 선언 + 서명 + 제출 -->
+<section class="vs-screen vs-dark" data-screen="s5">
+  <div class="vs-progress"><i style="width:90%"></i></div><div class="vs-steplabel">6단계 중 5단계 · 취임 선언</div>
+  <button class="vs-back" onclick="vsGo('s4')">← 뒤로</button>
+  <h2 class="vs-t">취임을 선언해요</h2>
+  <p class="vs-d">빈칸 두 개만 채우면 선언문이 완성돼요.</p>
+  <div class="vs-quote">💬 <b>강의 한마디</b> — 선언의 핵심은 "나는 <b>매장에 묶인 원장</b>이 아니라, 매장이 <b>나 없이도 굴러가게</b> 만드는 사람"이에요.</div>
+  <div class="vs-decl" id="declView"></div>
+  <label class="vs-l">가장 먼저 놓을 일</label><input type="text" id="f_release" placeholder="예: 복구매직 직접 시술" oninput="vsDecl()">
+  <label class="vs-l">가장 먼저 넘겨줄 사람</label><input type="text" id="f_succ" placeholder="예: 솔 (Level 3)" oninput="vsDecl()">
+
+  <label class="vs-l">대표이사 서명 <span style="font-weight:500;color:var(--gray)">(건너뛸 수 있어요)</span></label>
+  <div class="vs-sigwrap"><canvas id="sigPad"></canvas></div>
+  <button type="button" class="vs-btn ghost" onclick="vsClearSig()">지우기</button>
+  <label class="vs-l">서명 대신 이름을 적어도 돼요</label>
+  <input type="text" id="f_sigtype" placeholder="예: 이유경 (서명 대체)">
+
+  <label class="vs-l">이메일</label><input type="email" id="f_email" inputmode="email" placeholder="you@example.com">
+  <label class="vs-consent"><input type="checkbox" id="f_privacy"><span>(필수) 결과 발송을 위한 개인정보 수집·이용에 동의해요.</span></label>
+  <label class="vs-consent"><input type="checkbox" id="f_mkt"><span>(선택) 오토사장반 소식·혜택 메일을 받을게요.</span></label>
+  <p class="vs-err" id="err_s5"></p>
+  <button class="vs-btn" id="subBtn" onclick="vsSubmitFinal()">계획서 제출하고 검토받기</button>
+</section>
+
+<!-- 완료 -->
+<section class="vs-screen vs-dark" data-screen="done">
+  <div class="vs-progress"><i style="width:100%"></i></div><div class="vs-steplabel">&nbsp;</div>
+  <h2 class="vs-t">계획서를 접수했어요.</h2>
+  <div class="vs-done">
+    <div id="doneDoc" style="font-family:'Montserrat',sans-serif;font-size:15px;letter-spacing:1px;opacity:.9"></div>
+    <div id="doneName" style="font-size:18px;font-weight:800;margin-top:8px"></div>
+    <div id="doneRev" style="font-size:15px;margin-top:8px;color:rgba(255,255,255,.9)"></div>
+  </div>
+  <p class="vs-d" style="margin-top:22px">참모가 검토 의견서를 5분 안에 이메일로 보내드려요.</p>
+  <button class="vs-btn" onclick="vsBack()">강의로 돌아가기</button>
+</section>
+
+<script>
+(function(){
+  var API_URL = 'https://autoceo-worksheet.visual-f2e.workers.dev';
+  var LECTURE_URL = '';
+  var STORE = 'vs_worksheet_part8';
+
+  var CASES = [
+    {id:'08-01', num:'품의 08-01', drafter:'기안자 · 2호점 점장', title:'아침 조회 운영 방식을 바꾸고 싶어요', brief:'아침 조회에서 전달할 공지가 많아요.\n진행자 발언 시간을 70%로 늘리고,\n조회 시간도 20분으로 늘리고 싶어요.'},
+    {id:'08-02', num:'품의 08-02', drafter:'기안자 · 관리팀', title:'전 지점 CCTV 설치 및 매일 확인 공지', brief:'전 지점에 CCTV를 설치하고,\n단톡방에 "매일 확인한다"고 공지하려고 해요.'},
+    {id:'08-03', num:'품의 08-03', drafter:'기안자 · 신사점 원장', title:'제 방문 빈도를 정해주세요', brief:'디자이너 갈등으로 재방률이 떨어지고 있어요.\n대표님 방문 빈도를 어떻게 할지 정해주세요.\n다른 네 개 지점은 안정적이에요.'},
+    {id:'08-04', num:'품의 08-04', drafter:'기안자 · 인사팀', title:'셀카 3주 미제출자 벌금 부과', brief:'아침 셀카를 3주째 안 올리는 디자이너가 있어요.\n벌금 제도를 도입하려고 해요.'},
+    {id:'08-05', num:'품의 08-05', drafter:'기안자 · 본인', title:'가격 인상 및 이탈 손님 처리', brief:''},
+    {id:'08-06', num:'품의 08-06', drafter:'기안자 · 채용팀', title:'지점 2개 시점 슈퍼바이저 채용', brief:'지점이 두 개인데 관리가 어려워요.\n슈퍼바이저를 채용하려고 해요.'}
+  ];
+  var DECIS = ['승인','반려','조건부'];
+  var A_ITEMS = ['남 칭찬할 때 질투보다 기쁨이 더 커요','잔소리 잘한다는 소리를 자주 들어요','혼자 있는 걸 잘 못 견뎌요. 사람을 좋아해요','계획 세우고 판 짜는 걸 좋아해요','애들이 성장하면 내 일처럼 뿌듯해요'];
+  var B_ITEMS = ['내가 주인공이어야 마음이 편해요','남 신경 쓰는 게 귀찮아요','내가 다 해야 안심돼요','애들이 잘해도 별로 감흥이 없어요'];
+  var PATHS = ['오토사장을 하지 않아요. 디자이너로 계속 가요.','훈련해서 바꿔볼래요.','파트너를 찾을래요.'];
+
+  var state = {
+    respondent:{name:'', branchCount:null},
+    docNo:'',
+    step1:{currentDesigners:null,currentMonthlyRevenue:null,ownRevenue:null,mainService:'',currentPrice:null,annualIncreaseRate:12,targetBranches:null,designersPerBranch:null},
+    step2:CASES.map(function(c){return {caseId:c.id, decision:'', instruction:''};}),
+    step3:{groupA:[],groupB:[],chosenPath:''},
+    step4:{hostLayers:{l1:'',l2:'',l3:'',l4:''}},
+    step5:{firstToRelease:'',firstSuccessor:'',signature:null}
+  };
+  var email='', mkt=false;
+
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function num(v){var n=parseInt(String(v).replace(/[^0-9]/g,''),10);return isNaN(n)?null:n;}
+  function manwon(m){if(m==null||!isFinite(m))return'-';var e=Math.floor(m/10000),k=m%10000;if(e>0)return k>0?e+'억 '+k.toLocaleString()+'만원':e+'억원';return m.toLocaleString()+'만원';}
+  function won(v){return (v==null||!isFinite(v))?'-':Math.round(v).toLocaleString()+'원';}
+  function save(){try{localStorage.setItem(STORE,JSON.stringify({state:state,email:email,mkt:mkt}));}catch(e){}}
+  function restore(){try{var r=JSON.parse(localStorage.getItem(STORE)||'null');if(r&&r.state){state=r.state;email=r.email||'';mkt=!!r.mkt;}}catch(e){}}
+
+  // 문서번호: 입력값 기반 결정적 채번 (Math.random 사용 안 함)
+  function genDocNo(){
+    var seed=(state.respondent.name||'')+'|'+email+'|'+(state.respondent.branchCount||0)+'|'+(state.step1.mainService||'');
+    var h=0;for(var i=0;i<seed.length;i++){h=((h<<5)-h+seed.charCodeAt(i))|0;}
+    return 'AUTO-2026-'+String(Math.abs(h)%10000).padStart(4,'0');
+  }
+  window.vsDoc=function(){
+    state.respondent.name=$('f_name').value.trim();
+    state.respondent.branchCount=num($('f_branch').value);
+    $('docPrev').textContent=genDocNo();save();
+  };
+
+  function vsGo(name){
+    var s=document.querySelectorAll('#vsRoot .vs-screen');
+    for(var i=0;i<s.length;i++)s[i].classList.toggle('on',s[i].getAttribute('data-screen')===name);
+    if(name==='s2')renderS2();
+    if(name==='s3')renderS3();
+    if(name==='s5'){buildDecl();initSig();}
+    save();post();
+  }
+  window.vsGo=vsGo;
+  function err(id,m){var e=$(id);if(e)e.textContent=m||'';post();}
+  function post(){try{window.parent.postMessage({type:'vs-worksheet-height',part:8,height:$('vsRoot').scrollHeight},'*');}catch(e){}}
+  window.addEventListener('load',post);window.addEventListener('resize',post);
+
+  // STEP 0
+  window.vsSubmitIntro=function(){
+    vsDoc();
+    if(!state.respondent.name){err('err_intro','성함을 적어주세요');return;}
+    if(!state.respondent.branchCount||state.respondent.branchCount<1){err('err_intro','현재 지점 수를 적어주세요');return;}
+    state.step4.hostLayers.l1=state.respondent.name;
+    err('err_intro','');vsGo('s1');
+  };
+
+  // STEP 1
+  window.vsCalc1=function(){
+    var s=state.step1;
+    s.currentDesigners=num($('f_dc').value);s.currentMonthlyRevenue=num($('f_rev').value);s.ownRevenue=num($('f_own').value);
+    s.mainService=$('f_main').value.trim();s.currentPrice=num($('f_price').value);s.annualIncreaseRate=parseInt($('f_rate').value,10)||12;
+    s.targetBranches=num($('f_tb').value);s.designersPerBranch=num($('f_dpb').value);
+    $('rateLbl').textContent=s.annualIncreaseRate+'%';
+    // 의존도
+    var dep=(s.currentMonthlyRevenue>0&&s.ownRevenue!=null)?Math.round(s.ownRevenue/s.currentMonthlyRevenue*100):null;
+    $('depOut').innerHTML=dep!=null?'<div class="vs-rcard"><div class="cap">내 매출 의존도</div><div class="big-n">'+dep+'%</div><div class="sub">'+(dep>=40?'40%를 넘으면 강의에서 말한 함정 구간이에요.':'40% 아래예요. 이미 넘기는 구조를 만들고 있어요.')+'</div></div>':'';
+    // 가격 시뮬
+    if(s.currentPrice>0){
+      var g=function(y){return Math.round(s.currentPrice*Math.pow(1+s.annualIncreaseRate/100,y));};
+      $('priceOut').innerHTML='<div class="vs-rcard"><div class="vs-simrow"><span>3년 후</span><b>'+won(g(3))+'</b></div><div class="vs-simrow"><span>5년 후</span><b>'+won(g(5))+'</b></div><div class="vs-simrow"><span>10년 후</span><b>'+won(g(10))+'</b></div><div class="vs-simrow"><span>18년 후</span><b>'+won(g(18))+'</b></div></div>';
+    } else $('priceOut').innerHTML='';
+    // 그룹 매출
+    if(s.targetBranches>0&&s.designersPerBranch>0){
+      var gm=s.targetBranches*s.designersPerBranch*2000, ga=gm*12;
+      $('groupOut').innerHTML='<div class="vs-rcard"><div class="cap">디자이너 1인 목표 월매출 2,000만원 (고정)</div><div class="big-n">'+manwon(ga)+'</div><div class="sub">5년 후 그룹 연매출이에요 · 월 '+manwon(gm)+'</div></div>';
+    } else $('groupOut').innerHTML='';
+    save();
+  };
+  window.vsSubmitS1=function(){
+    vsCalc1();var s=state.step1;
+    if(!s.currentMonthlyRevenue){err('err_s1','현재 매장 월매출을 적어주세요');return;}
+    if(s.ownRevenue!=null&&s.ownRevenue>s.currentMonthlyRevenue){err('err_s1','직접 친 매출이 총매출보다 클 수 없어요');return;}
+    if(!s.mainService){err('err_s1','메인 시술명을 적어주세요');return;}
+    if(!s.currentPrice){err('err_s1','메인 시술 현재 가격을 적어주세요');return;}
+    if(!s.targetBranches||!s.designersPerBranch){err('err_s1','확장 목표 지점 수와 지점당 디자이너 수를 적어주세요');return;}
+    if(s.targetBranches<state.respondent.branchCount){err('err_s1','목표 지점 수는 현재 지점 수 이상으로 적어주세요');return;}
+    err('err_s1','');vsGo('s2');
+  };
+
+  // STEP 2
+  function briefFor(card){
+    if(card.id!=='08-05')return card.brief;
+    var s=state.step1;
+    return (s.mainService||'메인 시술')+' 가격을 '+(s.currentPrice?won(s.currentPrice):'현재가')+'에서 올리려고 해요.\n이탈하는 손님은 어떻게 할까요?';
+  }
+  function renderS2(){
+    var w=$('s2out');w.innerHTML='';
+    CASES.forEach(function(card){
+      var saved=state.step2.find(function(x){return x.caseId===card.id;})||{decision:'',instruction:''};
+      var el=document.createElement('div');el.className='vs-dcard';
+      var html='<div class="num">'+esc(card.num)+'</div><div class="drafter">'+esc(card.drafter)+'</div>';
+      html+='<div class="title">'+esc(card.title)+'</div><div class="sit">'+esc(briefFor(card))+'</div>';
+      html+='<div class="vs-radio3">'+DECIS.map(function(o){return '<div class="vs-opt'+(saved.decision===o?' on':'')+'" data-c="'+card.id+'" data-o="'+esc(o)+'">'+esc(o)+'</div>';}).join('')+'</div>';
+      html+='<label class="vs-l">대표 지시사항</label><textarea data-r="'+card.id+'" rows="2" placeholder="강의 근거를 담아 15자 이상 적어주세요">'+esc(saved.instruction)+'</textarea>';
+      el.innerHTML=html;w.appendChild(el);
+    });
+    w.querySelectorAll('.vs-opt').forEach(function(o){o.onclick=function(){var cid=o.getAttribute('data-c');o.parentNode.querySelectorAll('.vs-opt').forEach(function(x){x.classList.remove('on');});o.classList.add('on');setCase(cid,'decision',o.getAttribute('data-o'));};});
+    w.querySelectorAll('textarea[data-r]').forEach(function(t){t.oninput=function(){setCase(t.getAttribute('data-r'),'instruction',t.value);};});
+  }
+  function setCase(cid,key,val){var c=state.step2.find(function(x){return x.caseId===cid;});if(!c){c={caseId:cid,decision:'',instruction:''};state.step2.push(c);}c[key]=val;save();}
+  window.vsSubmitS2=function(){
+    for(var i=0;i<CASES.length;i++){var card=CASES[i];var c=state.step2.find(function(x){return x.caseId===card.id;})||{decision:'',instruction:''};
+      if(!c.decision){err('err_s2',card.num+'을 결재해주세요');return;}
+      if(!c.instruction||c.instruction.trim().length<15){err('err_s2',card.num+' 지시사항을 15자 이상 적어주세요. 근거가 있어야 지시가 돼요');return;}
+    }
+    err('err_s2','');vsGo('s3');
+  };
+
+  // STEP 3
+  function renderChecks(elId,items,arr){
+    var el=$(elId);
+    el.innerHTML=items.map(function(t,i){var on=arr.indexOf(i+1)>=0;return '<div class="vs-check'+(on?' on':'')+'" data-i="'+(i+1)+'"><span class="box">'+(on?'✓':'')+'</span><span>'+esc(t)+'</span></div>';}).join('');
+    el.querySelectorAll('.vs-check').forEach(function(c){c.onclick=function(){var n=parseInt(c.getAttribute('data-i'),10);var p=arr.indexOf(n);if(p>=0)arr.splice(p,1);else arr.push(n);renderChecks(elId,items,arr);updateElig();save();};});
+  }
+  function judge(a,b){if(a>=4&&b<=1)return['적격','바로 실행하면 돼요.'];if(a<=2&&b>=3)return['재검토','파트너를 찾거나 다른 길로 가도 괜찮아요. 세 경로 모두 정답이에요.'];return['조건부 적격','훈련으로 바뀔 수 있어요. 100일만 투자해보세요.'];}
+  function updateElig(){
+    var a=state.step3.groupA.length,b=state.step3.groupB.length,r=judge(a,b);
+    $('eligOut').innerHTML='<div class="vs-rcard"><div class="cap">심사 결과 · A군 '+a+'개 / B군 '+b+'개</div><div class="big-n" style="font-size:24px">'+r[0]+'</div><div class="sub">'+r[1]+'</div></div>';
+  }
+  function renderPaths(){
+    var el=$('pathOut');
+    el.innerHTML=PATHS.map(function(p){return '<div class="vs-opt'+(state.step3.chosenPath===p?' on':'')+'" data-p="'+esc(p)+'">'+esc(p)+'</div>';}).join('');
+    el.querySelectorAll('.vs-opt').forEach(function(o){o.onclick=function(){el.querySelectorAll('.vs-opt').forEach(function(x){x.classList.remove('on');});o.classList.add('on');state.step3.chosenPath=o.getAttribute('data-p');save();};});
+  }
+  function renderS3(){renderChecks('grpA',A_ITEMS,state.step3.groupA);renderChecks('grpB',B_ITEMS,state.step3.groupB);updateElig();renderPaths();}
+  window.vsSubmitS3=function(){if(!state.step3.chosenPath){err('err_s3','어떤 길로 갈지 골라주세요');return;}err('err_s3','');vsGo('s4');};
+
+  // STEP 4
+  window.vsSaveS4=function(){var h=state.step4.hostLayers;h.l1=state.respondent.name;h.l2=$('f_l2').value.trim();h.l3=$('f_l3').value.trim();h.l4=$('f_l4').value.trim();save();};
+  window.vsSubmitS4=function(){
+    vsSaveS4();var h=state.step4.hostLayers;
+    if(!h.l2){err('err_s4','Level 2 원장을 정해주세요');return;}
+    if(!h.l3){err('err_s4','Level 3 중간관리자를 정해주세요');return;}
+    err('err_s4','');vsGo('s5');
+  };
+
+  // STEP 5 선언문
+  function buildDecl(){$('f_l1').value=state.respondent.name;buildDeclView();}
+  function buildDeclView(){
+    var s=state.step1,name=state.respondent.name||'○○○';
+    var ga=(s.targetBranches>0&&s.designersPerBranch>0)?manwon(s.targetBranches*s.designersPerBranch*2000*12):'○○○';
+    var rel=state.step5.firstToRelease||'________', suc=state.step5.firstSuccessor||'________';
+    $('declView').innerHTML='나 '+esc(name)+'은(는)\n매장에 묶인 원장이 아니라,\n매장이 나 없이도 굴러가게 만드는 사람이 되기로 해요.\n\n내가 가장 먼저 놓을 일은 <span class="blank">'+esc(rel)+'</span> 이고,\n가장 먼저 넘겨줄 사람은 <span class="blank">'+esc(suc)+'</span> 이에요.\n\n5년 후 나는 지점 '+(state.respondent.branchCount||'N')+'개에서 시작해\n그룹 연매출 '+ga+'의 대표가 되어 있을 거예요.';
+  }
+  window.vsDecl=function(){state.step5.firstToRelease=$('f_release').value.trim();state.step5.firstSuccessor=$('f_succ').value.trim();buildDeclView();save();};
+
+  // Canvas 서명 패드
+  var sigCanvas,sigCtx,sigDrawn=false,sigDrawing=false,sigInit=false;
+  function initSig(){
+    if(sigInit)return;sigCanvas=$('sigPad');if(!sigCanvas)return;
+    var ratio=window.devicePixelRatio||1,rect=sigCanvas.getBoundingClientRect();
+    sigCanvas.width=Math.max(1,rect.width)*ratio;sigCanvas.height=150*ratio;
+    sigCtx=sigCanvas.getContext('2d');sigCtx.scale(ratio,ratio);
+    sigCtx.lineWidth=2.5;sigCtx.lineCap='round';sigCtx.lineJoin='round';sigCtx.strokeStyle='#141414';
+    function pos(e){var r=sigCanvas.getBoundingClientRect();var t=(e.touches&&e.touches[0])?e.touches[0]:e;return {x:t.clientX-r.left,y:t.clientY-r.top};}
+    function start(e){e.preventDefault();sigDrawing=true;var p=pos(e);sigCtx.beginPath();sigCtx.moveTo(p.x,p.y);}
+    function move(e){if(!sigDrawing)return;e.preventDefault();var p=pos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();sigDrawn=true;}
+    function end(){sigDrawing=false;}
+    sigCanvas.addEventListener('mousedown',start);sigCanvas.addEventListener('mousemove',move);window.addEventListener('mouseup',end);
+    sigCanvas.addEventListener('touchstart',start,{passive:false});sigCanvas.addEventListener('touchmove',move,{passive:false});sigCanvas.addEventListener('touchend',end);
+    sigInit=true;
+  }
+  window.vsClearSig=function(){if(sigCtx&&sigCanvas){sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);}sigDrawn=false;};
+
+  function captureSignature(){
+    if(sigDrawn&&sigCanvas){try{return sigCanvas.toDataURL('image/png');}catch(e){}}
+    var typed=$('f_sigtype').value.trim();
+    return typed||null; // 건너뛰기 가능
+  }
+
+  // 제출
+  window.vsSubmitFinal=function(){
+    vsDecl();email=$('f_email').value.trim();mkt=$('f_mkt').checked;
+    if(!state.step5.firstToRelease){err('err_s5','가장 먼저 놓을 일을 적어주세요');return;}
+    if(!state.step5.firstSuccessor){err('err_s5','가장 먼저 넘겨줄 사람을 적어주세요');return;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){err('err_s5','이메일 주소를 다시 확인해주세요');return;}
+    if(!$('f_privacy').checked){err('err_s5','개인정보 수집에 동의해주세요');return;}
+    state.step5.signature=captureSignature();
+    state.docNo=genDocNo();
+    err('err_s5','');var b=$('subBtn');b.disabled=true;b.textContent='보내는 중…';
+    fetch(API_URL+'/api/worksheet/part8/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,marketingConsent:mkt,data:state})})
+      .then(function(r){return r.json();}).then(function(res){
+        if(!res||!res.success){err('err_s5',(res&&res.message)||'잠시 후 다시 시도해주세요');b.disabled=false;b.textContent='계획서 제출하고 검토받기';return;}
+        var s=state.step1,ga=(s.targetBranches>0&&s.designersPerBranch>0)?manwon(s.targetBranches*s.designersPerBranch*2000*12):'-';
+        $('doneDoc').textContent=state.docNo;
+        $('doneName').textContent=state.respondent.name+' 대표님';
+        $('doneRev').textContent='5년 후 그룹 연매출 '+ga;
+        vsGo('done');try{localStorage.removeItem(STORE);}catch(e){}
+      }).catch(function(){err('err_s5','잠시 후 다시 시도해주세요');b.disabled=false;b.textContent='계획서 제출하고 검토받기';});
+  };
+  window.vsBack=function(){if(LECTURE_URL){try{window.top.location.href=LECTURE_URL;}catch(e){location.href=LECTURE_URL;}}else{try{window.scrollTo(0,0);}catch(e){}}};
+
+  // 초기화
+  restore();
+  $('f_name').value=state.respondent.name||'';if(state.respondent.branchCount!=null)$('f_branch').value=state.respondent.branchCount;
+  var s=state.step1;
+  if(s.currentDesigners!=null)$('f_dc').value=s.currentDesigners;if(s.currentMonthlyRevenue!=null)$('f_rev').value=s.currentMonthlyRevenue;
+  if(s.ownRevenue!=null)$('f_own').value=s.ownRevenue;$('f_main').value=s.mainService||'';if(s.currentPrice!=null)$('f_price').value=s.currentPrice;
+  $('f_rate').value=s.annualIncreaseRate||12;if(s.targetBranches!=null)$('f_tb').value=s.targetBranches;if(s.designersPerBranch!=null)$('f_dpb').value=s.designersPerBranch;
+  var h=state.step4.hostLayers;$('f_l2').value=h.l2||'';$('f_l3').value=h.l3||'';$('f_l4').value=h.l4||'';
+  $('f_release').value=state.step5.firstToRelease||'';$('f_succ').value=state.step5.firstSuccessor||'';$('f_email').value=email;
+  $('docPrev').textContent=genDocNo();vsCalc1();post();
+})();
+</script>
+</div>
+
+</body>
+</html>

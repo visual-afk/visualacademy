@@ -18,7 +18,14 @@ export default async function VideosPage({ params }: PageProps<"/admin/classes/[
       <VideoEditor
         classId={c.id}
         name={c.name}
-        initial={videos.map((v) => ({ id: v.id, title: v.title, url: `https://vimeo.com/${v.vimeoId}${v.vimeoHash ? `/${v.vimeoHash}` : ""}` }))}
+        initial={videos.map((v) => ({
+          id: v.id,
+          title: v.title,
+          url: `https://vimeo.com/${v.vimeoId}${v.vimeoHash ? `/${v.vimeoHash}` : ""}`,
+          ws: v.ws?.source ?? "",
+          wsPart: v.ws ? String(v.ws.part) : "",
+          wsLecture: v.ws?.lecture != null ? String(v.ws.lecture) : "",
+        }))}
       />
     </div>
   );

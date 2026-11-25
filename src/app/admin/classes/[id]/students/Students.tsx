@@ -101,7 +101,7 @@ function ExpiryFields({ form, set, current, fresh }: { form: Form; set: (f: Form
   );
 }
 
-type Cls = { id: number; name: string; months: number | null };
+type Cls = { id: number; name: string; months: number | null; wsTotal: number };
 
 export default function Students({ cls, students }: { cls: Cls; students: Student[] }) {
   const router = useRouter();
@@ -263,7 +263,7 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
                     <td><p className="cell-applicant">{formatPhone(s.phone)}</p><p className="cell-order">{s.email}</p></td>
                     <td>
                       <div className="prog"><span style={{ width: `${s.progress}%` }} /></div>
-                      <p className="cell-order">{s.progress}%</p>
+                      <p className="cell-order">{s.progress}%{cls.wsTotal > 0 ? ` · 워크시트 ${s.wsDone}/${cls.wsTotal}` : ""}</p>
                     </td>
                     <td>
                       <p className="cell-date">{s.lastWatchedAt ? expiryLabel(s.lastWatchedAt) : "아직 안 봄"}</p>

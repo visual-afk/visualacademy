@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>오토사장반 0파트 워크시트</title>
+<style>html,body{margin:0;background:#fff}</style>
+<script>
+/* 비주얼아카데미 강의 플레이어 연결 (scripts/sync-worksheet-widgets.mjs 가 붙임) */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var EMAIL = q.get("email") || "", LECTURE = Number(q.get("lecture")) || 0;
+  function post(m) { m.source = "va-worksheet"; try { parent.postMessage(m, location.origin); } catch (e) {} }
+  var orig = window.fetch;
+  window.fetch = function (input) {
+    var p = orig.apply(this, arguments);
+    var url = String((input && input.url) || input);
+    if (/\/submit$/.test(url)) p.then(function (r) { r.clone().json().then(function (d) { if (r.ok && d && d.success !== false) post({ type: "submitted" }); }).catch(function () {}); }).catch(function () {});
+    return p;
+  };
+  function fill() {
+    if (!EMAIL) return;
+    ["wsEmail", "f_email"].forEach(function (id) { var el = document.getElementById(id); if (el && !el.value) el.value = EMAIL; });
+  }
+  var n = 0, t = setInterval(function () { fill(); if (++n > 60) clearInterval(t); }, 500);
+  document.addEventListener("focusin", fill);
+  function height() { post({ type: "height", h: document.documentElement.scrollHeight }); }
+  window.addEventListener("load", function () {
+    if (LECTURE && window.wsSelectLecture) {
+      window.wsSelectLecture(LECTURE);
+      if (EMAIL && window.wsCheckEmail) { document.getElementById("wsEmail").value = EMAIL; window.wsCheckEmail(); }
+    }
+    height();
+    if (window.ResizeObserver) new ResizeObserver(height).observe(document.body);
+  });
+})();
+</script>
+</head>
+<body>
+<!-- ============================================================
+  오토사장반 PART 0 워크시트 — 소속사 설립 신고서
+  아임웹 코드위젯에 통째로 붙여넣거나, 이 파일을 호스팅해 iframe 임베드.
+  ★ 배포 후 아래 API_URL 을 autoceo-worksheet Worker 주소로 바꾸세요.
+============================================================ -->
+<div id="vsRoot">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Montserrat:wght@600;700;800&display=swap');
+  #vsRoot{--mint:#00F5D4;--mint-deep:#00C4AA;--mint-sub:#CFF7EF;--ink:#141414;--card-dark:#1A1A1A;
+    --gray:#6b6b6b;--gray-l:#F4F6F5;--border:#E2E6E4;
+    max-width:480px;margin:0 auto;font-family:'Noto Sans KR','Apple SD Gothic Neo',-apple-system,sans-serif;
+    color:#141414;font-weight:500;line-height:1.65;-webkit-text-size-adjust:100%;background:#fff;}
+  #vsRoot *{box-sizing:border-box;}
+  #vsRoot .vs-screen{display:none;padding:30px 20px 44px;min-height:60vh;background:#fff;color:var(--ink);}
+  #vsRoot .vs-screen.on{display:block;}
+  /* 예전 '다크' 화면 → 은은한 민트 틴트로 하이라이트 (검정 제거) */
+  #vsRoot .vs-dark{background:linear-gradient(180deg,#F1FCF9 0%,#FFFFFF 70%);color:var(--ink);}
+  #vsRoot .vs-light{background:#fff;color:var(--ink);}
+  #vsRoot .vs-progress{height:5px;background:#E9EDEB;border-radius:3px;overflow:hidden;margin-bottom:6px;}
+  #vsRoot .vs-progress > i{display:block;height:100%;background:var(--mint-deep);width:0;transition:width .3s;}
+  #vsRoot .vs-steplabel{font-size:12px;font-weight:700;color:var(--mint-deep);margin-bottom:22px;letter-spacing:.5px;}
+  #vsRoot h2.vs-t{font-size:26px;font-weight:900;margin:0 0 10px;line-height:1.32;letter-spacing:-.4px;}
+  #vsRoot p.vs-d{font-size:15px;font-weight:500;margin:0 0 22px;color:#4a4f4d;}
+  #vsRoot label.vs-l{display:block;font-size:14px;font-weight:700;margin:18px 0 7px;color:#1f2320;}
+  #vsRoot .vs-hint{font-size:13px;font-weight:500;color:var(--gray);margin:5px 0 0;}
+  #vsRoot input[type=text],#vsRoot input[type=email],#vsRoot input[type=number],#vsRoot textarea{
+    width:100%;height:52px;border:1.5px solid var(--border);border-radius:12px;background:var(--gray-l);
+    padding:0 14px;font-size:16px;font-weight:600;font-family:inherit;color:var(--ink);outline:none;}
+  #vsRoot textarea{height:auto;min-height:64px;padding:13px 14px;line-height:1.6;resize:vertical;}
+  #vsRoot input::placeholder,#vsRoot textarea::placeholder{color:#9aa09d;font-weight:500;}
+  #vsRoot input:focus,#vsRoot textarea:focus{border-color:var(--mint-deep);background:#fff;}
+  #vsRoot .vs-btn{display:block;width:100%;height:56px;border:0;border-radius:14px;background:var(--mint-deep);
+    color:#fff;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;margin-top:28px;letter-spacing:-.2px;
+    box-shadow:0 6px 16px rgba(0,196,170,.28);}
+  #vsRoot .vs-btn:active{transform:translateY(1px);}
+  #vsRoot .vs-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+  #vsRoot .vs-back{background:none;border:0;color:var(--gray);font-size:14px;font-weight:600;cursor:pointer;padding:6px 0;margin-bottom:8px;font-family:inherit;}
+  #vsRoot .vs-err{color:#e03131;font-size:13px;font-weight:600;margin-top:8px;min-height:16px;}
+  /* stepper */
+  #vsRoot .vs-stepper{display:flex;align-items:center;gap:14px;}
+  #vsRoot .vs-stepper button{width:46px;height:46px;border-radius:12px;border:1.5px solid var(--border);
+    background:#fff;font-size:22px;font-weight:700;cursor:pointer;color:var(--ink);}
+  #vsRoot .vs-stepper span{font-size:22px;font-weight:800;min-width:48px;text-align:center;}
+  /* slider */
+  #vsRoot input[type=range]{width:100%;accent-color:var(--mint-deep);height:38px;}
+  /* result cards */
+  #vsRoot .vs-rcard{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;margin:12px 0;}
+  #vsRoot .vs-rcard .cap{font-size:13px;font-weight:700;color:var(--gray);}
+  #vsRoot .vs-rcard .row{display:flex;justify-content:space-between;font-size:15px;font-weight:600;margin-top:6px;}
+  #vsRoot .vs-rcard.big{border-color:var(--mint-deep);background:linear-gradient(135deg,#EAFCF8,#F7FFFD);}
+  #vsRoot .vs-rcard.big .big-n{font-size:36px;font-weight:800;color:var(--mint-deep);
+    font-family:'Montserrat',sans-serif;letter-spacing:-.5px;}
+  #vsRoot .vs-arrow{text-align:center;color:#b9c2be;font-size:18px;margin:2px 0;}
+  /* chips */
+  #vsRoot .vs-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  #vsRoot .vs-chip{height:38px;padding:0 15px;border-radius:19px;border:1.5px solid var(--border);
+    background:#fff;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;color:#3a3f3d;}
+  #vsRoot .vs-chip.on{background:var(--mint-sub);border-color:var(--mint-deep);color:#00806f;font-weight:800;}
+  /* artist accordion */
+  #vsRoot .vs-artist{border:1.5px solid var(--border);border-radius:14px;margin:10px 0;overflow:hidden;background:#fff;}
+  #vsRoot .vs-artist > .head{padding:15px 16px;font-weight:800;cursor:pointer;display:flex;justify-content:space-between;align-items:center;color:var(--ink);}
+  #vsRoot .vs-artist > .body{padding:0 16px 16px;display:none;}
+  #vsRoot .vs-artist.open > .body{display:block;}
+  #vsRoot .vs-artist .chk{color:var(--mint-deep);}
+  #vsRoot .vs-addartist{width:100%;height:50px;border:1.5px dashed var(--mint-deep);border-radius:14px;background:#F7FFFD;
+    color:var(--mint-deep);font-weight:800;cursor:pointer;font-family:inherit;font-size:15px;}
+  #vsRoot .vs-sumbar{font-size:14px;font-weight:600;color:var(--gray);text-align:right;margin-top:10px;}
+  /* signature */
+  #vsRoot .vs-sign{border:1.5px dashed var(--mint-deep);border-radius:14px;padding:24px;text-align:center;margin-top:18px;background:#F7FFFD;}
+  #vsRoot .vs-sign .stamp{display:inline-block;margin-top:12px;padding:10px 18px;border:2.5px solid var(--mint-deep);
+    border-radius:50%;color:var(--mint-deep);font-weight:800;transform:scale(0);transition:transform .5s cubic-bezier(.2,1.4,.4,1);}
+  #vsRoot .vs-sign.signed .stamp{transform:scale(1);}
+  #vsRoot .vs-sign .sbtn{margin-top:14px;height:48px;padding:0 24px;border-radius:12px;border:0;background:var(--mint-deep);color:#fff;font-weight:800;cursor:pointer;font-family:inherit;}
+  /* decision cards */
+  #vsRoot .vs-dcard{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:20px 18px;margin:14px 0;}
+  #vsRoot .vs-dcard .num{display:inline-block;font-size:12px;color:#00806f;font-weight:800;letter-spacing:.5px;white-space:nowrap;background:var(--mint-sub);padding:5px 12px;border-radius:20px;}
+  #vsRoot .vs-dcard .sit{font-size:16px;font-weight:600;margin:8px 0 16px;white-space:pre-line;line-height:1.7;}
+  #vsRoot .vs-opt{display:block;border:1.5px solid var(--border);border-radius:12px;padding:14px 15px;margin:8px 0;
+    background:#fff;cursor:pointer;font-size:15px;font-weight:600;}
+  #vsRoot .vs-opt.on{border-color:var(--mint-deep);background:var(--mint-sub);font-weight:800;color:#00806f;}
+  /* statement live */
+  #vsRoot .vs-live{font-size:23px;font-weight:900;margin-top:20px;line-height:1.5;min-height:34px;letter-spacing:-.4px;}
+  #vsRoot .vs-live b{color:var(--mint-deep);}
+  /* consent */
+  #vsRoot .vs-consent{display:flex;align-items:flex-start;gap:10px;margin:12px 0;font-size:14px;font-weight:500;}
+  #vsRoot .vs-consent input{width:20px;height:20px;margin-top:2px;accent-color:var(--mint-deep);}
+  /* done summary */
+  #vsRoot .vs-done{background:linear-gradient(135deg,#00C4AA,#00A088);border-radius:20px;padding:28px 22px;margin-top:22px;text-align:center;color:#fff;
+    box-shadow:0 10px 28px rgba(0,196,170,.32);}
+  #vsRoot .vs-done .big{font-size:30px;font-weight:800;color:#fff;font-family:'Montserrat',sans-serif;margin:8px 0;}
+  #vsRoot .count{font-family:'Montserrat',sans-serif;}
+</style>
+
+<!-- ===== 인트로 ===== -->
+<section class="vs-screen vs-dark on" data-screen="intro">
+  <div class="vs-progress"><i style="width:0"></i></div>
+  <div class="vs-steplabel">&nbsp;</div>
+  <h2 class="vs-t">오늘부터 대표님이에요</h2>
+  <p class="vs-d">5년 뒤 얼마 벌지 계산하고, 내 소속사를 만들고, 대표로서 결재까지 해봐요.</p>
+  <p class="vs-d" style="color:var(--mint-deep);font-weight:700">약 15분 걸려요</p>
+  <button class="vs-btn" onclick="vsGo('step1')">소속사 만들러 가기</button>
+</section>
+
+<!-- ===== STEP 1 김칫국 시뮬레이터 ===== -->
+<section class="vs-screen vs-light" data-screen="step1">
+  <div class="vs-progress"><i style="width:14%"></i></div>
+  <div class="vs-steplabel">6단계 중 1단계</div>
+  <button class="vs-back" onclick="vsGo('intro')">← 뒤로</button>
+  <h2 class="vs-t">5년 뒤에 얼마 벌까요?</h2>
+  <p class="vs-d">숫자만 넣으면 알아서 계산해드려요.</p>
+
+  <label class="vs-l">내 가용 자본금 (만원)</label>
+  <input type="number" id="f_capital" inputmode="numeric" placeholder="지금 쓸 수 있는 돈이요" oninput="vsCalc()">
+  <p class="vs-hint">1,000만원부터 입력할 수 있어요</p>
+
+  <label class="vs-l">목표 디자이너 수</label>
+  <div class="vs-stepper">
+    <button type="button" onclick="vsStep('designerCount',-1)">−</button>
+    <span id="f_designerCount">5</span>
+    <button type="button" onclick="vsStep('designerCount',1)">＋</button>
+  </div>
+
+  <label class="vs-l">디자이너 1인 목표 월매출 (만원)</label>
+  <input type="number" id="f_revenuePerDesigner" inputmode="numeric" value="2000" oninput="vsCalc()">
+  <p class="vs-hint">강의에서 말한 2000이 기본값이에요</p>
+
+  <label class="vs-l">목표 순이익률 — <b id="f_profitMargin_v">15</b>%</label>
+  <input type="range" id="f_profitMargin" min="10" max="20" value="15" oninput="vsCalc()">
+  <p class="vs-hint">경영 잘하면 20%까지 나와요</p>
+
+  <div id="vsCalcOut" style="margin-top:24px"></div>
+
+  <label class="vs-l">5년 뒤 나는 뭘 하고 있을까요?</label>
+  <textarea id="f_vision5y" rows="2" placeholder="상상해서 편하게 써도 좋아요"></textarea>
+  <label class="vs-l">그 돈으로 제일 먼저 하고 싶은 건 뭐예요?</label>
+  <textarea id="f_firstWish" rows="1"></textarea>
+
+  <p class="vs-err" id="err_step1"></p>
+  <button class="vs-btn" onclick="vsSubmitStep1()">아티스트 캐스팅하러 가기</button>
+</section>
+
+<!-- ===== STEP 2 소속사 설립 신고서 ===== -->
+<section class="vs-screen vs-dark" data-screen="step2">
+  <div class="vs-progress"><i style="width:28%"></i></div>
+  <div class="vs-steplabel">6단계 중 2단계</div>
+  <button class="vs-back" onclick="vsGo('step1')">← 뒤로</button>
+  <h2 class="vs-t">내 소속사를 만들어요</h2>
+  <p class="vs-d">아직 매장이 없어도 괜찮아요. 상상해서 지어도 좋아요.</p>
+
+  <label class="vs-l">소속사명</label>
+  <input type="text" id="f_agencyName" placeholder="매장 이름이요. 없으면 지어도 좋아요">
+  <label class="vs-l">대표이사 이름</label>
+  <input type="text" id="f_ceoName">
+  <label class="vs-l">우리 소속사 슬로건</label>
+  <input type="text" id="f_slogan" placeholder="예: 동네에서 제일 예쁜 애들만 있는 곳">
+
+  <label class="vs-l" style="margin-top:26px">아티스트 캐스팅 <span style="color:var(--gray);font-weight:500">(최소 1명, 최대 5명)</span></label>
+  <div id="vsArtists"></div>
+  <button type="button" class="vs-addartist" id="vsAddArtist" onclick="vsAddArtist()">＋ 아티스트 추가</button>
+  <div class="vs-sumbar">총 목표 매출 <b id="vsArtistSum" style="color:var(--mint-deep)">0</b>만원</div>
+
+  <div class="vs-sign" id="vsSign">
+    <div style="font-size:14px;font-weight:600">위와 같이 소속사 설립을 신고해요.</div>
+    <div style="margin-top:8px;font-size:13px;color:var(--gray)">대표이사 <b id="vsSignName">—</b></div>
+    <button type="button" class="sbtn" onclick="vsSignNow()">서명하기</button>
+    <div><span class="stamp">印</span></div>
+  </div>
+
+  <p class="vs-err" id="err_step2"></p>
+  <button class="vs-btn" onclick="vsSubmitStep2()">결재하러 가기</button>
+</section>
+
+<!-- ===== STEP 3 결재 카드 ===== -->
+<section class="vs-screen vs-light" data-screen="step3">
+  <div class="vs-progress"><i style="width:42%"></i></div>
+  <div class="vs-steplabel">6단계 중 3단계</div>
+  <button class="vs-back" onclick="vsGo('step2')">← 뒤로</button>
+  <h2 class="vs-t">대표님, 결재 부탁해요</h2>
+  <p class="vs-d">정답은 화면에 안 나와요. 이유까지 적으면 메일로 해설을 보내드려요.</p>
+  <div id="vsDecisions"></div>
+  <p class="vs-err" id="err_step3"></p>
+  <button class="vs-btn" onclick="vsSubmitStep3()">마지막 한 마디 쓰러 가기</button>
+</section>
+
+<!-- ===== STEP 4 한 마디 ===== -->
+<section class="vs-screen vs-dark" data-screen="step4">
+  <div class="vs-progress"><i style="width:56%"></i></div>
+  <div class="vs-steplabel">6단계 중 4단계</div>
+  <button class="vs-back" onclick="vsGo('step3')">← 뒤로</button>
+  <h2 class="vs-t">마지막이에요</h2>
+  <p class="vs-d">예: 디자이너를 스타로 만드는 / 우리 동네에서 제일 예쁜 애들을 키우는</p>
+  <label class="vs-l">나는 [　　　]을(를) 하는 사람이다.</label>
+  <input type="text" id="f_statement" oninput="vsLiveStatement()">
+  <div class="vs-live" id="vsLive"></div>
+  <p class="vs-err" id="err_step4"></p>
+  <button class="vs-btn" onclick="vsSubmitStep4()">결과 받아보기</button>
+</section>
+
+<!-- ===== 이메일 입력 ===== -->
+<section class="vs-screen vs-light" data-screen="email">
+  <div class="vs-progress"><i style="width:80%"></i></div>
+  <div class="vs-steplabel">6단계 중 5단계</div>
+  <button class="vs-back" onclick="vsGo('step4')">← 뒤로</button>
+  <h2 class="vs-t">어디로 보내드릴까요?</h2>
+  <p class="vs-d">완성된 신고서랑 결재 해설을 메일로 보내드려요.</p>
+  <label class="vs-l">이메일</label>
+  <input type="email" id="f_email" inputmode="email" placeholder="you@example.com">
+  <label class="vs-consent"><input type="checkbox" id="f_privacy"><span>(필수) 결과 발송을 위한 개인정보 수집·이용에 동의해요.</span></label>
+  <label class="vs-consent"><input type="checkbox" id="f_marketing"><span>(선택) 오토사장반 소식·혜택 메일을 받을게요.</span></label>
+  <p class="vs-err" id="err_email"></p>
+  <button class="vs-btn" id="vsSubmitBtn" onclick="vsSubmitFinal()">신고서 받기</button>
+</section>
+
+<!-- ===== 완료 ===== -->
+<section class="vs-screen vs-light" data-screen="done">
+  <div class="vs-progress"><i style="width:100%"></i></div>
+  <div class="vs-steplabel">&nbsp;</div>
+  <h2 class="vs-t">대표님, 신고서 접수했어요.</h2>
+  <div class="vs-done">
+    <div id="vsDoneAgency" style="font-size:16px;font-weight:700"></div>
+    <div class="big" id="vsDoneProfit"></div>
+    <div id="vsDoneStatement" style="font-size:15px;font-weight:500;color:rgba(255,255,255,.9);margin-top:8px"></div>
+  </div>
+  <p class="vs-d" style="margin-top:22px">메일로 전체 신고서랑 결재 해설을 보냈어요.<br>1분 내로 도착해요.</p>
+  <button class="vs-btn" onclick="vsBackToLecture()">강의로 돌아가기</button>
+</section>
+
+<script>
+(function(){
+  /* ★ 배포 후 이 값을 autoceo-worksheet Worker 주소로 바꾸세요 */
+  var API_URL = 'https://autoceo-worksheet.visual-f2e.workers.dev';
+  var LECTURE_URL = '';   /* '강의로 돌아가기' 링크. 비우면 스크롤 상단으로 */
+  var STORE = 'vs_worksheet_part0';
+
+  var CONCEPTS = ['청순','걸크러쉬','키치','러블리','시크','큐트','카리스마','아나운서'];
+  var SERVICES = ['레이어드컷','염색','클리닉','직접입력'];
+  var CARDS = [
+    { id:1, num:'결재 요청 #01', sit:'실장이 보고해요.\n"대표님, 예약판이 3주치 꽉 찼어요."\n\n어떻게 할까요?',
+      opts:['단가를 올린다','프로모션을 돌린다','디자이너를 더 뽑는다'] },
+    { id:2, num:'결재 요청 #02', sit:'지인이 매물을 소개했어요. 인수비 1.5억, 시세보다 5천만원 싸요.\n근데 가보니 디자이너가 2명뿐이고, 둘 다 이번 달에 나간다고 해요.\n\n어떻게 할까요?',
+      opts:['인수한다','인수하지 않는다'] },
+    { id:3, num:'결재 요청 #03', sit:'이번 달 순이익이 2,200만원 나왔어요.\n\n어떻게 할까요?',
+      opts:['지금 구조를 그대로 유지한다','2호점을 준비한다'] },
+    { id:4, num:'결재 요청 #04', sit:'디자이너 한 명이 컴플레인은 하나도 없어요.\n근데 3개월째 재방 고객이 안 늘어요.\n\n어떻게 할까요?',
+      opts:['기술 교육을 시킨다','세일즈·CS 교육을 시킨다','조금 더 지켜본다'] },
+    { id:5, num:'결재 요청 #05', sit:'내가 직접 시술하면 월매출이 500만원 더 나와요.\n\n어떻게 할까요?',
+      opts:['직접 시술한다','직접 시술하지 않는다'] }
+  ];
+
+  var state = {
+    step1:{ capital:null, designerCount:5, revenuePerDesigner:2000, profitMargin:15, vision5y:'', firstWish:'' },
+    step2:{ agencyName:'', ceoName:'', slogan:'', artists:[ blankArtist() ], signed:false },
+    step3:{ decisions:[] },
+    step4:{ statement:'' }
+  };
+  function blankArtist(){ return { name:'', concepts:[], service:'', targetRevenue:2000 }; }
+  var openArtists = { 0:true };  /* 아코디언 열림 상태 기억 (재렌더 시 닫힘 방지) */
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function $(id){ return document.getElementById(id); }
+  function num(v){ var n=parseInt(String(v).replace(/[^0-9]/g,''),10); return isNaN(n)?0:n; }
+  function manwon(m){ if(!isFinite(m))return'-'; var e=Math.floor(m/10000),k=m%10000;
+    if(e>0)return k>0?e+'억 '+k.toLocaleString()+'만원':e+'억원'; return m.toLocaleString()+'만원'; }
+
+  /* ---------- 화면 이동 ---------- */
+  function vsGo(name){
+    var scr=document.querySelectorAll('#vsRoot .vs-screen');
+    for(var i=0;i<scr.length;i++) scr[i].classList.toggle('on', scr[i].getAttribute('data-screen')===name);
+    save(); postHeight();
+  }
+  window.vsGo = vsGo;
+
+  /* ---------- 저장/복원 ---------- */
+  function save(){ try{ state.updatedAt=new Date().toISOString(); localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+  function restore(){
+    try{ var raw=localStorage.getItem(STORE); if(!raw)return; var s=JSON.parse(raw);
+      if(s&&s.step1){ state=s; if(!state.step2.artists||!state.step2.artists.length) state.step2.artists=[blankArtist()]; }
+    }catch(e){}
+  }
+
+  /* ---------- STEP 1 ---------- */
+  window.vsStep=function(key,d){ var v=Math.max(1,Math.min(10, state.step1[key]+d)); state.step1[key]=v; $('f_'+key).textContent=v; vsCalc(); };
+  function readStep1(){
+    state.step1.capital=num($('f_capital').value);
+    state.step1.revenuePerDesigner=num($('f_revenuePerDesigner').value)||0;
+    state.step1.profitMargin=num($('f_profitMargin').value)||15;
+    state.step1.vision5y=$('f_vision5y').value.trim();
+    state.step1.firstWish=$('f_firstWish').value.trim();
+  }
+  function calcNumbers(s){
+    var mRev=s.designerCount*s.revenuePerDesigner;
+    var mProfit=Math.round(mRev*(s.profitMargin/100));
+    var yProfit=mProfit*12;
+    var payback=mProfit>0?Math.ceil((s.capital||0)/mProfit):null;
+    return { mRev:mRev, mProfit:mProfit, yProfit:yProfit, payback:payback,
+      p2:mProfit*2, y2:mProfit*24, p5:mProfit*5, y5:mProfit*60 };
+  }
+  window.vsCalc=function(){
+    $('f_profitMargin_v').textContent=$('f_profitMargin').value;
+    readStep1();
+    var n=calcNumbers(state.step1);
+    $('vsCalcOut').innerHTML =
+      rcard('지금 — 1호점', [['월 순이익',manwon(n.mProfit)],['연 순이익',manwon(n.yProfit)],['투자금 회수', n.payback!=null?n.payback+'개월':'—']]) +
+      '<div class="vs-arrow">↓</div>' +
+      rcard('2년 뒤 — 2호점', [['월 순이익',manwon(n.p2)],['연 순이익',manwon(n.y2)]]) +
+      '<div class="vs-arrow">↓</div>' +
+      '<div class="vs-rcard big"><div class="cap">5년 뒤 — 5호점</div><div class="row"><span>연 순이익</span><span class="big-n count" data-to="'+n.y5+'">'+manwon(n.y5)+'</span></div></div>';
+    save();
+  };
+  function rcard(cap,rows){
+    var r=rows.map(function(x){return '<div class="row"><span>'+x[0]+'</span><strong>'+x[1]+'</strong></div>';}).join('');
+    return '<div class="vs-rcard"><div class="cap">'+cap+'</div>'+r+'</div>';
+  }
+  window.vsSubmitStep1=function(){
+    readStep1();
+    if(!state.step1.capital || state.step1.capital<1000){ err('err_step1','1,000만원부터 입력할 수 있어요'); return; }
+    if(!state.step1.revenuePerDesigner){ err('err_step1','이것만 채우면 다음으로 갈 수 있어요'); return; }
+    err('err_step1',''); vsGo('step2'); renderArtists();
+  };
+
+  /* ---------- STEP 2 ---------- */
+  window.vsAddArtist=function(){ if(state.step2.artists.length>=5)return; state.step2.artists.push(blankArtist()); openArtists[state.step2.artists.length-1]=true; renderArtists(); };
+  function renderArtists(){
+    var wrap=$('vsArtists'); wrap.innerHTML='';
+    state.step2.artists.forEach(function(a,idx){ wrap.appendChild(artistEl(a,idx)); });
+    $('vsAddArtist').style.display = state.step2.artists.length>=5?'none':'block';
+    updateSum(); $('vsSignName').textContent=$('f_ceoName')&&$('f_ceoName').value?$('f_ceoName').value:(state.step2.ceoName||'—');
+  }
+  function artistEl(a,idx){
+    var el=document.createElement('div'); el.className='vs-artist'+(openArtists[idx]?' open':'');
+    var done=a.name&&a.service;
+    el.innerHTML =
+      '<div class="head"><span>아티스트 '+(idx+1)+' '+(done?'<span class="chk">✓</span>':'')+'</span><span style="color:var(--gray);font-weight:600">'+(a.name?esc(a.name):'입력')+'</span></div>'+
+      '<div class="body">'+
+        '<label class="vs-l">활동명</label><input type="text" value="'+esc(a.name)+'" data-k="name" data-i="'+idx+'" placeholder="예: 솔, 콜라">'+
+        '<label class="vs-l">컨셉 <span style="color:var(--gray);font-weight:500">(최대 2개)</span></label>'+chipRow(CONCEPTS,a.concepts,idx,'concept')+
+        '<label class="vs-l">주력 시술</label>'+chipRow(SERVICES,[a.service],idx,'service')+
+        (a.service&&SERVICES.indexOf(a.service)<0?'<input type="text" value="'+esc(a.service)+'" data-k="serviceText" data-i="'+idx+'" placeholder="직접 입력">':'<input type="text" data-k="serviceText" data-i="'+idx+'" placeholder="직접 입력" style="display:'+(a.service==='직접입력'?'block':'none')+'">')+
+        '<label class="vs-l">목표 월매출 (만원)</label><input type="number" value="'+(a.targetRevenue||'')+'" data-k="targetRevenue" data-i="'+idx+'" inputmode="numeric">'+
+      '</div>';
+    el.querySelector('.head').onclick=function(){ openArtists[idx]=el.classList.toggle('open'); };
+    el.querySelectorAll('input[data-k]').forEach(function(inp){
+      inp.oninput=function(){ var i=+inp.getAttribute('data-i'),k=inp.getAttribute('data-k');
+        if(k==='targetRevenue') state.step2.artists[i].targetRevenue=num(inp.value);
+        else if(k==='serviceText') state.step2.artists[i].service=inp.value.trim()||'직접입력';
+        else state.step2.artists[i][k]=inp.value;
+        updateSum(); save(); };
+    });
+    return el;
+  }
+  function chipRow(list,active,idx,kind){
+    return '<div class="vs-chips">'+list.map(function(c){
+      var on=active&&active.indexOf(c)>=0; return '<span class="vs-chip'+(on?' on':'')+'" data-c="'+esc(c)+'" data-i="'+idx+'" data-kind="'+kind+'">'+esc(c)+'</span>';
+    }).join('')+'</div>';
+  }
+  document.getElementById('vsArtists').addEventListener('click',function(e){
+    var chip=e.target.closest('.vs-chip'); if(!chip)return;
+    var i=+chip.getAttribute('data-i'),c=chip.getAttribute('data-c'),kind=chip.getAttribute('data-kind'),a=state.step2.artists[i];
+    if(kind==='concept'){ var p=a.concepts.indexOf(c);
+      if(p>=0)a.concepts.splice(p,1); else { if(a.concepts.length>=2)return; a.concepts.push(c); } }
+    else { a.service = (a.service===c?'':c); }
+    save(); renderArtists();
+  });
+  function updateSum(){ var t=state.step2.artists.reduce(function(s,a){return s+(num(a.targetRevenue)||0);},0); $('vsArtistSum').textContent=t.toLocaleString(); }
+  ['f_agencyName','f_ceoName','f_slogan'].forEach(function(id){
+    document.addEventListener('input',function(e){ if(e.target&&e.target.id===id){
+      state.step2[id.replace('f_','')]=e.target.value; if(id==='f_ceoName'){$('vsSignName').textContent=e.target.value||'—';} save(); } });
+  });
+  window.vsSignNow=function(){ state.step2.ceoName=$('f_ceoName').value.trim();
+    if(!state.step2.ceoName){ err('err_step2','대표이사 이름을 먼저 적어주세요'); return; }
+    err('err_step2',''); state.step2.signed=true; $('vsSign').classList.add('signed'); save(); };
+  window.vsSubmitStep2=function(){
+    state.step2.agencyName=$('f_agencyName').value.trim();
+    state.step2.ceoName=$('f_ceoName').value.trim();
+    state.step2.slogan=$('f_slogan').value.trim();
+    var filled=state.step2.artists.filter(function(a){return a.name&&a.name.trim();});
+    if(!state.step2.agencyName){ err('err_step2','소속사명을 지어주세요'); return; }
+    if(!state.step2.ceoName){ err('err_step2','대표이사 이름을 적어주세요'); return; }
+    if(!filled.length){ err('err_step2','아티스트를 최소 1명 캐스팅해주세요'); return; }
+    if(!state.step2.signed){ err('err_step2','아래에서 서명해주세요'); return; }
+    state.step2.artists=filled;
+    err('err_step2',''); vsGo('step3'); renderDecisions();
+  };
+
+  /* ---------- STEP 3 ---------- */
+  function renderDecisions(){
+    var wrap=$('vsDecisions'); wrap.innerHTML='';
+    CARDS.forEach(function(card){
+      var saved=state.step3.decisions.find(function(d){return d.cardId===card.id;})||{choice:'',reason:''};
+      var el=document.createElement('div'); el.className='vs-dcard';
+      el.innerHTML='<div class="num">'+card.num+'</div><div class="sit">'+esc(card.sit)+'</div>'+
+        card.opts.map(function(o){return '<div class="vs-opt'+(saved.choice===o?' on':'')+'" data-card="'+card.id+'" data-opt="'+esc(o)+'">'+esc(o)+'</div>';}).join('')+
+        '<label class="vs-l">이렇게 정한 이유는요</label><textarea data-reason="'+card.id+'" rows="2" placeholder="10자 이상 적어주세요">'+esc(saved.reason)+'</textarea>';
+      wrap.appendChild(el);
+    });
+    wrap.querySelectorAll('.vs-opt').forEach(function(o){ o.onclick=function(){
+      var cid=+o.getAttribute('data-card'); o.parentNode.querySelectorAll('.vs-opt').forEach(function(x){x.classList.remove('on');}); o.classList.add('on');
+      setDecision(cid,{choice:o.getAttribute('data-opt')}); }; });
+    wrap.querySelectorAll('textarea[data-reason]').forEach(function(t){ t.oninput=function(){ setDecision(+t.getAttribute('data-reason'),{reason:t.value}); }; });
+  }
+  function setDecision(cid,patch){
+    var d=state.step3.decisions.find(function(x){return x.cardId===cid;});
+    if(!d){ d={cardId:cid,choice:'',reason:''}; state.step3.decisions.push(d); }
+    if(patch.choice!=null)d.choice=patch.choice; if(patch.reason!=null)d.reason=patch.reason; save();
+  }
+  window.vsSubmitStep3=function(){
+    for(var i=0;i<CARDS.length;i++){ var d=state.step3.decisions.find(function(x){return x.cardId===CARDS[i].id;});
+      if(!d||!d.choice){ err('err_step3','카드 '+CARDS[i].id+'번을 아직 결재 안 하셨어요'); return; }
+      if(!d.reason||d.reason.trim().length<10){ err('err_step3','카드 '+CARDS[i].id+'번 이유를 조금만 더 자세히 써주세요'); return; } }
+    err('err_step3',''); vsGo('step4'); vsLiveStatement();
+  };
+
+  /* ---------- STEP 4 ---------- */
+  window.vsLiveStatement=function(){ var v=$('f_statement').value.trim(); state.step4.statement=v;
+    $('vsLive').innerHTML = v?('"나는 <b>'+esc(v)+'</b>을(를) 하는 사람이다."'):''; save(); };
+  window.vsSubmitStep4=function(){ state.step4.statement=$('f_statement').value.trim();
+    if(!state.step4.statement){ err('err_step4','한 마디만 채워주세요'); return; }
+    err('err_step4',''); vsGo('email'); };
+
+  /* ---------- 제출 ---------- */
+  window.vsSubmitFinal=function(){
+    var email=$('f_email').value.trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err('err_email','이메일 주소를 다시 확인해주세요'); return; }
+    if(!$('f_privacy').checked){ err('err_email','개인정보 수집에 동의해주세요'); return; }
+    err('err_email',''); var btn=$('vsSubmitBtn'); btn.disabled=true; btn.textContent='보내는 중…';
+    fetch(API_URL+'/api/worksheet/part0/submit',{ method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ email:email, marketingConsent:$('f_marketing').checked, data:state }) })
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(!res||!res.success){ err('err_email',(res&&res.message)||'잠시 후 다시 시도해주세요'); btn.disabled=false; btn.textContent='신고서 받기'; return; }
+        showDone(); try{ localStorage.removeItem(STORE); }catch(e){}
+      })
+      .catch(function(){ err('err_email','잠시 후 다시 시도해주세요'); btn.disabled=false; btn.textContent='신고서 받기'; });
+  };
+  function showDone(){
+    var n=calcNumbers(state.step1);
+    $('vsDoneAgency').textContent=(state.step2.agencyName||'무명')+' 소속사 · 아티스트 '+state.step2.artists.length+'명';
+    $('vsDoneProfit').textContent='5년 뒤 연 순이익 '+manwon(n.y5);
+    $('vsDoneStatement').textContent=state.step4.statement?('"나는 '+state.step4.statement+'을(를) 하는 사람이다"'):'';
+    vsGo('done');
+  }
+  window.vsBackToLecture=function(){ if(LECTURE_URL){ try{ window.top.location.href=LECTURE_URL; }catch(e){ location.href=LECTURE_URL; } } else { try{ window.scrollTo(0,0); }catch(e){} } };
+
+  /* ---------- 공통 ---------- */
+  function err(id,msg){ var e=$(id); if(e)e.textContent=msg||''; postHeight(); }
+  function postHeight(){ try{ var h=document.getElementById('vsRoot').scrollHeight;
+    window.parent.postMessage({ type:'vs-worksheet-height', part:0, height:h }, '*'); }catch(e){} }
+  window.addEventListener('load',postHeight); window.addEventListener('resize',postHeight);
+
+  /* ---------- 초기화 (복원) ---------- */
+  restore();
+  // step1 필드 반영
+  if(state.step1.capital!=null)$('f_capital').value=state.step1.capital;
+  $('f_designerCount').textContent=state.step1.designerCount;
+  $('f_revenuePerDesigner').value=state.step1.revenuePerDesigner;
+  $('f_profitMargin').value=state.step1.profitMargin; $('f_profitMargin_v').textContent=state.step1.profitMargin;
+  $('f_vision5y').value=state.step1.vision5y||''; $('f_firstWish').value=state.step1.firstWish||'';
+  $('f_agencyName').value=state.step2.agencyName||''; $('f_ceoName').value=state.step2.ceoName||''; $('f_slogan').value=state.step2.slogan||'';
+  if(state.step2.signed)$('vsSign').classList.add('signed');
+  $('f_statement').value=state.step4.statement||'';
+  vsCalc(); renderArtists(); renderDecisions(); vsLiveStatement();
+  postHeight();
+})();
+</script>
+</div>
+
+</body>
+</html>

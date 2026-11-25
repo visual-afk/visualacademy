@@ -1,7 +1,7 @@
 /*
  * 온라인 강의 진도 규칙 — 서버(lib/vod.ts)와 플레이어가 같은 규칙을 쓴다.
  * reach = 건너뛰지 않고 실제로 재생해서 도달한 위치. 완료는 reach 가 영상 길이의 90% 를 넘었을 때.
- * 순서 잠금: 앞 강의를 완료해야 다음 강의가 열린다 (unlockAll 이면 전부 열림).
+ * 순서 잠금: 앞 강의를 완료하고, 워크시트가 붙은 강의면 워크시트까지 내야 다음 강의가 열린다 (unlockAll 이면 전부 열림).
  */
 
 export type LessonState = { sec: number; dur: number; done: boolean; reach?: number; at?: number };
@@ -28,14 +28,24 @@ export function nextReach(prev: LessonState | undefined, sec: number, now: numbe
 
 export const isDone = (p: LessonState | undefined) => Boolean(p?.done);
 
-/** 열린 강의 id — 이미 완료한 강의(다시보기)와, 앞 강의를 모두 완료한 강의 */
-export function unlockedIds(videoIds: string[], progress: LessonProgress, unlockAll: boolean): Set<string> {
+/**
+ * 열린 강의 id — 이미 완료한 강의(다시보기)와, 앞 강의를 모두 마친 강의.
+ * 마쳤다 = 영상 완료 + (워크시트가 붙어 있으면) 워크시트 제출. wsPending(id) = 그 강의 워크시트를 아직 안 냈음.
+ */
+export function unlockedIds(videoIds: string[], progress: LessonProgress, unlockAll: boolean, wsPending: (id: string) => boolean = () => false): Set<string> {
   if (unlockAll) return new Set(videoIds);
   const open = new Set<string>();
   let prevAllDone = true;
   for (const id of videoIds) {
     if (prevAllDone || isDone(progress[id])) open.add(id);
-    prevAllDone &&= isDone(progress[id]);
+    prevAllDone &&= isDone(progress[id]) && !wsPending(id);
   }
   return open;
+}
+
+/** 진도 % — 영상 완료와 워크시트 제출을 같은 무게로 센다 */
+export function coursePct(videoIds: string[], progress: LessonProgress, wsTotal: number, wsDone: number): number {
+  const total = videoIds.length + wsTotal;
+  if (!total) return 0;
+  return Math.round(((videoIds.filter((id) => isDone(progress[id])).length + wsDone) / total) * 100);
 }

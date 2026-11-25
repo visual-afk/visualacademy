@@ -15,3 +15,11 @@
   .history b{font-weight:700}
   .history span{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px}
 }
+
+/* 관리자 — 강의 영상 편집: 워크시트 연결 칸 */
+.admin-ui.pg-payments{
+  .ws-pick{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ws-pick select{border:none;background:var(--surface);border-radius:100px;padding:9px 12px;font-family:var(--font);font-size:13px}
+  .ws-pick label{display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+  .ws-pick input{width:44px;border:none;background:var(--surface);border-radius:10px;padding:9px 8px;font-family:var(--font);font-size:13px;text-align:center}
+}
