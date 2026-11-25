@@ -1,12 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { bad, guardAdmin } from "@/lib/adminApi";
 import { getAdmin } from "@/lib/auth";
-import { changeExpiry, revokeEnrollment, updateNote } from "@/lib/enrollments";
+import { changeExpiry, revokeEnrollment, setUnlockAll, updateNote } from "@/lib/enrollments";
 import { parseExpiryChange } from "@/lib/expiry";
 
-type Body = { action?: "expiry" | "revoke" | "note"; change?: unknown; reason?: string; note?: string };
+type Body = { action?: "expiry" | "revoke" | "note" | "unlock"; change?: unknown; reason?: string; note?: string; on?: boolean };
 
-/** PATCH /api/admin/enrollments/:id — 기한 변경 · 회수(즉시 만료) · 메모 */
+/** PATCH /api/admin/enrollments/:id — 기한 변경 · 회수(즉시 만료) · 메모 · 순서 잠금 해제 */
 export async function PATCH(request: NextRequest, { params }: RouteContext<"/api/admin/enrollments/[id]">) {
   const denied = await guardAdmin();
   if (denied) return denied;
@@ -18,6 +18,10 @@ export async function PATCH(request: NextRequest, { params }: RouteContext<"/api
   try {
     if (b?.action === "note") {
       await updateNote(id, (b.note ?? "").trim().slice(0, 500));
+      return NextResponse.json({ ok: true });
+    }
+    if (b?.action === "unlock") {
+      await setUnlockAll(id, Boolean(b.on));
       return NextResponse.json({ ok: true });
     }
     if (b?.action !== "expiry" && b?.action !== "revoke") return bad("요청 형식이 올바르지 않아요");

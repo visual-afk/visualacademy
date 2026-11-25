@@ -15,5 +15,6 @@ export async function POST(request: NextRequest, { params }: RouteContext<"/api/
   if (!access.ok) return NextResponse.json({ error: access.reason === "expired" ? "수강 기간이 끝났어요" : "수강 권한이 없어요" }, { status: 403 });
   const r = await saveProgress(access.course, b.videoId, sec, dur);
   if (!r) return NextResponse.json({ error: "강의를 찾을 수 없어요" }, { status: 404 });
+  if (r.locked) return NextResponse.json({ error: "앞 강의를 먼저 끝까지 들어주세요" }, { status: 403 });
   return NextResponse.json(r);
 }

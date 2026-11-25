@@ -37,6 +37,11 @@ function toChange(f: Form): ExpiryChange | null {
   const n = parseInt(f.n, 10);
   return n > 0 ? { mode: f.mode, n } : null;
 }
+/** 마지막 시청 → 오늘 · 3일 전 */
+function agoLabel(iso: string) {
+  const d = -(daysLeft(iso) ?? 0);
+  return d <= 0 ? "오늘" : `${d}일 전`;
+}
 const kstDay = (iso: string) => new Date(new Date(iso).getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 
 function csv(name: string, head: string[], rows: (string | number | null)[][]) {
@@ -170,6 +175,15 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
     showToast("메모를 저장했어요");
   };
 
+  const toggleUnlock = async () => {
+    if (!target || busy) return;
+    const on = !target.unlockAll;
+    const r = await send(`/api/admin/enrollments/${target.id}`, "PATCH", { action: "unlock", on });
+    if (!r.ok) return edit && setEdit({ ...edit, error: r.error });
+    setRows((rs) => rs.map((s) => (s.id === target.id ? { ...s, unlockAll: on } : s)));
+    showToast(on ? "순서 잠금을 풀었어요 — 아무 강의나 볼 수 있어요" : "다시 순서대로 듣게 했어요");
+  };
+
   const saveGrant = async () => {
     if (!grant || busy) return;
     const change = toChange(grant);
@@ -204,8 +218,8 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
             className="btn btn-ghost"
             disabled={list.length === 0}
             onClick={() =>
-              csv(`수강생-${cls.name}`, ["이름", "휴대폰", "이메일", "근무 매장", "경로", "진도(%)", "수강 시작", "수강기한", "상태", "메모"],
-                list.map(({ s, status: x }) => [s.name, formatPhone(s.phone), s.email, s.shop, SOURCE[s.source] ?? s.source, s.progress, kstDay(s.startedAt), expiryLabel(s.expiresAt), x, s.note]))
+              csv(`수강생-${cls.name}`, ["이름", "휴대폰", "이메일", "근무 매장", "경로", "진도(%)", "수강 시작", "마지막 시청", "수강기한", "상태", "메모"],
+                list.map(({ s, status: x }) => [s.name, formatPhone(s.phone), s.email, s.shop, SOURCE[s.source] ?? s.source, s.progress, kstDay(s.startedAt), s.lastWatchedAt ? kstDay(s.lastWatchedAt) : "", expiryLabel(s.expiresAt), x, s.note]))
             }
           >
             CSV 내보내기
@@ -235,7 +249,7 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
         <div className="table-scroll">
           <table>
             <thead>
-              <tr><th>수강생</th><th>연락처</th><th>진도</th><th>수강 시작</th><th>수강기한</th><th>상태</th><th /></tr>
+              <tr><th>수강생</th><th>연락처</th><th>진도</th><th>마지막 시청</th><th>수강기한</th><th>상태</th><th /></tr>
             </thead>
             <tbody>
               {list.map(({ s, status: x }) => {
@@ -244,14 +258,17 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
                   <tr key={s.id}>
                     <td>
                       <p className="cell-class">{s.name || "-"}</p>
-                      <p className="cell-order">{SOURCE[s.source] ?? s.source}{s.shop ? ` · ${s.shop}` : ""}{s.note ? ` · 📝 ${s.note}` : ""}</p>
+                      <p className="cell-order">{SOURCE[s.source] ?? s.source}{s.unlockAll ? " · 잠금 해제" : ""}{s.shop ? ` · ${s.shop}` : ""}{s.note ? ` · 📝 ${s.note}` : ""}</p>
                     </td>
                     <td><p className="cell-applicant">{formatPhone(s.phone)}</p><p className="cell-order">{s.email}</p></td>
                     <td>
                       <div className="prog"><span style={{ width: `${s.progress}%` }} /></div>
                       <p className="cell-order">{s.progress}%</p>
                     </td>
-                    <td className="cell-date">{expiryLabel(s.startedAt)}</td>
+                    <td>
+                      <p className="cell-date">{s.lastWatchedAt ? expiryLabel(s.lastWatchedAt) : "아직 안 봄"}</p>
+                      {s.lastWatchedAt && <p className="cell-order">{agoLabel(s.lastWatchedAt)}</p>}
+                    </td>
                     <td>
                       <p className="cell-date">{expiryLabel(s.expiresAt)}{s.expiresAt ? "까지" : ""}</p>
                       {dl !== null && x !== "만료" && <p className="cell-order">{dl === 0 ? "오늘 만료" : `${dl}일 남음`}</p>}
@@ -306,6 +323,11 @@ export default function Students({ cls, students }: { cls: Cls; students: Studen
                   {target.history.length === 0 && <li><span>이 기능이 생기기 전에 만들어진 수강권이에요</span></li>}
                 </ul>
               )}
+            </div>
+
+            <div className="m-section">
+              <p className="m-help">{target.unlockAll ? "지금은 아무 강의나 볼 수 있어요." : "지금은 앞 강의를 끝까지 들어야 다음 강의가 열려요."} 이미 들은 분(아임웹 이관 등)은 잠금을 풀어 주세요.</p>
+              <button type="button" className="ca-btn" onClick={toggleUnlock} disabled={busy}>{target.unlockAll ? "다시 순서대로 듣게 하기" : "순서 잠금 풀기"}</button>
             </div>
 
             <div className="m-section">

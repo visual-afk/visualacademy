@@ -88,18 +88,21 @@ export type Student = {
   progress: number;
   note: string;
   startedAt: string;
+  lastWatchedAt: string | null;
+  unlockAll: boolean;
   history: EnrollmentChange[];
 };
 
 export async function getStudents(classId: number): Promise<Student[]> {
   const { data, error } = await getAdminSupabase()
     .from("enrollments")
-    .select("id, source, expires_at, progress, note, created_at, profiles(name, phone, email, shop), enrollment_changes(kind, prev_expires_at, new_expires_at, reason, actor, created_at)")
+    .select("id, source, expires_at, progress, note, created_at, last_watched_at, unlock_all, profiles(name, phone, email, shop), enrollment_changes(kind, prev_expires_at, new_expires_at, reason, actor, created_at)")
     .eq("class_id", classId)
     .order("created_at", { ascending: true });
   if (error) throw new Error(`수강생 조회 실패: ${error.message}`);
   type Row = {
     id: string; source: EnrollmentSource; expires_at: string | null; progress: number; note: string | null; created_at: string;
+    last_watched_at: string | null; unlock_all: boolean;
     profiles: { name: string | null; phone: string | null; email: string | null; shop: string | null } | null;
     enrollment_changes: { kind: ChangeKind; prev_expires_at: string | null; new_expires_at: string | null; reason: string | null; actor: string; created_at: string }[];
   };
@@ -114,6 +117,8 @@ export async function getStudents(classId: number): Promise<Student[]> {
     progress: r.progress,
     note: r.note ?? "",
     startedAt: r.created_at,
+    lastWatchedAt: r.last_watched_at,
+    unlockAll: r.unlock_all,
     history: r.enrollment_changes
       .map((c) => ({ kind: c.kind, prev: c.prev_expires_at, next: c.new_expires_at, reason: c.reason, actor: c.actor, at: c.created_at }))
       .sort((a, b) => b.at.localeCompare(a.at)),
@@ -145,6 +150,12 @@ export async function revokeEnrollment(id: string, reason: string, actor: string
 
 export async function updateNote(id: string, note: string) {
   const { error } = await getAdminSupabase().from("enrollments").update({ note: note || null }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+/** 순서 잠금 해제 — 아임웹에서 이미 듣던 수강생 등은 아무 강의나 볼 수 있게 */
+export async function setUnlockAll(id: string, on: boolean) {
+  const { error } = await getAdminSupabase().from("enrollments").update({ unlock_all: on }).eq("id", id);
   if (error) throw new Error(error.message);
 }
 
