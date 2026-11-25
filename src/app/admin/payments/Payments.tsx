@@ -281,7 +281,11 @@ export default function Payments({ initial }: { initial: Payment[] }) {
             </tbody>
           </table>
         </div>
-        {list.length === 0 && <div className="empty-state">조건에 맞는 결제 내역이 없어요</div>}
+        {list.length === 0 && (
+          <div className="empty-state">
+            {payments.length === 0 ? "아직 결제 내역이 없어요. 클래스 신청과 결제가 들어오면 여기에 쌓여요." : "조건에 맞는 결제 내역이 없어요"}
+          </div>
+        )}
       </div>
 
       {refund && refundTarget && (

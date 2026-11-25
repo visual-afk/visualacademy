@@ -17,7 +17,7 @@ export const ROADMAP_IMAGES = ["/images/roadmap/step1.jpg", "/images/roadmap/ste
 
 export const DEF_MAIN = {
   order: ["nav", "hero", "roadmap", "recruit", "programs", "online", "instructors", "reviews", "salon", "footer"],
-  visible: { nav: true, hero: true, roadmap: true, recruit: true, programs: true, online: true, instructors: true, reviews: true, salon: true, footer: true },
+  visible: { nav: true, hero: true, roadmap: true, recruit: true, programs: true, online: true, instructors: true, reviews: false, salon: true, footer: true },
   nav: { logo: "비주얼아카데미", links: [{ label: "클래스" }, { label: "온라인 강의" }, { label: "아카데미 소개" }], cta: "상담 신청" },
   hero: {
     eyebrow: "비주얼아카데미", title: "무엇이 궁금하세요? 물어보시면 바로 찾아드릴게요.", placeholder: "예) 3년차인데 뭐부터 들어야 할까요?",
@@ -38,14 +38,14 @@ export const DEF_MAIN = {
   programs: {
     title: "프로그램", desc: "목적에 맞는 세 갈래 — 세부 클래스는 각 페이지에서 필터로 찾을 수 있어요.",
     cards: [
-      { title: "디자이너의 정석", desc: "레벨 1~4 순차 과정. 10주 주기로 네 단계가 동시에 열려요.", chips: "레벨 1~4, 10주 과정", link: "정석" },
-      { title: "단독 특강", desc: "퍼스널 컬러, 손상모 연화 등 필요할 때 골라 듣는 단기 과정.", chips: "1일 과정, 골라 듣기", link: "특강" },
-      { title: "경영 · 컨설팅", desc: "브랜딩, CS, 창업까지 — 원장을 위한 실무 강의.", chips: "브랜딩, CS, 창업", link: "경영" },
+      { title: "디자이너의 정석", desc: "레벨 1부터 4까지 단계별로 이어지는 과정이에요.", chips: "레벨 1~4", link: "정석" },
+      { title: "단독 특강", desc: "필요할 때 골라 듣는 단독 특강이에요.", chips: "골라 듣기", link: "특강" },
+      { title: "경영 · 컨설팅", desc: "원장을 위한 경영 실무 강의예요.", chips: "", link: "경영" },
     ],
   },
   online: {
-    tag: "ONLINE", title: "시간이 안 맞아도, 온라인으로", desc: "월 2000플랜 · 미용 경영의 신 — 수강 기간 9개월, 원하는 시간에 들으세요.",
-    feats: "수강 기간 9개월, 언제든 시작, 반복 시청", btn: "온라인 강의 보기", priceName: "월 2000플랜", price: "550,000원",
+    tag: "ONLINE", title: "시간이 안 맞아도, 온라인으로", desc: "이천플랜 · 미용 경영의 신 — 원하는 시간에 들으세요.",
+    feats: "", btn: "온라인 강의 보기", priceName: "이천플랜", price: "1,800,000원",
   },
   /*
    * 강사 슬라이더 — 목록 순서 = '전체' 탭 순서. cats(쉼표)가 분류 탭, '레벨교육' 분류는 카드에 '레벨 전문 강사'로 표시.
@@ -58,9 +58,9 @@ export const DEF_MAIN = {
     list: [
       { name: "이유경", role: "대표원장", img: "/images/instructors/lee-yukyung.jpg", insta: "", cats: "온라인 클래스", tags: "미용 경영의 신, 월 2000플랜", career: "", career2Title: "", career2: "", intro: "", link: "/about/greeting" },
       { name: "순돌", role: "이사 · 원장", img: "/images/instructors/soondol.jpg", insta: "visual_soondol", cats: "모발과학", tags: "",
-        career: "현) 복구매직 전문 살롱 10년 운영\n현) 비주얼 아카데미 교육이사\n현) 비주얼랩 교육이사\n현) 트리필드 이사\n현) 비주얼뷰티 부사장",
-        career2Title: "그 외 이력",
-        career2: "2001년 미용 입문 25년차 경력 디자이너\n국/내외 모발 과학 교육 & 세미나 다수 이수\nm-nrt 대표 스터디 소수 그룹 10년 운영\n모발 과학 단일 교육 최대 인원 모집\n모발 과학 단일 교육 최장 기간 교육 매진\n최신 모발 과학 서적 출간\n트리필드 전제품 연구 개발 및 출시\ns3아카데미 (서울·천안·수원·창원)외 다수 아카데미 모발 과학 교육 및 입점교육\n레베 전국지사 모발 과학 세미나 & 펌 원리 교육 서울·부산 모발 과학 특강 20기 배출\n부산 보건 대학교 졸업생 출강 & 재직자 특강 다수 진행중",
+        career: "",
+        career2Title: "",
+        career2: "",
         intro: "", link: "" },
       { name: "지성", role: "원장", img: "/images/instructors/jiseong.jpg", insta: "", cats: "어프로치·연화", tags: "레이어드컷&리프컷, 하이퍼포머전략",
         career: "비주얼살롱 창립멤버\n**현)비주얼살롱 마곡나루점 원장**\n개인 순수 매출 6000만 원 이상\n복구 시술 7500건 진행\n비엠모리스 강의\n스타일마스터 강사\n미용 경력 17년 차",
@@ -83,9 +83,9 @@ export const DEF_MAIN = {
         career2Title: "", career2: "",
         intro: "시니어컷과 숏컷 전문으로,\n기술을 가르치는 강사가 아닌,\n생각하는 디자이너를 만드는 교육을 지향합니다.\n고객의 이미지와 **라이프스타일을 분석하고**\n**디자인으로 연결하는 실전 중심의 교육**을 진행합니다.", link: "" },
       { name: "준모", role: "디자이너", img: "/images/instructors/junmo.jpg", insta: "", cats: "레벨교육", tags: "약성곱슬매직, 숏컷",
-        career: "Visual academy 레벨 과정 강사\n2025 visual award 크리에이터상\nmilbon diploma\ncopyingcut diploma\n003 diploma",
+        career: "",
         career2Title: "", career2: "",
-        intro: "쉽게 해결하기 **어려운 모발을 중심으로,**\n**모발의 상태를 정확하게 진단**하고 그에 맞는 기술을 설계하듯이\n디자이너로 올라가는데 **정확한 지식과 기술로 성장**할 수 있는\n교육을 진행합니다", link: "" },
+        intro: "", link: "" },
     ],
   },
   reviews: {
@@ -104,12 +104,13 @@ export const DEF_MAIN = {
       { h: "이용 안내", links: "환불 규정" },
       { h: "관련 사이트", links: "비주얼살롱 ↗, 트리필드 ↗" },
     ],
-    /* 사업자 정보 — 내용이 빈 항목은 표시하지 않음 (통신판매업 신고번호는 확정 후 입력) */
+    /* 사업자 정보 (11.17 실제 정보 7개) — 내용이 빈 항목은 표시하지 않음 */
     biz: [
-      { k: "상호", v: "(주)비주얼뷰티" }, { k: "대표", v: "이유경" }, { k: "사업자등록번호", v: "652-81-03393" }, { k: "통신판매업", v: "" },
-      { k: "주소", v: "서울 강남구 언주로 622 (논현동, 구암빌딩) 1층" }, { k: "대표전화", v: "010-2755-7452" },
+      { k: "상호", v: "(주)비주얼뷰티" }, { k: "대표", v: "이유경" }, { k: "이메일", v: "visual7452@gmail.com" }, { k: "연락처", v: "010-2755-7452" },
+      { k: "사업자등록번호", v: "652-81-03393" }, { k: "통신판매업신고번호", v: "2025-서울강남-00136" },
+      { k: "주소", v: "서울 강남구 언주로 622 (논현동, 구암빌딩) 스퀘어논현 1층" },
     ],
-    copy: "Copyright ⓒ 비주얼아카데미. All rights reserved.",
+    copy: "Copyright ⓒ 2026 비주얼아카데미 미용학원. All rights reserved.",
     /* 푸터 '환불 규정'을 누르면 뜨는 안내 창 (모든 페이지 공통) */
     rfTitle: "환불 규정",
     rfTh: [{ t: "구분" }, { t: "환불 기준" }, { t: "환불 비율" }],
@@ -192,7 +193,7 @@ export const DEF_ABOUT = {
     ],
   },
   ifbs: {
-    tag: "국제미용과학협회", title: "International Society of\nBeauty Sciences", img: "/images/about/ifbs.jpg",
+    tag: "국제미용과학협회", title: "International Society of\nBeauty Sciences", logo: "/images/brand/ifbs.png", img: "/images/about/ifbs.jpg",
     paras: [
       { p: "IFBS 국제미용과학협회는 미용과학을 연구하고, 선진 미용문화를 선도하는 **국내 최고 수준의 종합 뷰티 과학 협회**입니다. 저희 협회는 최신 미용 과학 기술을 연구하며, 이를 바탕으로 미용 산업의 발전에 기여하고 있습니다." },
       { p: "또한, 과학적 근거에 기반한 미용 기술을 지속적으로 개발하여 **미용인들의 역량을 강화하고 있습니다.** 더불어, 미용 산업의 혁신을 목표로 권위 있는 학회 및 단체들과의 제휴와 교류를 통해 **대한민국 뷰티 산업에 새로운 패러다임을 제시합니다.**" },

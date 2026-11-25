@@ -27,6 +27,11 @@
   .site-header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--line)}
   .nav{display:flex;align-items:center;gap:36px;padding-top:18px;padding-bottom:18px}
   .logo{font-weight:700;font-size:18px;letter-spacing:-.01em;white-space:nowrap;text-decoration:none;color:inherit}
+  /* 실제 로고 이미지 (검은 글자, 투명 배경) — 어두운 히어로 헤더 위에서는 흰색으로 뒤집음 */
+  .logo-img{display:block;height:22px;width:auto}
+  .foot-top .logo-img{height:20px}
+  .site-header.is-hero:not(.scrolled) .logo-img{filter:invert(1)}
+  @media(max-width:520px){.site-header .logo-img{height:17px}}
   .navlinks{display:flex;gap:28px;flex:1;font-size:14.5px;color:var(--ink-2)}
   .navlinks a{text-decoration:none;transition:color .15s}
   .navlinks a.on{color:var(--ink);font-weight:700}

@@ -157,7 +157,8 @@ const SEC_ABOUT: Record<string, SectionSchema> = {
   facility: { name: "시설 안내", sub: "[아카데미 소개 탭] 시설 6곳", fields: [
     { k: "title", l: "섹션 제목", t: "text" },
     { k: "list", l: "시설", t: "list", item: "시설", max: 12, f: [{ k: "img", l: "사진", t: "image", rec: [600, 600, "1:1 정사각"] }, { k: "b", l: "이름", t: "text" }, { k: "d", l: "설명", t: "text" }] }] },
-  ifbs: { name: "국제미용과학협회", sub: "[아카데미 소개 탭] 협회 소개 · 사진", fields: [
+  ifbs: { name: "국제미용과학협회", sub: "[아카데미 소개 탭] 협회 로고 · 소개 · 사진", fields: [
+    { k: "logo", l: "협회 로고", t: "image", rec: [600, 126, "가로형 로고 (투명 PNG)"], hint: "로고가 있으면 작은 제목·큰 제목 대신 로고가 보여요" },
     { k: "tag", l: "작은 제목", t: "text" }, { k: "title", l: "큰 제목", t: "textarea", hint: "줄바꿈 가능" },
     { k: "img", l: "사진", t: "image", rec: [800, 600, "4:3 가로"] },
     { k: "paras", l: "본문", t: "list", item: "문단", max: 6, f: [{ k: "p", l: "내용", t: "textarea", hint: PH }] }] },

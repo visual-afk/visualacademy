@@ -67,7 +67,9 @@ export default function SiteHeader({
     <header className={`site-header${hero ? " is-hero" : ""}${scrolled ? " scrolled" : ""}`}>
       <div className="wrap nav">
         <Link href={ROUTES.home} className="logo">
-          {NAV_CONTENT.logo}
+          {/* 실제 아카데미 로고 (11.17) — 글자는 대체 텍스트로 */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="logo-img" src="/images/brand/logo.png" alt={NAV_CONTENT.logo} width={254} height={22} />
         </Link>
         <nav className="navlinks">
           {NAV.map((n) => (
